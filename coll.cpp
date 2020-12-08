@@ -481,6 +481,7 @@ void singleEmin(string &file, int layers)
 
     int fcount = 0;
 
+    fflags+="-";
     fflags+=to_string(N);
     fflags+="-";
     fflags+=to_string(dist_atoms);
