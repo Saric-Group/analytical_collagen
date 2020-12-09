@@ -481,12 +481,28 @@ void singleEmin(string &file, int layers)
 
     int fcount = 0;
 
+    double chargesum=0.0;
+    int chargecount = 0;
+
+    for(int c=0;c<charge.size();c++)
+    {
+      if(charge[c]!=0){
+        chargesum+=charge[c];
+        chargecount++;
+      }
+    }
+
+    double chargemean = chargesum/((double) chargecount);
+
     fflags+="-";
     fflags+=to_string(N);
     fflags+="-";
     fflags+=to_string(dist_atoms);
     fflags+="-";
-    fflags+=to_string(charge_ind[0]);
+    fflags+=to_string(chargesum);
+    fflags+="-";
+    fflags+=to_string(chargemean);
+    fflags+="-";
     
 
 
@@ -500,13 +516,13 @@ void singleEmin(string &file, int layers)
       }
       if((int) charge[i] != 0)
       {
-        f_charges+=pow(2,lulen-fcount-1);
+        f_charges+=pow(2,(int)(lulen-fcount-1));
       }
+
       fcount++;
     }
   
     fflags += to_string(f_charges);
-
 
     
     if (file.find(file_extension) != string::npos)
