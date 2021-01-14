@@ -6,6 +6,7 @@
 
 using namespace std;
 
+typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 
 /* Variables */
 string file;
@@ -20,6 +21,24 @@ double box;                 /* length of periodic box */
 double cd_cutoff = 4.0;     /* cutoff of cd potential */
 double lj_cutoff = 4.0;     /* cutoff of lj potential */
 double max_cutoff = max(cd_cutoff, lj_cutoff);
+
+
+  // argument overrides
+  // takes -i and -o as inputs
+
+  // -i input file
+  // -o output file
+
+string inputpath = "./charge_distribution";
+string outputpath = "./energy_min.dat";
+string file_extension = ".dat";
+double dist_atoms = 0.255;
+
+bool set_output = false;
+
+bool charge_hashed_outputs = false;
+
+
 
 vector<double> charge, charge_ind;  /* vector for the charges of each atom */
 
@@ -50,14 +69,61 @@ void multipleEmin(string &file, int layers, int numbers);
 
 int main(int argc, char const *argv[])
 {
-  auto start = chrono::high_resolution_clock::now();
+  bool input_override = false;
+  bool output_override = false;
+  bool distance_overrride = false;
+
+  if(argc > 0)
+  {
+    for(int i=0; i<argc; ++i)
+      {   
+        string strarg = argv[i];
+        if(input_override)
+        {
+          inputpath = argv[i];
+          input_override = false;
+        }
+        if(output_override)
+        {
+          outputpath = argv[i];
+          output_override = false;
+        }
+        if(distance_overrride)
+        {
+          dist_atoms = stod(argv[i]);
+          distance_overrride = false;
+        }
+        if(strarg.compare("-i")==0)
+        {
+          input_override = true;
+        }
+        if(strarg.compare("-o")==0)
+        {
+          output_override = true;
+        }
+        if(strarg.compare("-d")==0)
+        {
+          distance_overrride = true;
+        }
+        if(strarg.compare("-c")==0)
+        {
+          charge_hashed_outputs = true;
+        }
+      }
+  }
+
+
+  time_point start = chrono::high_resolution_clock::now();
   cout << ":: Computation start";
 
   /************************************************************************/
+
+  file = inputpath;
   // file = "./dis/charge_distribution_36";            /* Anne's collagen */
-  file = "./dis/charge_distribution_1054";       /* Native collagen */
+  //file = "./dis/charge_distribution";       /* Native collagen */
+  distance_atoms = dist_atoms;
   // distance_atoms = 0.255;   /* Anne's length */
-  distance_atoms = 0.285;   /* to account for length of 300nm */
+  //distance_atoms = 0.285;   /* to account for length of 300nm */
   readAtoms(file);
   L = (N - 1) * distance_atoms;
   /************************************************************************/
@@ -65,7 +131,9 @@ int main(int argc, char const *argv[])
   /************************************************************************/
   cout << "\n\n:: running computation...";
   /* Only global Emin */
-  file = "./data/globalEmin.dat";
+
+  file=outputpath;
+
   singleEmin(file, layers);
 
   /* First numbers Emin */
@@ -75,8 +143,8 @@ int main(int argc, char const *argv[])
   /************************************************************************/
 
   /************************************************************************/
-  auto end = chrono::high_resolution_clock::now();
-  auto duration = chrono::duration_cast<chrono::seconds>(end - start);
+  time_point end = chrono::high_resolution_clock::now();
+  chrono::seconds duration = chrono::duration_cast<chrono::seconds>(end - start);
   cout << "\n\n\n:: ... finished in " << duration.count() << " s.\n\n\n";
   /************************************************************************/
 
@@ -118,7 +186,7 @@ double distance(double pos, double first, int n, double lat_gap)
 
 double factorLJ(double d)
 {
-    return 4 * (pow(1 / d, 12) - pow(1 / d, 6));
+    return 4. * (pow(1. / d, 12.) - pow(1. / d, 6.));
 }
 
 double LJ_per_mol(double pos, double dx, double ref, double lat_gap)
@@ -359,10 +427,9 @@ void singleEmin(string &file, int layers)
 
   double lj, lje;
   double cd, cde;
-  vector<vector<double>> latmin, radmin, offmin, eCDmin, eLJmin, eTotmin;
+  vector<vector<double> > latmin, radmin, offmin, eCDmin, eLJmin, eTotmin;
 
-  /* Write header for outputfile */
-  header(file);
+
 
   /* Assign needed data vectors */
   // latmin.assign(50, vector<double> (20, 0));
@@ -401,6 +468,83 @@ void singleEmin(string &file, int layers)
     }
   }
 
+
+  if(charge_hashed_outputs)
+  {
+    //create a unique code for the output file
+
+    unsigned long f_charges = 0;
+
+    string fflags = "";
+
+    unsigned long lulen = sizeof(unsigned long)*8;
+
+    int fcount = 0;
+
+    double chargesum=0.0;
+    int chargecount = 0;
+
+    for(int c=0;c<charge.size();c++)
+    {
+      if(charge[c]!=0){
+        chargesum+=charge[c];
+        chargecount++;
+      }
+    }
+
+    double chargemean = chargesum/((double) chargecount);
+
+    fflags+="-";
+    fflags+=to_string(N);
+    fflags+="-";
+    fflags+=to_string(dist_atoms);
+    fflags+="-";
+    fflags+=to_string(chargesum);
+    fflags+="-";
+    fflags+=to_string(chargemean);
+    fflags+="-";
+    
+
+
+    for(int i=0; i<N; i++)
+    {
+      if(fcount>=lulen){
+        fflags += to_string(f_charges);
+        fflags+="-";
+        f_charges = 0;
+        fcount = 0;
+      }
+      if((int) charge[i] != 0)
+      {
+        f_charges+=pow(2,(int)(lulen-fcount-1));
+      }
+
+      fcount++;
+    }
+  
+    fflags += to_string(f_charges);
+
+    
+    if (file.find(file_extension) != string::npos)
+    {
+      file = file.substr(0, file.find(file_extension));
+    }
+    
+    file+=fflags;
+
+  }
+
+  if (file.find(file_extension) != string::npos)
+  {
+      file = file.substr(0, file.find(file_extension));
+  }
+
+  file+=".dat";
+
+  /* Write header for outputfile */
+  header(file);
+
+
   FILE *outf;
   outf = fopen(file.c_str(), "a");
   /* Both LJ and CD potential */
@@ -431,8 +575,8 @@ void multipleEmin(string &file, int layers, int number)
   int off_max;
   double lj, lje;
   double cd, cde;
-  vector<vector<vector<double>>> latmin, radmin, offmin;
-  vector<vector<vector<double>>> eCDmin, eLJmin, eTotmin;
+  vector<vector<vector<double> > > latmin, radmin, offmin;
+  vector<vector<vector<double> > > eCDmin, eLJmin, eTotmin;
 
   /* Write header for outputfile */
   string tmps = file;
@@ -442,12 +586,12 @@ void multipleEmin(string &file, int layers, int number)
   }
 
   /* Assign needed data vectors */
-  // latmin.assign(10, vector<vector<double>> (50, vector<double> (20, 0)));
-  radmin.assign(number, vector<vector<double>> (50, vector<double> (20, 0)));
-  offmin.assign(number, vector<vector<double>> (50, vector<double> (20, 0)));
-  eLJmin.assign(number, vector<vector<double>> (50, vector<double> (20, 1e6)));
-  eCDmin.assign(number, vector<vector<double>> (50, vector<double> (20, 1e6)));
-  eTotmin.assign(number, vector<vector<double>> (50,
+  // latmin.assign(10, vector<vector<double> > (50, vector<double> (20, 0)));
+  radmin.assign(number, vector<vector<double> > (50, vector<double> (20, 0)));
+  offmin.assign(number, vector<vector<double> > (50, vector<double> (20, 0)));
+  eLJmin.assign(number, vector<vector<double> > (50, vector<double> (20, 1e6)));
+  eCDmin.assign(number, vector<vector<double> > (50, vector<double> (20, 1e6)));
+  eTotmin.assign(number, vector<vector<double> > (50,
                                                   vector<double> (20, 1e6)));
 
   for (int rad = 0; rad <= rad_max; rad++) {
