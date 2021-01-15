@@ -24,7 +24,7 @@ double max_cutoff = max(cd_cutoff, lj_cutoff);
 
 double lj_min = 0.01;
 double lj_stepsize = 0.01;
-int lj_steps = 12;
+int lj_steps = 50;
 
 double cd_min = 10.0;
 double cd_stepsize = 10.0;
@@ -209,8 +209,8 @@ int main(int argc, char const *argv[])
   //distance_atoms = 0.285;   /* to account for length of 300nm */
   readAtoms(file);
   string file2 = "./dis/atom_types_1054";
-  readTypes(file2);
-  L = (N - 1) * distance_atoms;
+  //readTypes(file2);
+  //L = (N - 1) * distance_atoms;
   /************************************************************************/
 
   /************************************************************************/
@@ -771,7 +771,7 @@ void singleEmin(string &file, int layers)
       cd = compCD(lat_gap, rad_gap, offset, layers);
       /* Both CD and LJ potential */
       for (int i = 0; i < lj_steps; i++) {
-          lje = lj_min + (i) * lj_stepsize * lj;
+          lje = (lj_min + (i) * lj_stepsize) * lj;
           for (int j = 0; j < cd_steps; j++) {
               cde = cd / (cd_min + (j) * cd_stepsize);
               if (lje + cde < eTotmin[i][j]) {
@@ -929,7 +929,7 @@ void multipleEmin(string &file, int layers, int number)
       cd = compCD(lat_gap, rad_gap, offset, layers);
       /* Both CD and LJ potential */
       for (int i = 0; i < lj_steps; i++) {
-          lje = lj_min + (i) * lj_stepsize * lj / 5;
+          lje = (lj_min + (i) * lj_stepsize) * lj / 5;
           for (int j = 0; j < cd_steps; j++) {
               cde = cd / (cd_min + (j) * cd_stepsize / 2);
 
