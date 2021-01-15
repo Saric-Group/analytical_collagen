@@ -22,6 +22,15 @@ double cd_cutoff = 4.0;     /* cutoff of cd potential */
 double lj_cutoff = 4.0;     /* cutoff of lj potential */
 double max_cutoff = max(cd_cutoff, lj_cutoff);
 
+double lj_min = 0.01;
+double lj_stepsize = 0.01;
+int lj_steps = 12;
+
+double cd_min = 10.0;
+double cd_stepsize = 10.0;
+int cd_steps = 20;
+
+
 
   // argument overrides
   // takes -i and -o as inputs
@@ -73,6 +82,13 @@ int main(int argc, char const *argv[])
   bool output_override = false;
   bool distance_overrride = false;
 
+  bool ljsteps_override = false;
+  bool ljstepsize_override = false;
+  bool cdsteps_override = false;
+  bool cdstepsize_override = false;
+  bool ljmin_override = false;
+  bool cdmin_override = false;
+
   if(argc > 0)
   {
     for(int i=0; i<argc; ++i)
@@ -93,6 +109,39 @@ int main(int argc, char const *argv[])
           dist_atoms = stod(argv[i]);
           distance_overrride = false;
         }
+        if(ljsteps_override)
+        {
+          lj_steps = stoi(argv[i]);
+          ljsteps_override = false;
+        }
+        if(ljstepsize_override)
+        {
+          lj_stepsize = stod(argv[i]);
+          ljstepsize_override = false;
+        }
+        if(cdsteps_override)
+        {
+          cd_steps = stoi(argv[i]);
+          cdsteps_override = false;
+        }
+        if(cdstepsize_override)
+        {
+          cd_stepsize = stod(argv[i]);
+          cdstepsize_override = false;
+        }
+        if(ljmin_override)
+        {
+          lj_min = stod(argv[i]);
+          ljmin_override = false;
+        }
+        if(cdmin_override)
+        {
+          cd_min = stod(argv[i]);
+          cdmin_override = false;
+        }
+
+
+
         if(strarg.compare("-i")==0)
         {
           input_override = true;
@@ -109,6 +158,31 @@ int main(int argc, char const *argv[])
         {
           charge_hashed_outputs = true;
         }
+        if(strarg.compare("-slj")==0)
+        {
+          ljsteps_override = true;
+        }
+        if(strarg.compare("-sslj")==0)
+        {
+          ljstepsize_override = true;
+        }
+        if(strarg.compare("-scd")==0)
+        {
+          cdsteps_override = true;
+        }
+        if(strarg.compare("-sscd")==0)
+        {
+          cdstepsize_override = true;
+        }
+        if(strarg.compare("-mcd")==0)
+        {
+          cdmin_override = true;
+        }
+        if(strarg.compare("-mlj")==0)
+        {
+          ljmin_override = true;
+        }
+
       }
   }
 
@@ -307,7 +381,7 @@ double compLJ(double lat_gap, double rad_gap, double offset, int layers)
 double factorCD(double q1, double q2, double d)
 {
     double tmp = 0;
-    double CDconst = 22.4 * 22.4;
+    double CDconst = 1.0;
     double CDdamping = 1;
 
     tmp = (CDconst * q1 * q2) / d;
@@ -433,11 +507,11 @@ void singleEmin(string &file, int layers)
 
   /* Assign needed data vectors */
   // latmin.assign(50, vector<double> (20, 0));
-  radmin.assign(50, vector<double> (20, 0));
-  offmin.assign(50, vector<double> (20, 0));
-  eLJmin.assign(50, vector<double> (20, 1e6));
-  eCDmin.assign(50, vector<double> (20, 1e6));
-  eTotmin.assign(50, vector<double> (20, 1e6));
+  radmin.assign(lj_steps, vector<double> (cd_steps, 0));
+  offmin.assign(lj_steps, vector<double> (cd_steps, 0));
+  eLJmin.assign(lj_steps, vector<double> (cd_steps, 1e6));
+  eCDmin.assign(lj_steps, vector<double> (cd_steps, 1e6));
+  eTotmin.assign(lj_steps, vector<double> (cd_steps, 1e6));
 
   for (int rad = 0; rad <= rad_max; rad++) {
     cout << "\n --> " << (100. * rad) / (1. * rad_max);
@@ -451,10 +525,10 @@ void singleEmin(string &file, int layers)
       lj = compLJ(lat_gap, rad_gap, offset, layers);
       cd = compCD(lat_gap, rad_gap, offset, layers);
       /* Both CD and LJ potential */
-      for (int i = 0; i < 50; i++) {
-          lje = (i + 1) * 0.01 * lj;
-          for (int j = 0; j < 20; j++) {
-              cde = cd / ((j + 1) * 10);
+      for (int i = 0; i < lj_steps; i++) {
+          lje = lj_min + (i) * lj_stepsize * lj;
+          for (int j = 0; j < cd_steps; j++) {
+              cde = cd_min + cd / ((j) * cd_stepsize);
               if (lje + cde < eTotmin[i][j]) {
                   eLJmin[i][j] = lje;
                   eCDmin[i][j] = cde;
@@ -548,11 +622,11 @@ void singleEmin(string &file, int layers)
   FILE *outf;
   outf = fopen(file.c_str(), "a");
   /* Both LJ and CD potential */
-  for (int i = 0; i < 50; i++) {
-      for (int j = 0; j < 20; j++) {
+  for (int i = 0; i < lj_steps; i++) {
+      for (int j = 0; j < cd_steps; j++) {
           fprintf(outf, "\n");
-          fprintf(outf, "%.3f", (i + 1) * 0.01);
-          fprintf(outf, "\t%.3f", (j + 1) * 10.);
+          fprintf(outf, "%.3f", lj_min + (i) * lj_stepsize);
+          fprintf(outf, "\t%.3f", cd_min + (j) * cd_stepsize);
           fprintf(outf, "\t%.3f", lat_gap);
           fprintf(outf, "\t%.3f", radmin[i][j]);
           fprintf(outf, "\t%.3f", offmin[i][j]);
@@ -587,12 +661,12 @@ void multipleEmin(string &file, int layers, int number)
 
   /* Assign needed data vectors */
   // latmin.assign(10, vector<vector<double> > (50, vector<double> (20, 0)));
-  radmin.assign(number, vector<vector<double> > (50, vector<double> (20, 0)));
-  offmin.assign(number, vector<vector<double> > (50, vector<double> (20, 0)));
-  eLJmin.assign(number, vector<vector<double> > (50, vector<double> (20, 1e6)));
-  eCDmin.assign(number, vector<vector<double> > (50, vector<double> (20, 1e6)));
-  eTotmin.assign(number, vector<vector<double> > (50,
-                                                  vector<double> (20, 1e6)));
+  radmin.assign(number, vector<vector<double> > (lj_steps, vector<double> (cd_steps, 0)));
+  offmin.assign(number, vector<vector<double> > (lj_steps, vector<double> (cd_steps, 0)));
+  eLJmin.assign(number, vector<vector<double> > (lj_steps, vector<double> (cd_steps, 1e6)));
+  eCDmin.assign(number, vector<vector<double> > (lj_steps, vector<double> (cd_steps, 1e6)));
+  eTotmin.assign(number, vector<vector<double> > (lj_steps,
+                                                  vector<double> (cd_steps, 1e6)));
 
   for (int rad = 0; rad <= rad_max; rad++) {
     cout << "\n --> " << (100. * rad) / (1. * rad_max);
@@ -606,10 +680,10 @@ void multipleEmin(string &file, int layers, int number)
       lj = compLJ(lat_gap, rad_gap, offset, layers);
       cd = compCD(lat_gap, rad_gap, offset, layers);
       /* Both CD and LJ potential */
-      for (int i = 0; i < 50; i++) {
-          lje = (i + 1) * 0.01 * lj / 5;
-          for (int j = 0; j < 20; j++) {
-              cde = cd / ((j + 1) * 10 / 2);
+      for (int i = 0; i < lj_steps; i++) {
+          lje = lj_min + (i) * lj_stepsize * lj / 5;
+          for (int j = 0; j < cd_steps; j++) {
+              cde = cd_min + cd / ((j) * cd_stepsize / 2);
 
               for (int k = 0; k < number; k++) {
                 if (lje + cde < eTotmin[k][i][j]) {
@@ -633,11 +707,11 @@ void multipleEmin(string &file, int layers, int number)
     file = tmps + "Emin_" + to_string(l) + ".dat";
     outf = fopen(file.c_str(), "a");
     /* Both LJ and CD potential */
-    for (int i = 0; i < 50; i++) {
-        for (int j = 0; j < 20; j++) {
+    for (int i = 0; i < lj_steps; i++) {
+        for (int j = 0; j < cd_steps; j++) {
             fprintf(outf, "\n");
-            fprintf(outf, "%.3f", (i + 1) * 0.01 / 5.);
-            fprintf(outf, "\t%.3f", (j + 1) * 10. / 2.);
+            fprintf(outf, "%.3f", lj_min + (i) * lj_stepsize / 5.);
+            fprintf(outf, "\t%.3f", lj_min + (j) * cd_stepsize / 2.);
             fprintf(outf, "\t%.3f", lat_gap);
             fprintf(outf, "\t%.3f", radmin[k][i][j]);
             fprintf(outf, "\t%.3f", offmin[k][i][j]);
