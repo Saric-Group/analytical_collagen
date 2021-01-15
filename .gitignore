@@ -1,5 +1,6 @@
 emin
 random_charges
+energy_min.dat
 ./*.dat
 
 # Prerequisites

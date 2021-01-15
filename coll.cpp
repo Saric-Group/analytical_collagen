@@ -773,7 +773,7 @@ void singleEmin(string &file, int layers)
       for (int i = 0; i < lj_steps; i++) {
           lje = lj_min + (i) * lj_stepsize * lj;
           for (int j = 0; j < cd_steps; j++) {
-              cde = cd_min + cd / ((j) * cd_stepsize);
+              cde = cd / (cd_min + (j) * cd_stepsize);
               if (lje + cde < eTotmin[i][j]) {
                   eLJmin[i][j] = lje;
                   eCDmin[i][j] = cde;
@@ -931,7 +931,7 @@ void multipleEmin(string &file, int layers, int number)
       for (int i = 0; i < lj_steps; i++) {
           lje = lj_min + (i) * lj_stepsize * lj / 5;
           for (int j = 0; j < cd_steps; j++) {
-              cde = cd_min + cd / ((j) * cd_stepsize / 2);
+              cde = cd / (cd_min + (j) * cd_stepsize / 2);
 
               for (int k = 0; k < number; k++) {
                 if (lje + cde < eTotmin[k][i][j]) {
@@ -959,7 +959,7 @@ void multipleEmin(string &file, int layers, int number)
         for (int j = 0; j < cd_steps; j++) {
             fprintf(outf, "\n");
             fprintf(outf, "%.3f", lj_min + (i) * lj_stepsize / 5.);
-            fprintf(outf, "\t%.3f", lj_min + (j) * cd_stepsize / 2.);
+            fprintf(outf, "\t%.3f", cd_min + (j) * cd_stepsize / 2.);
             fprintf(outf, "\t%.3f", lat_gap);
             fprintf(outf, "\t%.3f", radmin[k][i][j]);
             fprintf(outf, "\t%.3f", offmin[k][i][j]);
