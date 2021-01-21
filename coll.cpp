@@ -30,6 +30,14 @@ double cd_min = 10.0;
 double cd_stepsize = 10.0;
 int cd_steps = 20;
 
+//error codes
+
+int misc_err = 1;
+int d_parse_err = 2;
+int d_limit_err = 4;
+int i_parse_err = 8;
+int i_limit_err = 16;
+int path_exist_err = 32;
 
 
   // argument overrides
@@ -41,6 +49,7 @@ int cd_steps = 20;
 string inputpath = "./charge_distribution";
 string outputpath = "./energy_min.dat";
 string file_extension = ".dat";
+string configpath = "";
 double dist_atoms = 0.255;
 
 bool set_output = false;
@@ -84,9 +93,115 @@ double energy(double lat_gap, double rad_gap, double offset, int layer1,
 double intra_layer_energy(double lat_gap, double rad_gap, double offset,
                           double lj, double cd, bool lj_on);
 
+double read_double(string arg, int* err){
+  double argd = 0.0;
+  try {                                                                          
+    argd = std::stod(arg);                                             
+  } catch (const std::invalid_argument &) {     
+    *err += d_parse_err;                              
+  } catch (const std::out_of_range &) {      
+    *err += d_limit_err;                                          
+  }
+  return argd;
+}
 
-int main(int argc, char const *argv[])
+int read_integer(string arg, int* err){
+  int argi = 0;
+  try {                                                                          
+    argi = std::stoi(arg);                                             
+  } catch (const std::invalid_argument &) {     
+    *err += i_parse_err;                              
+  } catch (const std::out_of_range &) {      
+    *err += i_limit_err;                                          
+  }
+  return argi;
+}
+
+int parse_errs(const int err, const string arg, const bool verbose){
+  int errstate = 0;
+  if(err&d_parse_err){
+    errstate = 1;
+    if(verbose){
+      cout << "error parsing argument: " << arg << " as double" << endl;
+    }
+  }
+  if(err&d_limit_err){
+    errstate = 1;
+    if(verbose){
+      cout << "argument overflowed buffer: " << arg << " as double" << endl;
+    }
+  }
+  if(err&i_parse_err){
+    errstate = 1;
+    if(verbose){
+      cout << "error parsing argument: " << arg << " as integer" << endl;
+    }
+  }
+  if(err&i_limit_err){
+    errstate = 1;
+    if(verbose){
+      cout << "argument overflowed buffer: " << arg << " as integer" << endl;
+    }
+  }
+  if(err&path_exist_err){
+    errstate = 1;
+    if(verbose){
+      cout << "path does not exist or could not be accessed: " << arg << endl;
+    }
+  }
+  return errstate;
+}
+
+int path_exists(const std::string& name){
+    if (FILE *file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return 0;
+    } else {
+        return 1;
+    }   
+}
+
+int verify_path(const string path, int* err){
+  if(path_exists(path)!=0){
+    *err += path_exist_err;
+  }
+  return *err >0 ? 1 : 0;
+}
+
+string get_config_path(const int argc, char const *argv[])
 {
+  int errcodes = 0;
+  int configerr = -1; // -1 for no config file, 0 for succesful read, 1 for errors
+  bool has_config = false;
+  string cpath = "";
+  if(argc > 0)
+  {                                                                          
+    for(int i=0; i<argc; ++i)
+      {
+        string strarg = argv[i];
+        if(has_config){
+          configerr = 0;
+          cpath = strarg;
+        }
+        if(strarg.compare("-conf")==0 || strarg.compare("-config")==0 || strarg.compare("-f")==0){
+          has_config = true;
+        }
+      }
+  }
+  int verifyerr = verify_path(cpath,&errcodes);
+  configerr = parse_errs(errcodes,cpath,true);
+
+  return configerr==0?cpath:"";
+}
+
+int read_config_file(string path){
+  return 0;
+}
+
+int read_args(const int argc, char const *argv[])
+{
+  int errstate = 0;
+
   bool input_override = false;
   bool output_override = false;
   bool distance_overrride = false;
@@ -99,54 +214,60 @@ int main(int argc, char const *argv[])
   bool cdmin_override = false;
 
   if(argc > 0)
-  {
+  {                                                                          
     for(int i=0; i<argc; ++i)
       {
+        int errcodes = 0;
         string strarg = argv[i];
         if(input_override)
         {
-          inputpath = argv[i];
+          inputpath = strarg;
           input_override = false;
         }
         if(output_override)
         {
-          outputpath = argv[i];
+          outputpath = strarg;
           output_override = false;
         }
         if(distance_overrride)
         {
-          dist_atoms = stod(argv[i]);
+          dist_atoms = read_double(strarg,&errcodes);
           distance_overrride = false;
         }
         if(ljsteps_override)
         {
-          lj_steps = stoi(argv[i]);
+          lj_steps = read_integer(strarg,&errcodes);
           ljsteps_override = false;
         }
         if(ljstepsize_override)
         {
-          lj_stepsize = stod(argv[i]);
+          lj_stepsize = read_double(strarg,&errcodes);
           ljstepsize_override = false;
         }
         if(cdsteps_override)
         {
-          cd_steps = stoi(argv[i]);
+          cd_steps = read_integer(strarg,&errcodes);
           cdsteps_override = false;
         }
         if(cdstepsize_override)
         {
-          cd_stepsize = stod(argv[i]);
+          cd_stepsize = read_double(strarg,&errcodes);
           cdstepsize_override = false;
         }
         if(ljmin_override)
         {
-          lj_min = stod(argv[i]);
+          lj_min = read_double(strarg,&errcodes);
           ljmin_override = false;
         }
         if(cdmin_override)
         {
-          cd_min = stod(argv[i]);
+          cd_min = read_double(strarg,&errcodes);
           cdmin_override = false;
+        }
+
+        if (parse_errs(errcodes,strarg,true) != 0)
+        {
+          errstate = 1;
         }
 
 
@@ -194,7 +315,20 @@ int main(int argc, char const *argv[])
 
       }
   }
+  return errstate;
+}
 
+int main(int argc, char const *argv[])
+{
+  string cpatharg = get_config_path(argc,argv);
+  if(cpatharg.compare("")!=0){
+    configpath = cpatharg;
+
+  }
+  if (read_args(argc,argv) != 0){
+    cout << "improper arguments supplied, exiting now" << endl;
+    return 0;
+  }
 
   time_point start = chrono::high_resolution_clock::now();
   cout << ":: Computation start";
