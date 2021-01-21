@@ -1,8 +1,5 @@
-#include <chrono>           /* Time */
-#include <iostream>         /* cout, ... */
-#include <fstream>          /* ifstream, ... */
-#include <math.h>           /* ceil, ... */
-#include <vector>           /* vector, ... */
+
+#include "coll.h"
 
 using namespace std;
 
@@ -11,7 +8,6 @@ typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 /* Variables */
 string file;
 
-double distance_atoms;      /* distance between neighbouring atoms */
 int N = 0;                  /* number of atoms in one molecule */
 double L;                   /* length of collagen molecule */
 double box;                 /* length of periodic box */
@@ -23,7 +19,7 @@ int layers = 2;             /* Number of layers including focus layer */
 
 double diameter_atom = 1.12;    /* diameter of atom */
 
-double dist_atoms = 0.255;
+double distance_atoms = 0.255;
 
 double lj_min = 0.01;
 double lj_stepsize = 0.01;
@@ -61,37 +57,6 @@ int path_exist_err = 32;
 vector<double> charge, charge_ind;  /* vector for the charges of each atom */
 vector<int> type, type_ind; /* vector for the type of each atom */
 
-/* Functions */
-void readAtoms(string &file);
-void readTypes(string &file);
-
-double distance(double pos, double first, int n, double lat_gap);
-
-double factorLJ(double d);
-double LJ_per_mol(double pos, double dx, double ref, double lat_gap);
-double newLJ_per_mol(double pos, double dx, double ref, double lat_gap);
-double LJ_layer(double pos, double dx, int layer, double offset,
-                double lat_gap);
-double newLJ_layer(double pos, double dx, int layer, double offset,
-                double lat_gap);
-double compLJ(double lat_gap, double rad_gap, double offset, int layers);
-double newLJ(double lat_gap, double rad_gap, double offset, int layers);
-
-double factorCD(double q1, double q2, double d);
-double CD_per_mol(double pos, double q1, double dx, double ref,
-                  double lat_gap);
-double CD_layer(double pos, double q1, double dx, int layer, double offset,
-                double lat_gap);
-double compCD(double lat_gap, double rad_gap, double offset, int layers);
-
-void header(string &file);
-void singleEmin(string &file, int layers);
-void multipleEmin(string &file, int layers, int numbers);
-/* map functions */
-double energy(double lat_gap, double rad_gap, double offset, int layer1,
-              int layer2, double lj, double cd, bool lj_on);
-double intra_layer_energy(double lat_gap, double rad_gap, double offset,
-                          double lj, double cd, bool lj_on);
 
 double read_double(string arg, int* err){
   double argd = 0.0;
@@ -187,7 +152,7 @@ string get_config_path(const int argc, char const *argv[])
           configerr = 0;
           cpath = strarg;
         }
-        if(strarg.compare("-conf")==0 || strarg.compare("-config")==0 || strarg.compare("-f")==0){
+        if(strarg.compare("--conf")==0 || strarg.compare("--config")==0 || strarg.compare("-f")==0){
           has_config = true;
         }
       }
@@ -202,6 +167,10 @@ string get_config_path(const int argc, char const *argv[])
 
 int read_config_file(string path){
   return 0;
+}
+
+bool flag(string arg,string str){
+  return arg.compare(str)==0;
 }
 
 int read_args(const int argc, char const *argv[])
@@ -241,7 +210,7 @@ int read_args(const int argc, char const *argv[])
         }
         if(distance_overrride)
         {
-          dist_atoms = read_double(strarg,&errcodes);
+          distance_atoms = read_double(strarg,&errcodes);
           distance_overrride = false;
         }
         if(ljsteps_override)
@@ -280,49 +249,48 @@ int read_args(const int argc, char const *argv[])
           errstate = 1;
         }
 
-
-        if(strarg.compare("-h")==0)
+        if(flag(strarg,"-h") || flag(strarg,"--help"))
         {
           print_help();
           return -1;
         }
-        if(strarg.compare("-i")==0)
+        if(flag(strarg,"-i") || flag(strarg,"--input"))
         {
           input_override = true;
         }
-        if(strarg.compare("-o")==0)
+        if(flag(strarg,"-o") || flag(strarg,"--output"))
         {
           output_override = true;
         }
-        if(strarg.compare("-d")==0)
+        if(flag(strarg,"-d") || flag(strarg,"--dist"))
         {
           distance_overrride = true;
         }
-        if(strarg.compare("-c")==0)
+        if(flag(strarg,"-c") || flag(strarg,"--chargehash"))
         {
           charge_hashed_outputs = true;
         }
-        if(strarg.compare("-slj")==0)
+        if(flag(strarg,"-slj") || flag(strarg,"--ljsteps"))
         {
           ljsteps_override = true;
         }
-        if(strarg.compare("-sslj")==0)
+        if(flag(strarg,"-sslj") || flag(strarg,"--ljstepssize"))
         {
           ljstepsize_override = true;
         }
-        if(strarg.compare("-scd")==0)
+        if(flag(strarg,"-scd") || flag(strarg,"--cdsteps"))
         {
           cdsteps_override = true;
         }
-        if(strarg.compare("-sscd")==0)
+        if(flag(strarg,"-sscd") || flag(strarg,"--cdstepssize"))
         {
           cdstepsize_override = true;
         }
-        if(strarg.compare("-mcd")==0)
+        if(flag(strarg,"-mcd") || flag(strarg,"--cdmin"))
         {
           cdmin_override = true;
         }
-        if(strarg.compare("-mlj")==0)
+        if(flag(strarg,"-mlj") || flag(strarg,"--ljmin"))
         {
           ljmin_override = true;
         }
@@ -356,130 +324,15 @@ int main(int argc, char const *argv[])
   /************************************************************************/
 
   file = inputpath;
-  // file = "./dis/charge_distribution_36";            /* Anne's collagen */
-  //file = "./dis/charge_distribution_1054";       /* Native collagen */
-  distance_atoms = dist_atoms;
-  // distance_atoms = 0.255;   /* Anne's length */
-  //distance_atoms = 0.285;   /* to account for length of 300nm */
+  distance_atoms = distance_atoms;
   readAtoms(file);
-  string file2 = "./dis/atom_types_1054";
-  //readTypes(file2);
-  //L = (N - 1) * distance_atoms;
-  /************************************************************************/
 
-  /************************************************************************/
   cout << "\n\n:: running computation...";
   /* Only global Emin */
 
   file=outputpath;
 
   singleEmin(file, layers);
-
-  /* First numbers Emin */
-  // int numbers = 10;
-  // file = "./data/multiple/";
-  // multipleEmin(file, layers, numbers);
-
-  /* Individual part for maps */
-  // bool lj_on = false;
-  // double rad_gap, offset, cell_energy, cell_energy_min, min_r, min_o;
-  // cell_energy_min = 1e10;
-  // for (int rad = 1; rad <= N; rad++) {
-  //     cout << "\n --> " << (100. * rad) / (1. * N);
-  //     cout << "\% done...";
-  //   rad_gap = rad * distance_atoms;
-  //   for (int off = 0; off <= N; off++) {
-  //     offset = (rad + off) * distance_atoms;
-  //     /* Here calculation of energies for the above given geometries */
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 0, 1, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 0, 2, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 1, 2, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 1, 3, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 2, 3, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 2, 4, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 3, 4, 1.0, 14.0, lj_on);
-  //     cell_energy += energy(diameter_atom, rad_gap, offset, 3, 5, 1.0, 14.0, lj_on);
-  //
-  //     cell_energy += 5.0 * intra_layer_energy(diameter_atom, rad_gap, offset, 1.0, 14.0, lj_on);
-  //
-  //     if (cell_energy <= cell_energy_min) {
-  //       cell_energy_min = cell_energy;
-  //       min_r = rad_gap;
-  //       min_o = offset;
-  //     }
-  //   }
-  // }
-  //
-  // cout << "\n\nResult:";
-  // cout << "\ncell_enery = " << cell_energy_min;
-  // cout << "\nmin_r = " << min_r;
-  // cout << "\nmin_o = " << min_o;
-
-  // rad_gap = 34.0;
-  // offset = 67.0;
-  // cout << "\nenergy = " << energy(diameter_atom, rad_gap, offset, 0, 2, 1.0, 14.0, lj_on);
-  // cout << "\nintra_energy = " << 5.0 * intra_layer_energy(diameter_atom, rad_gap, offset, 1.0, 14.0, lj_on);
-
-  /* Individual part for maps */
-
-
-  /* Individual part for energy ratio */
-  // file = "./data/hydro/paramspace.dat";
-  // FILE *outf;
-  // outf = fopen(file.c_str(), "w");
-  // fprintf(outf, "#atoms per molecule N = %i", N);
-  // fprintf(outf, "\n#distance_atoms = %.3f", distance_atoms);
-  // fprintf(outf, "\n#molecule_length = %.3f", L);
-  // fprintf(outf, "\n#layers = %i", layers);
-  // // fprintf(outf, "\n\n#ratio_CD_LJ");
-  // fprintf(outf, "\n\n#CD_param");
-  // fprintf(outf, "\tradial_gap_min");
-  // fprintf(outf, "\toffset_min");
-  // fprintf(outf, "\tE_CD_min");
-  // fprintf(outf, "\tE_LJ_min");
-  // fprintf(outf, "\tE_total_min");
-  // double cd, lj, rad_gap, offset, help;
-  // vector<double> radmin, offmin, eCDmin, eLJmin, eTotmin;
-  // radmin.assign(1000, 0);
-  // offmin.assign(1000, 0);
-  // eLJmin.assign(1000, 1e6);
-  // eCDmin.assign(1000, 1e6);
-  // eTotmin.assign(1000, 1e6);
-  // for (int rad = 1; rad <= N; rad++) {
-  //   rad_gap = rad * distance_atoms;
-  //   cout << "\n --> " << (100. * rad) / (1. * N);
-  //   cout << "\% done...";
-  //   for (int off = 0; off <= N - rad; off++) {
-  //     offset = (rad + off) * distance_atoms;
-  //     lj = newLJ(diameter_atom, rad_gap, offset, layers);
-  //     // lj = 0;
-  //     cd = compCD(diameter_atom, rad_gap, offset, layers);
-  //     for (int i = 0; i < 1000; i++) {
-  //       help = cd * (0.001 + i * 0.001);
-  //       if (lj + help < eTotmin[i]) {
-  //         eLJmin[i] = lj;
-  //         eCDmin[i] = help;
-  //         eTotmin[i] = lj + help;
-  //         radmin[i] = rad_gap;
-  //         offmin[i] = offset;
-  //       }
-  //     }
-  //   }
-  // }
-  // for (int i = 0; i < 1000; i++) {
-  //   fprintf(outf, "\n");
-  //   fprintf(outf, "%.3f", (0.001 + i * 0.001));
-  //   fprintf(outf, "\t%.3f", radmin[i]);
-  //   fprintf(outf, "\t%.3f", offmin[i]);
-  //   fprintf(outf, "\t%.3f", eCDmin[i]);
-  //   fprintf(outf, "\t%.3f", eLJmin[i]);
-  //   fprintf(outf, "\t%.3f", eTotmin[i]);
-  // }
-  // fclose(outf);
-  // cout << "\nGlobal minimum energy = " << mini;
-  // cout << " at r = " << mini_r << " and o = " << mini_o;
-  /* Individual part for energy ratio */
-  /************************************************************************/
 
   /************************************************************************/
   time_point end = chrono::high_resolution_clock::now();
@@ -971,7 +824,7 @@ void singleEmin(string &file, int layers)
     fflags+="-";
     fflags+=to_string(N);
     fflags+="-";
-    fflags+=to_string(dist_atoms);
+    fflags+=to_string(distance_atoms);
     fflags+="-";
     fflags+=to_string(chargesum);
     fflags+="-";
