@@ -282,7 +282,6 @@ int main(int argc, char const *argv[])
   /************************************************************************/
 
   file = inputpath;
-  distance_atoms = distance_atoms;
   readAtoms(file);
 
   cout << "\n\n:: running computation...";
