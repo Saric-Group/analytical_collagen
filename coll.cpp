@@ -62,9 +62,18 @@ int read_args(const int argc, char const *argv[])
 {
   int errstate = 0;
 
+  //io settings
+
   bool input_override = false;
   bool output_override = false;
-  bool distance_overrride = false;
+
+  //spatial settings
+
+  bool layers_override = false;
+  bool diameter_override = false;
+  bool distance_override = false;
+
+  //potential settings
 
   bool ljsteps_override = false;
   bool ljstepsize_override = false;
@@ -73,12 +82,18 @@ int read_args(const int argc, char const *argv[])
   bool ljmin_override = false;
   bool cdmin_override = false;
 
+  bool cdcut_override = false;
+  bool ljcut_override = false;
+
   if(argc > 0)
   {                                                                          
     for(int i=0; i<argc; ++i)
       {
         int errcodes = 0;
         string strarg = argv[i];
+
+        //io settings
+
         if(input_override)
         {
           if(verify_path(strarg,&errcodes)==0){
@@ -93,11 +108,27 @@ int read_args(const int argc, char const *argv[])
           }
           output_override = false;
         }
-        if(distance_overrride)
+
+        //spatial settings
+
+        if(layers_override)
+        {
+          layers = read_integer(strarg,&errcodes);
+          layers_override = false;
+        }
+        if(diameter_override)
+        {
+          diameter_atom = read_double(strarg,&errcodes);
+          diameter_override = false;
+        }
+        if(distance_override)
         {
           distance_atoms = read_double(strarg,&errcodes);
-          distance_overrride = false;
+          distance_override = false;
         }
+
+        //potential settings
+
         if(ljsteps_override)
         {
           lj_steps = read_integer(strarg,&errcodes);
@@ -128,17 +159,39 @@ int read_args(const int argc, char const *argv[])
           cd_min = read_double(strarg,&errcodes);
           cdmin_override = false;
         }
+        if(ljcut_override)
+        {
+          lj_cutoff = read_double(strarg,&errcodes);
+          ljcut_override = false;
+        }
+        if(cdcut_override)
+        {
+          cd_cutoff = read_double(strarg,&errcodes);
+          cdcut_override = false;
+        }
+
+        //error handling
 
         if (parse_errs(errcodes,strarg,true) != 0)
         {
           errstate = 1;
         }
 
+        //bool flags and help
+
         if(flag(strarg,"-h") || flag(strarg,"--help"))
         {
           print_help();
           return -1;
         }
+
+        if(flag(strarg,"-c") || flag(strarg,"--chargehash"))
+        {
+          charge_hashed_outputs = true;
+        }
+
+        //io settings
+
         if(flag(strarg,"-i") || flag(strarg,"--input"))
         {
           input_override = true;
@@ -147,14 +200,24 @@ int read_args(const int argc, char const *argv[])
         {
           output_override = true;
         }
+
+        //spatial settings
+
+        if(flag(strarg,"-l") || flag(strarg,"--layers"))
+        {
+          layers_override = true;
+        }
+        if(flag(strarg,"-dia") || flag(strarg,"--diameter"))
+        {
+          diameter_override = true;
+        }
         if(flag(strarg,"-d") || flag(strarg,"--dist"))
         {
-          distance_overrride = true;
+          distance_override = true;
         }
-        if(flag(strarg,"-c") || flag(strarg,"--chargehash"))
-        {
-          charge_hashed_outputs = true;
-        }
+
+        //potential settings
+
         if(flag(strarg,"-slj") || flag(strarg,"--ljsteps"))
         {
           ljsteps_override = true;
@@ -178,6 +241,16 @@ int read_args(const int argc, char const *argv[])
         if(flag(strarg,"-mlj") || flag(strarg,"--ljmin"))
         {
           ljmin_override = true;
+        }
+
+
+        if(flag(strarg,"-ccd") || flag(strarg,"--cdcut"))
+        {
+          cdcut_override = true;
+        }
+        if(flag(strarg,"-clj") || flag(strarg,"--ljcut"))
+        {
+          ljcut_override = true;
         }
 
       }
