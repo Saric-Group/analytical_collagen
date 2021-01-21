@@ -11,16 +11,19 @@ typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 /* Variables */
 string file;
 
-int layers = 2;             /* Number of layers including focus layer */
-
 double distance_atoms;      /* distance between neighbouring atoms */
-double diameter_atom = 1.12;    /* diameter of atom */
 int N = 0;                  /* number of atoms in one molecule */
 double L;                   /* length of collagen molecule */
 double box;                 /* length of periodic box */
-double cd_cutoff = 2.0;     /* cutoff of cd potential */
-double lj_cutoff = 2.0;     /* cutoff of lj potential */
-double max_cutoff = max(cd_cutoff, lj_cutoff);
+
+
+//defaults
+
+int layers = 2;             /* Number of layers including focus layer */
+
+double diameter_atom = 1.12;    /* diameter of atom */
+
+double dist_atoms = 0.255;
 
 double lj_min = 0.01;
 double lj_stepsize = 0.01;
@@ -29,6 +32,20 @@ int lj_steps = 50;
 double cd_min = 10.0;
 double cd_stepsize = 10.0;
 int cd_steps = 20;
+
+double cd_cutoff = 2.0;     /* cutoff of cd potential */
+double lj_cutoff = 2.0;     /* cutoff of lj potential */
+double max_cutoff = max(cd_cutoff, lj_cutoff);
+
+string inputpath = "./charge_distribution";
+string outputpath = "./energy_min.dat";
+string file_extension = ".dat";
+string configpath = "";
+
+// flags
+
+bool set_output = false;
+bool charge_hashed_outputs = false;
 
 //error codes
 
@@ -39,24 +56,7 @@ int i_parse_err = 8;
 int i_limit_err = 16;
 int path_exist_err = 32;
 
-
-  // argument overrides
-  // takes -i and -o as inputs
-
-  // -i input file
-  // -o output file
-
-string inputpath = "./charge_distribution";
-string outputpath = "./energy_min.dat";
-string file_extension = ".dat";
-string configpath = "";
-double dist_atoms = 0.255;
-
-bool set_output = false;
-
-bool charge_hashed_outputs = false;
-
-
+//collections
 
 vector<double> charge, charge_ind;  /* vector for the charges of each atom */
 vector<int> type, type_ind; /* vector for the type of each atom */
@@ -168,6 +168,10 @@ int verify_path(const string path, int* err){
   return *err >0 ? 1 : 0;
 }
 
+void print_help(){
+
+}
+
 string get_config_path(const int argc, char const *argv[])
 {
   int errcodes = 0;
@@ -188,8 +192,10 @@ string get_config_path(const int argc, char const *argv[])
         }
       }
   }
-  int verifyerr = verify_path(cpath,&errcodes);
-  configerr = parse_errs(errcodes,cpath,true);
+  if(cpath.compare("") != 0){
+    int verifyerr = verify_path(cpath,&errcodes);
+    configerr = parse_errs(errcodes,cpath,true);
+  }
 
   return configerr==0?cpath:"";
 }
@@ -221,12 +227,16 @@ int read_args(const int argc, char const *argv[])
         string strarg = argv[i];
         if(input_override)
         {
-          inputpath = strarg;
+          if(verify_path(strarg,&errcodes)==0){
+            inputpath = strarg;
+          }
           input_override = false;
         }
         if(output_override)
         {
-          outputpath = strarg;
+          if(verify_path(strarg,&errcodes)==0){
+            outputpath = strarg;
+          }
           output_override = false;
         }
         if(distance_overrride)
@@ -271,7 +281,11 @@ int read_args(const int argc, char const *argv[])
         }
 
 
-
+        if(strarg.compare("-h")==0)
+        {
+          print_help();
+          return -1;
+        }
         if(strarg.compare("-i")==0)
         {
           input_override = true;
@@ -321,13 +335,19 @@ int read_args(const int argc, char const *argv[])
 int main(int argc, char const *argv[])
 {
   string cpatharg = get_config_path(argc,argv);
-  if(cpatharg.compare("")!=0){
+  if(!cpatharg.empty()){
     configpath = cpatharg;
-
   }
-  if (read_args(argc,argv) != 0){
+  int argerr = read_args(argc,argv);
+  if (argerr > 0){
     cout << "improper arguments supplied, exiting now" << endl;
     return 0;
+  }
+  else if (argerr < 0){
+    return 0;
+  }
+  if(configpath.empty()){
+    cout << "no config file selected, using defaults" << endl;
   }
 
   time_point start = chrono::high_resolution_clock::now();
