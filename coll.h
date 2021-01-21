@@ -37,3 +37,4 @@ double energy(double lat_gap, double rad_gap, double offset, int layer1,
               int layer2, double lj, double cd, bool lj_on);
 double intra_layer_energy(double lat_gap, double rad_gap, double offset,
                           double lj, double cd, bool lj_on);
+int read_args(int, char *);
