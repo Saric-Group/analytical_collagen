@@ -49,231 +49,36 @@ bool charge_hashed_outputs = false;
 vector<double> charge, charge_ind;  /* vector for the charges of each atom */
 vector<int> type, type_ind; /* vector for the type of each atom */
 
+//I wish these weren't global variables...
 
-void print_help(){
+//io settings
 
-}
+bool input_override = false;
+bool output_override = false;
 
-int read_config_file(string path){
-  return 0;
-}
+//spatial settings
 
-int read_args(const int argc, char const *argv[])
-{
-  int errstate = 0;
+bool layers_override = false;
+bool diameter_override = false;
+bool distance_override = false;
 
-  //io settings
+//potential settings
 
-  bool input_override = false;
-  bool output_override = false;
+bool ljsteps_override = false;
+bool ljstepsize_override = false;
+bool cdsteps_override = false;
+bool cdstepsize_override = false;
+bool ljmin_override = false;
+bool cdmin_override = false;
 
-  //spatial settings
-
-  bool layers_override = false;
-  bool diameter_override = false;
-  bool distance_override = false;
-
-  //potential settings
-
-  bool ljsteps_override = false;
-  bool ljstepsize_override = false;
-  bool cdsteps_override = false;
-  bool cdstepsize_override = false;
-  bool ljmin_override = false;
-  bool cdmin_override = false;
-
-  bool cdcut_override = false;
-  bool ljcut_override = false;
-
-  if(argc > 0)
-  {                                                                          
-    for(int i=0; i<argc; ++i)
-      {
-        int errcodes = 0;
-        string strarg = argv[i];
-
-        //io settings
-
-        if(input_override)
-        {
-          if(verify_path(strarg,&errcodes)==0){
-            inputpath = strarg;
-          }
-          input_override = false;
-        }
-        if(output_override)
-        {
-          if(verify_path(strarg,&errcodes)==0){
-            outputpath = strarg;
-          }
-          output_override = false;
-        }
-
-        //spatial settings
-
-        if(layers_override)
-        {
-          layers = read_integer(strarg,&errcodes);
-          layers_override = false;
-        }
-        if(diameter_override)
-        {
-          diameter_atom = read_double(strarg,&errcodes);
-          diameter_override = false;
-        }
-        if(distance_override)
-        {
-          distance_atoms = read_double(strarg,&errcodes);
-          distance_override = false;
-        }
-
-        //potential settings
-
-        if(ljsteps_override)
-        {
-          lj_steps = read_integer(strarg,&errcodes);
-          ljsteps_override = false;
-        }
-        if(ljstepsize_override)
-        {
-          lj_stepsize = read_double(strarg,&errcodes);
-          ljstepsize_override = false;
-        }
-        if(cdsteps_override)
-        {
-          cd_steps = read_integer(strarg,&errcodes);
-          cdsteps_override = false;
-        }
-        if(cdstepsize_override)
-        {
-          cd_stepsize = read_double(strarg,&errcodes);
-          cdstepsize_override = false;
-        }
-        if(ljmin_override)
-        {
-          lj_min = read_double(strarg,&errcodes);
-          ljmin_override = false;
-        }
-        if(cdmin_override)
-        {
-          cd_min = read_double(strarg,&errcodes);
-          cdmin_override = false;
-        }
-        if(ljcut_override)
-        {
-          lj_cutoff = read_double(strarg,&errcodes);
-          ljcut_override = false;
-        }
-        if(cdcut_override)
-        {
-          cd_cutoff = read_double(strarg,&errcodes);
-          cdcut_override = false;
-        }
-
-        //error handling
-
-        if (parse_errs(errcodes,strarg,true) != 0)
-        {
-          errstate = 1;
-        }
-
-        //bool flags and help
-
-        if(flag(strarg,"-h") || flag(strarg,"--help"))
-        {
-          print_help();
-          return -1;
-        }
-
-        if(flag(strarg,"-c") || flag(strarg,"--chargehash"))
-        {
-          charge_hashed_outputs = true;
-        }
-
-        //io settings
-
-        if(flag(strarg,"-i") || flag(strarg,"--input"))
-        {
-          input_override = true;
-        }
-        if(flag(strarg,"-o") || flag(strarg,"--output"))
-        {
-          output_override = true;
-        }
-
-        //spatial settings
-
-        if(flag(strarg,"-l") || flag(strarg,"--layers"))
-        {
-          layers_override = true;
-        }
-        if(flag(strarg,"-dia") || flag(strarg,"--diameter"))
-        {
-          diameter_override = true;
-        }
-        if(flag(strarg,"-d") || flag(strarg,"--dist"))
-        {
-          distance_override = true;
-        }
-
-        //potential settings
-
-        if(flag(strarg,"-slj") || flag(strarg,"--ljsteps"))
-        {
-          ljsteps_override = true;
-        }
-        if(flag(strarg,"-sslj") || flag(strarg,"--ljstepssize"))
-        {
-          ljstepsize_override = true;
-        }
-        if(flag(strarg,"-scd") || flag(strarg,"--cdsteps"))
-        {
-          cdsteps_override = true;
-        }
-        if(flag(strarg,"-sscd") || flag(strarg,"--cdstepssize"))
-        {
-          cdstepsize_override = true;
-        }
-        if(flag(strarg,"-mcd") || flag(strarg,"--cdmin"))
-        {
-          cdmin_override = true;
-        }
-        if(flag(strarg,"-mlj") || flag(strarg,"--ljmin"))
-        {
-          ljmin_override = true;
-        }
-
-
-        if(flag(strarg,"-ccd") || flag(strarg,"--cdcut"))
-        {
-          cdcut_override = true;
-        }
-        if(flag(strarg,"-clj") || flag(strarg,"--ljcut"))
-        {
-          ljcut_override = true;
-        }
-
-      }
-  }
-  return errstate;
-}
+bool cdcut_override = false;
+bool ljcut_override = false;
 
 int main(int argc, char const *argv[])
 {
-  string cpatharg = get_config_path(argc,argv);
-  if(!cpatharg.empty()){
-    configpath = cpatharg;
-  }
-  int argerr = read_args(argc,argv);
-  if (argerr > 0){
-    cout << "improper arguments supplied, exiting now" << endl;
+
+  if(parse_all_args(argc,argv) != 1){
     return 0;
-  }
-  else if (argerr < 0){
-    return 0;
-  }
-  if(configpath.empty()){
-    cout << "no config file selected, using defaults" << endl;
   }
 
   time_point start = chrono::high_resolution_clock::now();
@@ -1046,4 +851,239 @@ double intra_layer_energy(double lat_gap, double rad_gap, double offset,
   }
 
   return sum;
+}
+
+void print_help(){
+
+}
+
+int process_arg(string strarg, int* errcodes, bool dashes){
+  //io settings
+    int errstate = 0;
+
+    string d = dashes ? "-" : "";
+    string dd = dashes ? "--" : "";
+    if(input_override)
+    {
+      if(verify_path(strarg,errcodes)==0){
+        inputpath = strarg;
+      }
+      input_override = false;
+    }
+    if(output_override)
+    {
+      if(verify_path(strarg,errcodes)==0){
+        outputpath = strarg;
+      }
+      output_override = false;
+    }
+
+    //spatial settings
+
+    if(layers_override)
+    {
+      layers = safe_read_integer(layers,strarg,errcodes);
+      layers_override = false;
+    }
+    if(diameter_override)
+    {
+      diameter_atom = safe_read_double(diameter_atom,strarg,errcodes);
+      diameter_override = false;
+    }
+    if(distance_override)
+    {
+      distance_atoms = safe_read_double(distance_atoms,strarg,errcodes);
+      distance_override = false;
+    }
+
+    //potential settings
+
+    if(ljsteps_override)
+    {
+      lj_steps = safe_read_integer(lj_steps,strarg,errcodes);
+      ljsteps_override = false;
+    }
+    if(ljstepsize_override)
+    {
+      lj_stepsize = safe_read_double(lj_stepsize,strarg,errcodes);
+      ljstepsize_override = false;
+    }
+    if(cdsteps_override)
+    {
+      cd_steps = safe_read_integer(cd_steps,strarg,errcodes);
+      cdsteps_override = false;
+    }
+    if(cdstepsize_override)
+    {
+      cd_stepsize = safe_read_double(cd_stepsize,strarg,errcodes);
+      cdstepsize_override = false;
+    }
+    if(ljmin_override)
+    {
+      lj_min = safe_read_double(lj_min,strarg,errcodes);
+      ljmin_override = false;
+    }
+    if(cdmin_override)
+    {
+      cd_min = safe_read_double(cd_min,strarg,errcodes);
+      cdmin_override = false;
+    }
+    if(ljcut_override)
+    {
+      lj_cutoff = safe_read_double(lj_cutoff,strarg,errcodes);
+      ljcut_override = false;
+    }
+    if(cdcut_override)
+    {
+      cd_cutoff = safe_read_double(cd_cutoff,strarg,errcodes);
+      cdcut_override = false;
+    }
+
+    //error handling
+
+    if (parse_errs(*errcodes,strarg,true) != 0)
+    {
+      errstate = 1;
+    }
+
+    //bool flags and help
+
+    if(flag(strarg,d+"h") || flag(strarg,dd+"help"))
+    {
+      print_help();
+      return -1;
+    }
+
+    if(flag(strarg,d+"c") || flag(strarg,dd+"chargehash"))
+    {
+      charge_hashed_outputs = true;
+    }
+
+    //io settings
+
+    if(flag(strarg,d+"i") || flag(strarg,dd+"input"))
+    {
+      input_override = true;
+    }
+    if(flag(strarg,d+"o") || flag(strarg,dd+"output"))
+    {
+      output_override = true;
+    }
+
+    //spatial settings
+
+    if(flag(strarg,d+"l") || flag(strarg,dd+"layers"))
+    {
+      layers_override = true;
+    }
+    if(flag(strarg,d+"dia") || flag(strarg,dd+"diameter"))
+    {
+      diameter_override = true;
+    }
+    if(flag(strarg,d+"d") || flag(strarg,dd+"dist"))
+    {
+      distance_override = true;
+    }
+
+    //potential settings
+
+    if(flag(strarg,d+"slj") || flag(strarg,dd+"ljsteps"))
+    {
+      ljsteps_override = true;
+    }
+    if(flag(strarg,d+"sslj") || flag(strarg,dd+"ljstepssize"))
+    {
+      ljstepsize_override = true;
+    }
+    if(flag(strarg,d+"scd") || flag(strarg,dd+"cdsteps"))
+    {
+      cdsteps_override = true;
+    }
+    if(flag(strarg,d+"sscd") || flag(strarg,dd+"cdstepssize"))
+    {
+      cdstepsize_override = true;
+    }
+    if(flag(strarg,d+"mcd") || flag(strarg,dd+"cdmin"))
+    {
+      cdmin_override = true;
+    }
+    if(flag(strarg,d+"mlj") || flag(strarg,dd+"ljmin"))
+    {
+      ljmin_override = true;
+    }
+
+
+    if(flag(strarg,"-ccd") || flag(strarg,dd+"cdcut"))
+    {
+      cdcut_override = true;
+    }
+    if(flag(strarg,"-clj") || flag(strarg,dd+"ljcut"))
+    {
+      ljcut_override = true;
+    }
+    return errstate;
+}
+
+int read_config_file(string path){
+  int errcodes = 0;
+  std::ifstream infile("default.config");
+  std::string line;
+  while (std::getline(infile, line))
+  {
+      errcodes = 0;
+      std::string s = remove_spaces(line);
+      std::string delimiter = "=";
+
+      size_t pos = 0;
+      std::string token;
+      while ((pos = s.find(delimiter)) != std::string::npos) {
+          token = s.substr(0, pos);
+          process_arg(token,&errcodes,false);
+          s.erase(0, pos + delimiter.length());
+      }
+      process_arg(s,&errcodes,false);
+  }
+  return 0;
+}
+
+int read_args(int argc, char const *argv[])
+{
+  int errstate = 0;
+
+  if(argc > 0)
+  {                                                                          
+    for(int i=0; i<argc; ++i)
+      {
+        int errcodes = 0;
+        string strarg = argv[i];
+        process_arg(strarg,&errcodes,true);
+
+      }
+  }
+  return errstate;
+}
+
+int parse_all_args(int argc, char const *argv[]){
+  string cpatharg = get_config_path(argc,argv);
+  if(!cpatharg.empty()){
+    configpath = cpatharg;
+  }
+
+  if(configpath.empty()){
+    cout << "no config file selected, using defaults" << endl;
+  }
+  else {
+    cout << "reading from config path " << configpath << endl;
+    read_config_file(configpath);
+  }
+
+  int argerr = read_args(argc,argv);
+  if (argerr > 0){
+    cout << "improper arguments supplied, exiting now" << endl;
+    return 0;
+  }
+  else if (argerr < 0){
+    return 0;
+  }
+  return 1;
 }

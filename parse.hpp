@@ -100,6 +100,7 @@ string get_config_path(const int argc, char const *argv[])
         if(has_config){
           configerr = 0;
           cpath = strarg;
+          has_config = false;
         }
         if(strarg.compare("--conf")==0 || strarg.compare("--config")==0 || strarg.compare("-f")==0){
           has_config = true;
@@ -116,4 +117,20 @@ string get_config_path(const int argc, char const *argv[])
 
 bool flag(string arg,string str){
   return arg.compare(str)==0;
+}
+
+string remove_spaces(string input)
+{
+  input.erase(std::remove(input.begin(),input.end(),' '),input.end());
+  return input;
+}
+
+int safe_read_integer(int orig,string strarg,int* errcodes){
+  int parsed = read_integer(strarg,errcodes);
+  return *errcodes == 0 ? parsed : orig;
+}
+
+double safe_read_double(double orig,string strarg,int* errcodes){
+  double parsed = read_double(strarg,errcodes);
+  return *errcodes == 0 ? parsed : orig;
 }
