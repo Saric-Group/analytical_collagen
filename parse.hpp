@@ -11,6 +11,29 @@ int i_parse_err = 8;
 int i_limit_err = 16;
 int path_exist_err = 32;
 
+string lastchar(string input)
+{
+  return input.substr(input.size() - 1);
+}
+
+string clean_to_string(double f){
+  std::string str = std::to_string (f);
+  str.erase ( str.find_last_not_of('0') + 1, std::string::npos );
+  if(lastchar(str) == "."){
+    str.erase ( str.find_last_not_of('.') + 1, std::string::npos );
+  }
+  return str;
+}
+
+
+string replace_char(string str, char ch1, char ch2) {
+  for (int i = 0; i < str.length(); ++i) {
+    if (str[i] == ch1)
+      str[i] = ch2;
+  }
+  return str;
+}
+
 double read_double(string arg, int* err){
   double argd = 0.0;
   try {                                                                          

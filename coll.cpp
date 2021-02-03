@@ -75,11 +75,12 @@ bool cdmin_override = false;
 bool cdcut_override = false;
 bool ljcut_override = false;
 
+
 int produce_xyz(int numatoms,int rows,double distatom, double latgap, double radgap, double offset ,int id[],int type[],double charges[], double xpos[], double ypos[], double zpos[]){
   int natoms = layers*rows*numatoms;
 
-  cout << natoms << endl;
-  cout << "Atoms. Timestep: 0" << endl;
+  //cout << natoms << endl;
+  //cout << "Atoms. Timestep: 0" << endl;
 
   map<int,int> typemap;
   int typecount = 0;
@@ -104,16 +105,16 @@ int produce_xyz(int numatoms,int rows,double distatom, double latgap, double rad
         xpos[i] = (((double)numatoms)*dr*distatom) + (dr*radgap) + dl*offset + da*distatom;
         ypos[i] = -dl*latgap;
         zpos[i] = 0.0;
-        cout << id[i] << "  " << xpos[i] << "  " << ypos[i] << "  " << zpos[i] << "  " << type[i] << "  " << charges[i] << endl;
+        //cout << id[i] << "  " << xpos[i] << "  " << ypos[i] << "  " << zpos[i] << "  " << type[i] << "  " << charges[i] << endl;
       }
     }
   }
 
-  return 0;
+  return 1;
 
 }
 
-int xyztest(int rows, double latgap, double radgap, double offset){
+int output_xyz(string filename, int rows, double latgap, double radgap, double offset){
 
   int natoms = layers*rows*N;
   int * id = new int[natoms];
@@ -123,7 +124,33 @@ int xyztest(int rows, double latgap, double radgap, double offset){
   double * ypos = new double[natoms];
   double * zpos = new double[natoms];
 
-  int err = produce_xyz(N,3,distance_atoms,1.12,1.0,1.9,id,type,charges,xpos,ypos,zpos);
+  int err = produce_xyz(N,rows,distance_atoms,latgap,radgap,offset,id,type,charges,xpos,ypos,zpos);
+
+  if(err != 1){
+    return 0;
+  }
+
+  FILE *xyzf;
+  xyzf = fopen(filename.c_str(), "w");
+
+  fprintf(xyzf, "%i\n", natoms);
+  fprintf(xyzf, "Atoms. Timestep: 0\n");
+  for(int i=0; i<natoms;i++){
+    string xyzrow = 
+    to_string(id[i]) 
+    + "  " 
+    + clean_to_string(xpos[i]) 
+    + "  " 
+    + clean_to_string(ypos[i]) 
+    + "  " 
+    + clean_to_string(zpos[i]) 
+    + "  " 
+    + to_string(type[i]) 
+    + "  " 
+    + clean_to_string(charges[i]) 
+    + "\n";
+    fprintf(xyzf, "%s",xyzrow.c_str());
+  }
 
   return err;
 
@@ -663,9 +690,6 @@ void singleEmin(string &file, int layers)
                   radmin[i][j] = rad_gap;
                   offmin[i][j] = offset;
               }
-              if(xyz_outputs){
-                xyztest(3,lat_gap,rad_gap,offset);
-              }
           }
       }
     }
@@ -681,6 +705,11 @@ void singleEmin(string &file, int layers)
   if (file.find(file_extension) != string::npos)
   {
       file = file.substr(0, file.find(file_extension));
+  }
+  string xyzbasefile = "";
+
+  if(xyz_outputs){
+    xyzbasefile = file;
   }
 
   file+=".dat";
@@ -704,6 +733,16 @@ void singleEmin(string &file, int layers)
           fprintf(outf, "\t%.3f", eCDmin[i][j]);                        //E_CD min
           fprintf(outf, "\t%.3f", eLJmin[i][j]);                        //E_LJ min
           fprintf(outf, "\t%.3f", eTotmin[i][j]);                       //E_tot min
+          if(xyz_outputs){
+            string xyzfile = xyzbasefile;
+            xyzfile += "-"
+              + replace_char(clean_to_string(lj_min + (i) * lj_stepsize),'.','_')
+              + "-" 
+              +  replace_char(clean_to_string(cd_min + (j) * cd_stepsize),'.','_') 
+              + ".xyz";
+            cout << xyzfile << endl;
+            output_xyz(xyzfile,3,latmin[i][j],radmin[i][j],offmin[i][j]);
+          }
       }
       fprintf(outf, "\n");
   }
