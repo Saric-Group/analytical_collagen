@@ -964,9 +964,7 @@ int process_arg(string strarg, int* errcodes, bool dashes){
     }
     if(output_override)
     {
-      if(verify_path(strarg,errcodes)==0){
-        outputpath = strarg;
-      }
+      outputpath = strarg;
       output_override = false;
     }
 
