@@ -43,6 +43,7 @@ string configpath = "";
 
 bool set_output = false;
 bool charge_hashed_outputs = false;
+bool xyz_outputs = false;
 
 //collections
 
@@ -74,12 +75,134 @@ bool cdmin_override = false;
 bool cdcut_override = false;
 bool ljcut_override = false;
 
+int produce_xyz(int numatoms,int rows,double distatom, double latgap, double radgap, double offset ,int id[],int type[],double charges[], double xpos[], double ypos[], double zpos[]){
+  int natoms = layers*rows*numatoms;
+
+  cout << natoms << endl;
+  cout << "Atoms. Timestep: 0" << endl;
+
+  map<int,int> typemap;
+  int typecount = 0;
+  for(int i=0; i<numatoms; i++){
+    if(not typemap.count(charge[i])){
+      typemap[charge[i]]=typecount;
+      typecount += 1;
+    }
+  }
+
+  for(int l=0; l<layers; l++){
+    for(int r=0; r<rows; r++){
+      for(int a=0; a<numatoms; a++){
+        int i = l*rows*numatoms + r*numatoms + a;
+        double drows = (double) rows;
+        double dr =(double) r;
+        double da =(double) a;
+        double dl =(double) l;
+        id[i] = i;
+        charges[i] = charge[a];
+        type[i] = typemap[charge[a]];
+        xpos[i] = (((double)numatoms)*dr*distatom) + (dr*radgap) + dl*offset + da*distatom;
+        ypos[i] = -dl*latgap;
+        zpos[i] = 0.0;
+        cout << id[i] << "  " << xpos[i] << "  " << ypos[i] << "  " << zpos[i] << "  " << type[i] << "  " << charges[i] << endl;
+      }
+    }
+  }
+
+  return 0;
+
+}
+
+int xyztest(int rows, double latgap, double radgap, double offset){
+
+  int natoms = layers*rows*N;
+  int * id = new int[natoms];
+  int * type = new int[natoms];
+  double * charges = new double[natoms];
+  double * xpos = new double[natoms];
+  double * ypos = new double[natoms];
+  double * zpos = new double[natoms];
+
+  int err = produce_xyz(N,3,distance_atoms,1.12,1.0,1.9,id,type,charges,xpos,ypos,zpos);
+
+  return err;
+
+}
+
+string hash_output(){
+  //create a unique code for the output file
+
+    unsigned long f_charges = 0;
+
+    string fflags = "";
+
+    unsigned long lulen = sizeof(unsigned long)*8;
+
+    int fcount = 0;
+
+    double chargesum=0.0;
+    int chargecount = 0;
+
+    for(int c=0;c<charge.size();c++)
+    {
+      if(charge[c]!=0){
+        chargesum+=charge[c];
+        chargecount++;
+      }
+    }
+
+    double chargemean = chargesum/((double) chargecount);
+
+    fflags+="-";
+    fflags+=to_string(N);
+    fflags+="-";
+    fflags+=to_string(distance_atoms);
+    fflags+="-";
+    fflags+=to_string(chargesum);
+    fflags+="-";
+    fflags+=to_string(chargemean);
+    fflags+="-";
+
+
+
+    for(int i=0; i<N; i++)
+    {
+      if(fcount>=lulen){
+        fflags += to_string(f_charges);
+        fflags+="-";
+        f_charges = 0;
+        fcount = 0;
+      }
+      if((int) charge[i] != 0)
+      {
+        f_charges+=pow(2,(int)(lulen-fcount-1));
+      }
+
+      fcount++;
+    }
+
+    fflags += to_string(f_charges);
+
+
+    if (file.find(file_extension) != string::npos)
+    {
+      file = file.substr(0, file.find(file_extension));
+    }
+
+    file+=fflags;
+    return file;
+}
+
 int main(int argc, char const *argv[])
 {
+
+  
 
   if(parse_all_args(argc,argv) != 1){
     return 0;
   }
+
+  
 
   time_point start = chrono::high_resolution_clock::now();
   cout << ":: Computation start";
@@ -120,7 +243,6 @@ void readAtoms(string &file)
         if (charge[N - 1] != 0) {
           charge_ind.push_back(N - 1);
         }
-        // cout << "\natom " << N << " has charge " << line;
     }
     myfile.close();
     cout << "\n -> " << N << " atoms read.";
@@ -406,10 +528,7 @@ double CD_per_mol(double pos, double q1, double dx, double ref, double lat_gap)
             q2 = charge[left + i];
             if (q2 != 0) {
                 d = distance(pos, ref, left + i, lat_gap);
-                // cout << "\nhit with " << factorCD(q1, q2, d) / 150;
-                // cout << " to change sum = " << sum / 150;
                 sum += factorCD(q1, q2, d);
-                // cout << " to sum = " << sum / 150;
             }
         }
     }
@@ -521,20 +640,13 @@ void singleEmin(string &file, int layers)
   for (int lat = 0; lat <= lat_max; lat++) {
     lat_gap = lat * 0.1 * diameter_atom;
   for (int rad = 0; rad <= rad_max; rad++) {
-    // cout << "\n --> " << (100. * rad) / (1. * rad_max);
-    // cout << "\% done ...";
 
-    // rad_gap = rad * distance_atoms;
-    rad_gap = rad * 0.1;
-
-    // double tmp = (L - (layers - 1.0) * rad_gap) / layers / distance_atoms;
-    // double tmp = (L - rad_gap) / distance_atoms;
-    // off_max = (int) ceil(tmp);
-    off_max = (int) ceil(L / 0.1);
+    rad_gap = rad * distance_atoms;
+    double tmp = (L - (layers - 1.0) * rad_gap) / layers / distance_atoms;
+    off_max = (int) ceil(tmp);
 
     for (int off = 0; off <= off_max; off++) {
-      // offset = rad_gap + off * distance_atoms;
-      offset = off * 0.1;
+      offset = rad_gap + off * distance_atoms;
       /* Energy factors calculation for given parameters above */
       lj = compLJ(lat_gap, rad_gap, offset, layers);
       cd = compCD(lat_gap, rad_gap, offset, layers);
@@ -551,6 +663,9 @@ void singleEmin(string &file, int layers)
                   radmin[i][j] = rad_gap;
                   offmin[i][j] = offset;
               }
+              if(xyz_outputs){
+                xyztest(3,lat_gap,rad_gap,offset);
+              }
           }
       }
     }
@@ -560,67 +675,7 @@ void singleEmin(string &file, int layers)
 
   if(charge_hashed_outputs)
   {
-    //create a unique code for the output file
-
-    unsigned long f_charges = 0;
-
-    string fflags = "";
-
-    unsigned long lulen = sizeof(unsigned long)*8;
-
-    int fcount = 0;
-
-    double chargesum=0.0;
-    int chargecount = 0;
-
-    for(int c=0;c<charge.size();c++)
-    {
-      if(charge[c]!=0){
-        chargesum+=charge[c];
-        chargecount++;
-      }
-    }
-
-    double chargemean = chargesum/((double) chargecount);
-
-    fflags+="-";
-    fflags+=to_string(N);
-    fflags+="-";
-    fflags+=to_string(distance_atoms);
-    fflags+="-";
-    fflags+=to_string(chargesum);
-    fflags+="-";
-    fflags+=to_string(chargemean);
-    fflags+="-";
-
-
-
-    for(int i=0; i<N; i++)
-    {
-      if(fcount>=lulen){
-        fflags += to_string(f_charges);
-        fflags+="-";
-        f_charges = 0;
-        fcount = 0;
-      }
-      if((int) charge[i] != 0)
-      {
-        f_charges+=pow(2,(int)(lulen-fcount-1));
-      }
-
-      fcount++;
-    }
-
-    fflags += to_string(f_charges);
-
-
-    if (file.find(file_extension) != string::npos)
-    {
-      file = file.substr(0, file.find(file_extension));
-    }
-
-    file+=fflags;
-
+    hash_output();
   }
 
   if (file.find(file_extension) != string::npos)
@@ -639,17 +694,16 @@ void singleEmin(string &file, int layers)
   /* Both LJ and CD potential */
   for (int i = 0; i < lj_steps; i++) {
       for (int j = 0; j < cd_steps; j++) {
-          fprintf(outf, "\n");
-          fprintf(outf, "%.3f", lj_min + (i) * lj_stepsize);
-          fprintf(outf, "\t%.3f", cd_min + (j) * cd_stepsize);
-          //fprintf(outf, "\t%.3f", lat_gap);
-          fprintf(outf, "\t%.3f", latmin[i][j]);
-          fprintf(outf, "\t%.3f", radmin[i][j]);
-          fprintf(outf, "\t%.3f", offmin[i][j]);
-          fprintf(outf, "\t%.3f", L + radmin[i][j] - offmin[i][j]);
-          fprintf(outf, "\t%.3f", eCDmin[i][j]);
-          fprintf(outf, "\t%.3f", eLJmin[i][j]);
-          fprintf(outf, "\t%.3f", eTotmin[i][j]);
+          fprintf(outf, "\n");                                          
+          fprintf(outf, "%.3f", lj_min + (i) * lj_stepsize);            //LJ_epsilon
+          fprintf(outf, "\t%.3f", cd_min + (j) * cd_stepsize);          //CD_epsilon
+          fprintf(outf, "\t%.3f", latmin[i][j]);                        //lateral gap min
+          fprintf(outf, "\t%.3f", radmin[i][j]);                        //radial gap min
+          fprintf(outf, "\t%.3f", offmin[i][j]);                        //offset min
+          fprintf(outf, "\t%.3f", L + radmin[i][j] - offmin[i][j]);     //D-periodicity min
+          fprintf(outf, "\t%.3f", eCDmin[i][j]);                        //E_CD min
+          fprintf(outf, "\t%.3f", eLJmin[i][j]);                        //E_LJ min
+          fprintf(outf, "\t%.3f", eTotmin[i][j]);                       //E_tot min
       }
       fprintf(outf, "\n");
   }
@@ -707,7 +761,6 @@ void multipleEmin(string &file, int layers, int number)
                     eLJmin[k][i][j] = lje;
                     eCDmin[k][i][j] = cde;
                     eTotmin[k][i][j] = lje + cde;
-                    // latmin[k][i][j] = lat_gap;
                     radmin[k][i][j] = rad_gap;
                     offmin[k][i][j] = offset;
                     break;
@@ -959,6 +1012,12 @@ int process_arg(string strarg, int* errcodes, bool dashes){
       charge_hashed_outputs = true;
     }
 
+    if(flag(strarg,d+"x") || flag(strarg,dd+"xyz"))
+    {
+      xyz_outputs = true;
+    }
+
+
     //io settings
 
     if(flag(strarg,d+"i") || flag(strarg,dd+"input"))
@@ -1023,6 +1082,8 @@ int process_arg(string strarg, int* errcodes, bool dashes){
     }
     return errstate;
 }
+
+
 
 int read_config_file(string path){
   int errcodes = 0;

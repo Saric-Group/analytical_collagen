@@ -4,6 +4,7 @@
 #include <math.h>           /* ceil, ... */
 #include <vector>           /* vector, ... */
 #include <sstream>
+#include <map>
 
 using namespace std;
 
