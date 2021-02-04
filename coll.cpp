@@ -151,6 +151,7 @@ int output_xyz(string filename, int rows, double latgap, double radgap, double o
     + "\n";
     fprintf(xyzf, "%s",xyzrow.c_str());
   }
+  fclose (xyzf);
 
   return err;
 
@@ -740,7 +741,7 @@ void singleEmin(string &file, int layers)
               + "-" 
               +  replace_char(clean_to_string(cd_min + (j) * cd_stepsize),'.','_') 
               + ".xyz";
-            cout << xyzfile << endl;
+            // cout << xyzfile << endl;
             output_xyz(xyzfile,3,latmin[i][j],radmin[i][j],offmin[i][j]);
           }
       }
