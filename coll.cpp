@@ -102,7 +102,7 @@ int produce_xyz(int numatoms,int rows,double distatom, double latgap, double rad
         id[i] = i;
         charges[i] = charge[a];
         type[i] = typemap[charge[a]];
-        xpos[i] = (((double)numatoms)*dr*distatom) + (dr*radgap*distatom) + dl*offset*distatom + da*distatom;
+        xpos[i] = (((double)numatoms)*dr*distatom) + (dr*radgap) + dl*offset + da*distatom;
         ypos[i] = -dl*latgap;
         zpos[i] = 0.0;
         //cout << id[i] << "  " << xpos[i] << "  " << ypos[i] << "  " << zpos[i] << "  " << type[i] << "  " << charges[i] << endl;
