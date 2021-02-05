@@ -5,6 +5,7 @@
 #include <vector>           /* vector, ... */
 #include <sstream>
 #include <map>
+#include <algorithm>        /* std::remove */
 
 using namespace std;
 

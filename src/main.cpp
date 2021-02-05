@@ -1,6 +1,7 @@
-
-#include "coll.h"
+#include "main.hpp"
+#include "mainfuncs.hpp"
 #include "parse.hpp"
+#include "collmol.hpp"
 
 using namespace std;
 
@@ -13,13 +14,16 @@ int N = 0;                  /* number of atoms in one molecule */
 double L;                   /* length of collagen molecule */
 double box;                 /* length of periodic box */
 
+parameters_ parameters;   /* Calculation parameters */
+filePaths_ filePaths; /* File settings */
+flags_ flags;             /* Flags */
 
 //defaults
 
 int layers = 2;             /* Number of layers including focus layer */
 
 double diameter_atom = 1.12;    /* diameter of atom */
-
+//
 double distance_atoms = 0.255;
 
 double lj_min = 0.01;
@@ -52,28 +56,28 @@ vector<int> type, type_ind; /* vector for the type of each atom */
 
 //I wish these weren't global variables...
 
-//io settings
-
-bool input_override = false;
-bool output_override = false;
-
-//spatial settings
-
-bool layers_override = false;
-bool diameter_override = false;
-bool distance_override = false;
-
-//potential settings
-
-bool ljsteps_override = false;
-bool ljstepsize_override = false;
-bool cdsteps_override = false;
-bool cdstepsize_override = false;
-bool ljmin_override = false;
-bool cdmin_override = false;
-
-bool cdcut_override = false;
-bool ljcut_override = false;
+// //io settings
+//
+// bool input_override = false;
+// bool output_override = false;
+//
+// //spatial settings
+//
+// bool layers_override = false;
+// bool diameter_override = false;
+// bool distance_override = false;
+//
+// //potential settings
+//
+// bool ljsteps_override = false;
+// bool ljstepsize_override = false;
+// bool cdsteps_override = false;
+// bool cdstepsize_override = false;
+// bool ljmin_override = false;
+// bool cdmin_override = false;
+//
+// bool cdcut_override = false;
+// bool ljcut_override = false;
 
 
 int produce_xyz(int numatoms,int rows,double distatom, double latgap, double radgap, double offset ,int id[],int type[],double charges[], double xpos[], double ypos[], double zpos[]){
@@ -136,18 +140,18 @@ int output_xyz(string filename, int rows, double latgap, double radgap, double o
   fprintf(xyzf, "%i\n", natoms);
   fprintf(xyzf, "Atoms. Timestep: 0\n");
   for(int i=0; i<natoms;i++){
-    string xyzrow = 
-    to_string(id[i]) 
-    + "  " 
-    + clean_to_string(xpos[i]) 
-    + "  " 
-    + clean_to_string(ypos[i]) 
-    + "  " 
-    + clean_to_string(zpos[i]) 
-    + "  " 
-    + to_string(type[i]) 
-    + "  " 
-    + clean_to_string(charges[i]) 
+    string xyzrow =
+    to_string(id[i])
+    + "  "
+    + clean_to_string(xpos[i])
+    + "  "
+    + clean_to_string(ypos[i])
+    + "  "
+    + clean_to_string(zpos[i])
+    + "  "
+    + to_string(type[i])
+    + "  "
+    + clean_to_string(charges[i])
     + "\n";
     fprintf(xyzf, "%s",xyzrow.c_str());
   }
@@ -157,80 +161,23 @@ int output_xyz(string filename, int rows, double latgap, double radgap, double o
 
 }
 
-string hash_output(){
-  //create a unique code for the output file
 
-    unsigned long f_charges = 0;
-
-    string fflags = "";
-
-    unsigned long lulen = sizeof(unsigned long)*8;
-
-    int fcount = 0;
-
-    double chargesum=0.0;
-    int chargecount = 0;
-
-    for(int c=0;c<charge.size();c++)
-    {
-      if(charge[c]!=0){
-        chargesum+=charge[c];
-        chargecount++;
-      }
-    }
-
-    double chargemean = chargesum/((double) chargecount);
-
-    fflags+="-";
-    fflags+=to_string(N);
-    fflags+="-";
-    fflags+=to_string(distance_atoms);
-    fflags+="-";
-    fflags+=to_string(chargesum);
-    fflags+="-";
-    fflags+=to_string(chargemean);
-    fflags+="-";
-
-
-
-    for(int i=0; i<N; i++)
-    {
-      if(fcount>=lulen){
-        fflags += to_string(f_charges);
-        fflags+="-";
-        f_charges = 0;
-        fcount = 0;
-      }
-      if((int) charge[i] != 0)
-      {
-        f_charges+=pow(2,(int)(lulen-fcount-1));
-      }
-
-      fcount++;
-    }
-
-    fflags += to_string(f_charges);
-
-
-    if (file.find(file_extension) != string::npos)
-    {
-      file = file.substr(0, file.find(file_extension));
-    }
-
-    file+=fflags;
-    return file;
-}
 
 int main(int argc, char const *argv[])
 {
 
-  
+  collagenFibril fib;
 
-  if(parse_all_args(argc,argv) != 1){
+  if (parse_all_args(argc, argv, fib) != 1) {
     return 0;
   }
 
-  
+  fib.mol.readAtoms(filePaths.inputpath);
+  cout << "\n layers: " << fib.layers;
+  cout << "\n distanceAtoms: " << fib.mol.distanceAtoms;
+  cout << "\n atoms: " << fib.mol.numAtoms << "\n";
+
+
 
   time_point start = chrono::high_resolution_clock::now();
   cout << ":: Computation start";
@@ -238,14 +185,15 @@ int main(int argc, char const *argv[])
   /************************************************************************/
 
   file = inputpath;
-  readAtoms(file);
+  // readAtoms(file);
 
   cout << "\n\n:: running computation...";
   /* Only global Emin */
 
-  file=outputpath;
+  file = filePaths.outputpath;
 
-  singleEmin(file, layers);
+  singleEmin(file, layers, fib);
+
 
   /************************************************************************/
   time_point end = chrono::high_resolution_clock::now();
@@ -258,25 +206,25 @@ int main(int argc, char const *argv[])
 
 
 /* Functions */
-void readAtoms(string &file)
-{
-    cout << "\n\n:: reading atom configuration...";
-    string line;
-    ifstream myfile;
-    myfile.open(file.c_str(), ios::in);
-    while (myfile.peek() != EOF) {
-        getline(myfile, line);
-        N++;
-        charge.push_back(atof(line.c_str()));
-        if (charge[N - 1] != 0) {
-          charge_ind.push_back(N - 1);
-        }
-    }
-    myfile.close();
-    cout << "\n -> " << N << " atoms read.";
-    L = (N - 1) * distance_atoms;
-    cout << " Molecule length L = " << L << ".";
-}
+// void readAtoms(string &file)
+// {
+//     cout << "\n\n:: reading atom configuration...";
+//     string line;
+//     ifstream myfile;
+//     myfile.open(file.c_str(), ios::in);
+//     while (myfile.peek() != EOF) {
+//         getline(myfile, line);
+//         N++;
+//         charge.push_back(atof(line.c_str()));
+//         if (charge[N - 1] != 0) {
+//           charge_ind.push_back(N - 1);
+//         }
+//     }
+//     myfile.close();
+//     cout << "\n -> " << N << " atoms read.";
+//     L = (N - 1) * distance_atoms;
+//     cout << " Molecule length L = " << L << ".";
+// }
 
 void readTypes(string &file)
 {
@@ -641,7 +589,7 @@ void header(string &file)
   fclose(outf);
 }
 
-void singleEmin(string &file, int layers)
+void singleEmin(string &file, int layers, collagenFibril fib)
 {
   double lat_gap = diameter_atom;
   double rad_gap, offset;
@@ -700,7 +648,7 @@ void singleEmin(string &file, int layers)
 
   if(charge_hashed_outputs)
   {
-    hash_output();
+    hash_output(fib);
   }
 
   if (file.find(file_extension) != string::npos)
@@ -724,7 +672,7 @@ void singleEmin(string &file, int layers)
   /* Both LJ and CD potential */
   for (int i = 0; i < lj_steps; i++) {
       for (int j = 0; j < cd_steps; j++) {
-          fprintf(outf, "\n");                                          
+          fprintf(outf, "\n");
           fprintf(outf, "%.3f", lj_min + (i) * lj_stepsize);            //LJ_epsilon
           fprintf(outf, "\t%.3f", cd_min + (j) * cd_stepsize);          //CD_epsilon
           fprintf(outf, "\t%.3f", latmin[i][j]);                        //lateral gap min
@@ -738,8 +686,8 @@ void singleEmin(string &file, int layers)
             string xyzfile = xyzbasefile;
             xyzfile += "-"
               + replace_char(clean_to_string(lj_min + (i) * lj_stepsize),'.','_')
-              + "-" 
-              +  replace_char(clean_to_string(cd_min + (j) * cd_stepsize),'.','_') 
+              + "-"
+              +  replace_char(clean_to_string(cd_min + (j) * cd_stepsize),'.','_')
               + ".xyz";
             // cout << xyzfile << endl;
             output_xyz(xyzfile,3,latmin[i][j],radmin[i][j],offmin[i][j]);
@@ -950,239 +898,240 @@ void print_help(){
 
 }
 
-int process_arg(string strarg, int* errcodes, bool dashes){
-  //io settings
-    int errstate = 0;
+// int process_arg(string strarg, int* errcodes, bool dashes)
+// {
+//   //io settings
+//     int errstate = 0;
+//
+//     string d = dashes ? "-" : "";
+//     string dd = dashes ? "--" : "";
+//     if(input_override)
+//     {
+//       if(verify_path(strarg,errcodes)==0){
+//         inputpath = strarg;
+//       }
+//       input_override = false;
+//     }
+//     if(output_override)
+//     {
+//       outputpath = strarg;
+//       output_override = false;
+//     }
+//
+//     //spatial settings
+//
+//     if(layers_override)
+//     {
+//       layers = safe_read_integer(layers,strarg,errcodes);
+//       layers_override = false;
+//     }
+//     if(diameter_override)
+//     {
+//       diameter_atom = safe_read_double(diameter_atom,strarg,errcodes);
+//       diameter_override = false;
+//     }
+//     if(distance_override)
+//     {
+//       distance_atoms = safe_read_double(distance_atoms,strarg,errcodes);
+//       distance_override = false;
+//     }
+//
+//     //potential settings
+//
+//     if(ljsteps_override)
+//     {
+//       lj_steps = safe_read_integer(lj_steps,strarg,errcodes);
+//       ljsteps_override = false;
+//     }
+//     if(ljstepsize_override)
+//     {
+//       lj_stepsize = safe_read_double(lj_stepsize,strarg,errcodes);
+//       ljstepsize_override = false;
+//     }
+//     if(cdsteps_override)
+//     {
+//       cd_steps = safe_read_integer(cd_steps,strarg,errcodes);
+//       cdsteps_override = false;
+//     }
+//     if(cdstepsize_override)
+//     {
+//       cd_stepsize = safe_read_double(cd_stepsize,strarg,errcodes);
+//       cdstepsize_override = false;
+//     }
+//     if(ljmin_override)
+//     {
+//       lj_min = safe_read_double(lj_min,strarg,errcodes);
+//       ljmin_override = false;
+//     }
+//     if(cdmin_override)
+//     {
+//       cd_min = safe_read_double(cd_min,strarg,errcodes);
+//       cdmin_override = false;
+//     }
+//     if(ljcut_override)
+//     {
+//       lj_cutoff = safe_read_double(lj_cutoff,strarg,errcodes);
+//       ljcut_override = false;
+//     }
+//     if(cdcut_override)
+//     {
+//       cd_cutoff = safe_read_double(cd_cutoff,strarg,errcodes);
+//       cdcut_override = false;
+//     }
+//
+//     //error handling
+//
+//     if (parse_errs(*errcodes,strarg,true) != 0)
+//     {
+//       errstate = 1;
+//     }
+//
+//     //bool flags and help
+//
+//     if(flag(strarg,d+"h") || flag(strarg,dd+"help"))
+//     {
+//       print_help();
+//       return -1;
+//     }
+//
+//     if(flag(strarg,d+"c") || flag(strarg,dd+"chargehash"))
+//     {
+//       charge_hashed_outputs = true;
+//     }
+//
+//     if(flag(strarg,d+"x") || flag(strarg,dd+"xyz"))
+//     {
+//       xyz_outputs = true;
+//     }
+//
+//
+//     //io settings
+//
+//     if(flag(strarg,d+"i") || flag(strarg,dd+"input"))
+//     {
+//       input_override = true;
+//     }
+//     if(flag(strarg,d+"o") || flag(strarg,dd+"output"))
+//     {
+//       output_override = true;
+//     }
+//
+//     //spatial settings
+//
+//     if(flag(strarg,d+"l") || flag(strarg,dd+"layers"))
+//     {
+//       layers_override = true;
+//     }
+//     if(flag(strarg,d+"dia") || flag(strarg,dd+"diameter"))
+//     {
+//       diameter_override = true;
+//     }
+//     if(flag(strarg,d+"d") || flag(strarg,dd+"dist"))
+//     {
+//       distance_override = true;
+//     }
+//
+//     //potential settings
+//
+//     if(flag(strarg,d+"slj") || flag(strarg,dd+"ljsteps"))
+//     {
+//       ljsteps_override = true;
+//     }
+//     if(flag(strarg,d+"sslj") || flag(strarg,dd+"ljstepssize"))
+//     {
+//       ljstepsize_override = true;
+//     }
+//     if(flag(strarg,d+"scd") || flag(strarg,dd+"cdsteps"))
+//     {
+//       cdsteps_override = true;
+//     }
+//     if(flag(strarg,d+"sscd") || flag(strarg,dd+"cdstepssize"))
+//     {
+//       cdstepsize_override = true;
+//     }
+//     if(flag(strarg,d+"mcd") || flag(strarg,dd+"cdmin"))
+//     {
+//       cdmin_override = true;
+//     }
+//     if(flag(strarg,d+"mlj") || flag(strarg,dd+"ljmin"))
+//     {
+//       ljmin_override = true;
+//     }
+//
+//
+//     if(flag(strarg,"-ccd") || flag(strarg,dd+"cdcut"))
+//     {
+//       cdcut_override = true;
+//     }
+//     if(flag(strarg,"-clj") || flag(strarg,dd+"ljcut"))
+//     {
+//       ljcut_override = true;
+//     }
+//     return errstate;
+// }
 
-    string d = dashes ? "-" : "";
-    string dd = dashes ? "--" : "";
-    if(input_override)
-    {
-      if(verify_path(strarg,errcodes)==0){
-        inputpath = strarg;
-      }
-      input_override = false;
-    }
-    if(output_override)
-    {
-      outputpath = strarg;
-      output_override = false;
-    }
-
-    //spatial settings
-
-    if(layers_override)
-    {
-      layers = safe_read_integer(layers,strarg,errcodes);
-      layers_override = false;
-    }
-    if(diameter_override)
-    {
-      diameter_atom = safe_read_double(diameter_atom,strarg,errcodes);
-      diameter_override = false;
-    }
-    if(distance_override)
-    {
-      distance_atoms = safe_read_double(distance_atoms,strarg,errcodes);
-      distance_override = false;
-    }
-
-    //potential settings
-
-    if(ljsteps_override)
-    {
-      lj_steps = safe_read_integer(lj_steps,strarg,errcodes);
-      ljsteps_override = false;
-    }
-    if(ljstepsize_override)
-    {
-      lj_stepsize = safe_read_double(lj_stepsize,strarg,errcodes);
-      ljstepsize_override = false;
-    }
-    if(cdsteps_override)
-    {
-      cd_steps = safe_read_integer(cd_steps,strarg,errcodes);
-      cdsteps_override = false;
-    }
-    if(cdstepsize_override)
-    {
-      cd_stepsize = safe_read_double(cd_stepsize,strarg,errcodes);
-      cdstepsize_override = false;
-    }
-    if(ljmin_override)
-    {
-      lj_min = safe_read_double(lj_min,strarg,errcodes);
-      ljmin_override = false;
-    }
-    if(cdmin_override)
-    {
-      cd_min = safe_read_double(cd_min,strarg,errcodes);
-      cdmin_override = false;
-    }
-    if(ljcut_override)
-    {
-      lj_cutoff = safe_read_double(lj_cutoff,strarg,errcodes);
-      ljcut_override = false;
-    }
-    if(cdcut_override)
-    {
-      cd_cutoff = safe_read_double(cd_cutoff,strarg,errcodes);
-      cdcut_override = false;
-    }
-
-    //error handling
-
-    if (parse_errs(*errcodes,strarg,true) != 0)
-    {
-      errstate = 1;
-    }
-
-    //bool flags and help
-
-    if(flag(strarg,d+"h") || flag(strarg,dd+"help"))
-    {
-      print_help();
-      return -1;
-    }
-
-    if(flag(strarg,d+"c") || flag(strarg,dd+"chargehash"))
-    {
-      charge_hashed_outputs = true;
-    }
-
-    if(flag(strarg,d+"x") || flag(strarg,dd+"xyz"))
-    {
-      xyz_outputs = true;
-    }
 
 
-    //io settings
+// int read_config_file(string path){
+//   int errcodes = 0;
+//   std::ifstream infile("default.config");
+//   std::string line;
+//   while (std::getline(infile, line))
+//   {
+//       errcodes = 0;
+//       std::string s = remove_spaces(line);
+//       std::string delimiter = "=";
+//
+//       size_t pos = 0;
+//       std::string token;
+//       while ((pos = s.find(delimiter)) != std::string::npos) {
+//           token = s.substr(0, pos);
+//           process_arg(token,&errcodes,false);
+//           s.erase(0, pos + delimiter.length());
+//       }
+//       process_arg(s,&errcodes,false);
+//   }
+//   return 0;
+// }
 
-    if(flag(strarg,d+"i") || flag(strarg,dd+"input"))
-    {
-      input_override = true;
-    }
-    if(flag(strarg,d+"o") || flag(strarg,dd+"output"))
-    {
-      output_override = true;
-    }
+// int read_args(int argc, char const *argv[])
+// {
+//   int errstate = 0;
+//
+//   if(argc > 0)
+//   {
+//     for(int i=0; i<argc; ++i)
+//       {
+//         int errcodes = 0;
+//         string strarg = argv[i];
+//         process_arg(strarg,&errcodes,true);
+//
+//       }
+//   }
+//   return errstate;
+// }
 
-    //spatial settings
-
-    if(flag(strarg,d+"l") || flag(strarg,dd+"layers"))
-    {
-      layers_override = true;
-    }
-    if(flag(strarg,d+"dia") || flag(strarg,dd+"diameter"))
-    {
-      diameter_override = true;
-    }
-    if(flag(strarg,d+"d") || flag(strarg,dd+"dist"))
-    {
-      distance_override = true;
-    }
-
-    //potential settings
-
-    if(flag(strarg,d+"slj") || flag(strarg,dd+"ljsteps"))
-    {
-      ljsteps_override = true;
-    }
-    if(flag(strarg,d+"sslj") || flag(strarg,dd+"ljstepssize"))
-    {
-      ljstepsize_override = true;
-    }
-    if(flag(strarg,d+"scd") || flag(strarg,dd+"cdsteps"))
-    {
-      cdsteps_override = true;
-    }
-    if(flag(strarg,d+"sscd") || flag(strarg,dd+"cdstepssize"))
-    {
-      cdstepsize_override = true;
-    }
-    if(flag(strarg,d+"mcd") || flag(strarg,dd+"cdmin"))
-    {
-      cdmin_override = true;
-    }
-    if(flag(strarg,d+"mlj") || flag(strarg,dd+"ljmin"))
-    {
-      ljmin_override = true;
-    }
-
-
-    if(flag(strarg,"-ccd") || flag(strarg,dd+"cdcut"))
-    {
-      cdcut_override = true;
-    }
-    if(flag(strarg,"-clj") || flag(strarg,dd+"ljcut"))
-    {
-      ljcut_override = true;
-    }
-    return errstate;
-}
-
-
-
-int read_config_file(string path){
-  int errcodes = 0;
-  std::ifstream infile("default.config");
-  std::string line;
-  while (std::getline(infile, line))
-  {
-      errcodes = 0;
-      std::string s = remove_spaces(line);
-      std::string delimiter = "=";
-
-      size_t pos = 0;
-      std::string token;
-      while ((pos = s.find(delimiter)) != std::string::npos) {
-          token = s.substr(0, pos);
-          process_arg(token,&errcodes,false);
-          s.erase(0, pos + delimiter.length());
-      }
-      process_arg(s,&errcodes,false);
-  }
-  return 0;
-}
-
-int read_args(int argc, char const *argv[])
-{
-  int errstate = 0;
-
-  if(argc > 0)
-  {                                                                          
-    for(int i=0; i<argc; ++i)
-      {
-        int errcodes = 0;
-        string strarg = argv[i];
-        process_arg(strarg,&errcodes,true);
-
-      }
-  }
-  return errstate;
-}
-
-int parse_all_args(int argc, char const *argv[]){
-  string cpatharg = get_config_path(argc,argv);
-  if(!cpatharg.empty()){
-    configpath = cpatharg;
-  }
-
-  if(configpath.empty()){
-    cout << "no config file selected, using defaults" << endl;
-  }
-  else {
-    cout << "reading from config path " << configpath << endl;
-    read_config_file(configpath);
-  }
-
-  int argerr = read_args(argc,argv);
-  if (argerr > 0){
-    cout << "improper arguments supplied, exiting now" << endl;
-    return 0;
-  }
-  else if (argerr < 0){
-    return 0;
-  }
-  return 1;
-}
+// int parse_all_args(int argc, char const *argv[]){
+//   string cpatharg = get_config_path(argc,argv);
+//   if(!cpatharg.empty()){
+//     configpath = cpatharg;
+//   }
+//
+//   if(configpath.empty()){
+//     cout << "no config file selected, using defaults" << endl;
+//   }
+//   else {
+//     cout << "reading from config path " << configpath << endl;
+//     read_config_file(configpath);
+//   }
+//
+//   int argerr = read_args(argc,argv);
+//   if (argerr > 0){
+//     cout << "improper arguments supplied, exiting now" << endl;
+//     return 0;
+//   }
+//   else if (argerr < 0){
+//     return 0;
+//   }
+//   return 1;
+// }

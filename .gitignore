@@ -41,6 +41,7 @@ energy_min.dat
 /dis/*
 /gnuplot/*
 /papers/*
+/build/*
 
 
 # General
