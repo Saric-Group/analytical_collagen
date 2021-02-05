@@ -2,16 +2,18 @@
 #include "mainfuncs.hpp"
 #include "parse.hpp"
 #include "collmol.hpp"
+#include "collfibril.hpp"
+#include "random.hpp"
 
 using namespace std;
 
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 
-/* Settings */
-parameters_ parameters;   /* Calculation parameters */
-filePaths_ filePaths; /* File settings */
-flags_ flags;             /* Flags */
 
+/* Settings */
+parameters_ parameters;     /* Various parameters, see main.hpp */
+filePaths_ filePaths;       /* IO File paths */
+flags_ flags;               /* Various flags, see main.hpp */
 
 
 // int produce_xyz(int numatoms,int rows,double distatom, double latgap, double radgap, double offset ,int id[],int type[],double charges[], double xpos[], double ypos[], double zpos[]){
@@ -113,17 +115,69 @@ int main(int argc, char const *argv[])
 
   cout << "\n\n:: running computation...";
   /* Only global Emin */
-  fib.mol.readAtoms(filePaths.inputpath);
-  cout << "\n layers: " << fib.layers;
-  cout << "\n distanceAtoms: " << fib.mol.distanceAtoms;
-  cout << "\n atoms: " << fib.mol.numAtoms << "\n";
-  fib.singleEmin();
+  // fib.mol.readAtoms(filePaths.inputpath);
+  // cout << "\nlayers: " << fib.layers;
+  // cout << "\ndistanceAtoms: " << fib.mol.distanceAtoms;
+  // cout << "\natoms: " << fib.mol.numAtoms << "\n";
+  // cout << "\nCD cutoff: " << parameters.cd_cutoff;
+  // fib.minimizeEnergy();
+  // cout << "\nMinimal energy configuration:";
+  // cout << "\nEnergy: " << fib.energy;
+  // cout << "\nLateral gap: " << fib.latGap;
+  // cout << "\nRadial gap: " << fib.radGap;
+  // cout << "\nOffset: " << fib.offset;
+  // fib.singleEmin();
 
+  int nativeN = 1054;
+  int nativePos = 86;
+  int nativeNeg = 82;
+  int pos, neg;
+  int error = 0;
+  int samples = 100;
+  double energy = 0.0;
+  double gap = 0.0;
+  double offset = 0.0;
+
+  vector<double> vec;
+  FILE *outf;
+  outf = fopen(filePaths.outputpath.c_str(), "a");
+  fprintf(outf, "#radGap\toffset\tenergy");
+  for (int i = 0; i < samples; i++) {
+    cout << "\nMinimizing " << i + 1 << ". random distribution finished with";
+    vec = createRandomChargeDistribution(nativeN, nativePos, nativeNeg);
+    countCharges(vec, pos, neg);
+    if (pos != nativePos || neg != nativeNeg) {
+      error++;
+    }
+    fib.mol.readAtoms(vec);
+    fib.energy = 1e16;
+    fib.minimizeEnergy();
+    fprintf(outf, "\n%.4f", fib.radGap);
+    fprintf(outf, "\t%.4f", fib.offset);
+    fprintf(outf, "\t%.4f", fib.energy);
+    energy += fib.energy;
+    gap += fib.radGap;
+    offset += fib.offset;
+    cout << " min_energy = " << fib.energy << ".";
+    if (isinf(fib.energy)) {
+      fib.writeXYZ();
+    }
+  }
+
+  fprintf(outf, "\n\n");
+  fprintf(outf, "#Averages:");
+  fprintf(outf, "\n%.4f", gap / samples);
+  fprintf(outf, "\t%.4f", offset / samples);
+  fprintf(outf, "\t%.4f", energy / samples);
+  fclose(outf);
+  cout << "\n\nErrors: " << error;
 
   /************************************************************************/
+
   time_point end = chrono::high_resolution_clock::now();
   chrono::seconds duration = chrono::duration_cast<chrono::seconds>(end - start);
   cout << "\n\n\n:: ... finished in " << duration.count() << " s.\n\n\n";
+
   /************************************************************************/
 
   return 0;
@@ -251,25 +305,25 @@ int main(int argc, char const *argv[])
 //   return sum;
 // }
 
-void header(string &file)
-{
-  FILE *outf;
-  outf = fopen(file.c_str(), "w");
-  fprintf(outf, "#atoms per molecule N = %i", N);
-  fprintf(outf, "\n#distance_atoms = %.3f", distance_atoms);
-  fprintf(outf, "\n#molecule_length = %.3f", L);
-  fprintf(outf, "\n#layers = %i", layers);
-  fprintf(outf, "\n\n#LJ_epsilon");
-  fprintf(outf, "\tCD_epsilon");
-  fprintf(outf, "\tlateral_gap_min");
-  fprintf(outf, "\tradial_gap_min");
-  fprintf(outf, "\toffset_min");
-  fprintf(outf, "\tD-periodicity_min");
-  fprintf(outf, "\tE_CD_min");
-  fprintf(outf, "\tE_LJ_min");
-  fprintf(outf, "\tE_total_min");
-  fclose(outf);
-}
+// void header(string &file)
+// {
+//   FILE *outf;
+//   outf = fopen(file.c_str(), "w");
+//   fprintf(outf, "#atoms per molecule N = %i", N);
+//   fprintf(outf, "\n#distance_atoms = %.3f", distance_atoms);
+//   fprintf(outf, "\n#molecule_length = %.3f", L);
+//   fprintf(outf, "\n#layers = %i", layers);
+//   fprintf(outf, "\n\n#LJ_epsilon");
+//   fprintf(outf, "\tCD_epsilon");
+//   fprintf(outf, "\tlateral_gap_min");
+//   fprintf(outf, "\tradial_gap_min");
+//   fprintf(outf, "\toffset_min");
+//   fprintf(outf, "\tD-periodicity_min");
+//   fprintf(outf, "\tE_CD_min");
+//   fprintf(outf, "\tE_LJ_min");
+//   fprintf(outf, "\tE_total_min");
+//   fclose(outf);
+// }
 
 // void singleEmin(string &file, int layers, collagenFibril fib)
 // {

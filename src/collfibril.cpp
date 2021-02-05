@@ -237,7 +237,6 @@ void collagenFibril::singleEmin()
   double latGap_ = mol.diameterAtom;
   double radGap_ = mol.diameterAtom;
   double offset_ = mol.diameterAtom;
-  double energy_ = 1e16;
 
   int latMax = (int) ceil(parameters.max_cutoff / (0.1 * mol.diameterAtom));
   int radMax = (int) ceil((mol.length + 2. * parameters.max_cutoff) / 0.1);
@@ -312,6 +311,77 @@ void collagenFibril::singleEmin()
           // }
       }
       fprintf(outf, "\n");
+  }
+  fclose(outf);
+}
+
+void collagenFibril::minimizeEnergy()
+{
+  double latGap_ = mol.diameterAtom;
+  double radGap_ = mol.diameterAtom;
+  double offset_ = mol.diameterAtom;
+  double energy_ = 1e16;
+
+  /* We do not vary the lateral gap here */
+  for (int rad = 0; rad <= mol.numAtoms; rad++) {
+    // std::cout << "\nrad: " << rad;
+    offset_ = radGap_;
+    for (int off = rad; off <= mol.numAtoms; off++) {
+      energy_ = compCD(latGap_, radGap_, offset_);
+      // std::cout << "\nradGap: " << radGap_;
+      // std::cout << "\toffset: " << offset_;
+      // std::cout << "\tenergy: " << energy_;
+      if (energy_ < energy) {
+        energy = energy_;
+        latGap = latGap_;
+        radGap = radGap_;
+        offset = offset_;
+      }
+      offset_ += mol.distanceAtoms;
+    }
+    radGap_ += mol.distanceAtoms;
+  }
+}
+
+void collagenFibril::writeXYZ()
+{
+  FILE *outf;
+  std::string file = filePaths.outputpath;
+  if (file.find(filePaths.file_extension) != std::string::npos)
+  {
+      file = file.substr(0, file.find(filePaths.file_extension));
+  }
+  file += ".xyz";
+  outf = fopen(file.c_str(), "w");
+  int units = 1;
+  fprintf(outf, "%i", mol.numAtoms * layers * 3 * units);
+  fprintf(outf, "\n");
+
+  double box = mol.length + radGap;
+  for (int j = 0; j < units; j++) {
+    for (int layer = 0; layer < layers; layer++) {
+      /* center molecule */
+      for (int i = 0; i < mol.numAtoms; i++) {
+        fprintf(outf, "\n%.3f", mol.charges[i]);
+        fprintf(outf, "\t%.8f", layer * offset + i * mol.distanceAtoms);
+        fprintf(outf, "\t%.8f", (layer + j * layers) * latGap);
+        fprintf(outf, "\t%.8f", 0.);
+      }
+      /* right molecule */
+      for (int i = 0; i < mol.numAtoms; i++) {
+        fprintf(outf, "\n%.3f", mol.charges[i]);
+        fprintf(outf, "\t%.8f", box + layer * offset + i * mol.distanceAtoms);
+        fprintf(outf, "\t%.8f", (layer + j * layers) * latGap);
+        fprintf(outf, "\t%.8f", 0.);
+      }
+      /* left molecule */
+      for (int i = 0; i < mol.numAtoms; i++) {
+        fprintf(outf, "\n%.3f", mol.charges[i]);
+        fprintf(outf, "\t%.8f", -box + layer * offset + i * mol.distanceAtoms);
+        fprintf(outf, "\t%.8f", (layer + j * layers) * latGap);
+        fprintf(outf, "\t%.8f", 0.);
+      }
+    }
   }
   fclose(outf);
 }

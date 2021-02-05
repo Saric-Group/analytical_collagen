@@ -16,7 +16,7 @@ struct collagenFibril {
 
   /* Constructors */
 
-  /* Functions */
+  /* Old functions */
   double distance(double pos, double first, int n, double lat_gap);
 
   double factorLJ(double d);
@@ -32,6 +32,10 @@ struct collagenFibril {
   double compCD(double lat_gap, double rad_gap, double offset);
 
   void singleEmin();
+
+  /* New functions */
+  void minimizeEnergy();
+  void writeXYZ();
 };
 
 #endif

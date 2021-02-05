@@ -27,7 +27,7 @@ void collagenMolecule::readAtoms(std::vector<double> vec)
   numAtoms = 0;
   for (int i = 0; i < (int) vec.size(); i++) {
     numAtoms++;
-    charges.push_back(numAtoms - 1);
+    charges.push_back(vec[numAtoms - 1]);
     if (abs(charges[numAtoms - 1]) > 1e-15) {
       nonZeroChargesIndex.push_back(numAtoms - 1);
     }
