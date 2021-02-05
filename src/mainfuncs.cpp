@@ -310,3 +310,8 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
   }
   return 1;
 }
+
+void print_help()
+{
+
+}
