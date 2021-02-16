@@ -455,16 +455,17 @@ void collagenFibril::singleEmin()
     hash_output();
   }
 
-  std::string tmp;
   if (filePaths.outputpath.find(filePaths.file_extension) != std::string::npos)
   {
-      tmp = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
+      filePaths.outputpath = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
   }
   std::string xyzbasefile = "";
 
   if(flags.xyz_outputs){
-    xyzbasefile = tmp;
+    xyzbasefile = filePaths.outputpath;
   }
+
+  filePaths.outputpath += ".dat";
 
   /* Write header for outputfile */
   header(filePaths.outputpath);
