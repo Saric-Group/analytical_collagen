@@ -3,76 +3,10 @@
 
 /* Variables */
 overrides_ overrides;
-extern parameters_ parameters;
 extern filePaths_ filePaths;
 extern flags_ flags;
 
 /* Functions */
-std::string hash_output(collagenFibril &fib)
-{
-  //create a unique code for the output file
-
-    unsigned long f_charges = 0;
-
-    std::string fflags = "";
-
-    unsigned long lulen = sizeof(unsigned long)*8;
-
-    int fcount = 0;
-
-    double chargesum=0.0;
-    int chargecount = 0;
-
-    for(int c = 0; c < (int) fib.mol.charges.size(); c++)
-    {
-      if(fib.mol.charges[c] != 0){
-        chargesum += fib.mol.charges[c];
-        chargecount++;
-      }
-    }
-
-    double chargemean = chargesum / ((double) chargecount);
-
-    fflags += "-";
-    fflags += std::to_string(fib.mol.numAtoms);
-    fflags += "-";
-    fflags += std::to_string(fib.mol.distanceAtoms);
-    fflags += "-";
-    fflags += std::to_string(chargesum);
-    fflags += "-";
-    fflags += std::to_string(chargemean);
-    fflags += "-";
-
-
-
-    for(int i = 0; i < fib.mol.numAtoms; i++)
-    {
-      if(fcount >= lulen){
-        fflags += std::to_string(f_charges);
-        fflags += "-";
-        f_charges = 0;
-        fcount = 0;
-      }
-      if((int) fib.mol.charges[i] != 0)
-      {
-        f_charges += pow(2,(int) (lulen - fcount - 1));
-      }
-
-      fcount++;
-    }
-
-    fflags += std::to_string(f_charges);
-
-
-    if (filePaths.outputpath.find(filePaths.file_extension) != std::string::npos)
-    {
-      filePaths.outputpath = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
-    }
-
-    filePaths.outputpath += fflags;
-    return filePaths.outputpath;
-}
-
 int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &fib)
 {
   //io overrides
@@ -115,42 +49,42 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 
     if(overrides.ljsteps_override)
     {
-      parameters.lj_steps = safe_read_integer(parameters.lj_steps,strarg,errcodes);
+      fib.parameters.lj_steps = safe_read_integer(fib.parameters.lj_steps,strarg,errcodes);
       overrides.ljsteps_override = false;
     }
     if(overrides.ljstepsize_override)
     {
-      parameters.lj_stepsize = safe_read_double(parameters.lj_stepsize,strarg,errcodes);
+      fib.parameters.lj_stepsize = safe_read_double(fib.parameters.lj_stepsize,strarg,errcodes);
       overrides.ljstepsize_override = false;
     }
     if(overrides.cdsteps_override)
     {
-      parameters.cd_steps = safe_read_integer(parameters.cd_steps,strarg,errcodes);
+      fib.parameters.cd_steps = safe_read_integer(fib.parameters.cd_steps,strarg,errcodes);
       overrides.cdsteps_override = false;
     }
     if(overrides.cdstepsize_override)
     {
-      parameters.cd_stepsize = safe_read_double(parameters.cd_stepsize,strarg,errcodes);
+      fib.parameters.cd_stepsize = safe_read_double(fib.parameters.cd_stepsize,strarg,errcodes);
       overrides.cdstepsize_override = false;
     }
     if(overrides.ljmin_override)
     {
-      parameters.lj_min = safe_read_double(parameters.lj_min,strarg,errcodes);
+      fib.parameters.lj_min = safe_read_double(fib.parameters.lj_min,strarg,errcodes);
       overrides.ljmin_override = false;
     }
     if(overrides.cdmin_override)
     {
-      parameters.cd_min = safe_read_double(parameters.cd_min,strarg,errcodes);
+      fib.parameters.cd_min = safe_read_double(fib.parameters.cd_min,strarg,errcodes);
       overrides.cdmin_override = false;
     }
     if(overrides.ljcut_override)
     {
-      parameters.lj_cutoff = safe_read_double(parameters.lj_cutoff,strarg,errcodes);
+      fib.parameters.lj_cutoff = safe_read_double(fib.parameters.lj_cutoff,strarg,errcodes);
       overrides.ljcut_override = false;
     }
     if(overrides.cdcut_override)
     {
-      parameters.cd_cutoff = safe_read_double(parameters.cd_cutoff,strarg,errcodes);
+      fib.parameters.cd_cutoff = safe_read_double(fib.parameters.cd_cutoff,strarg,errcodes);
       overrides.cdcut_override = false;
     }
 

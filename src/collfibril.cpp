@@ -1,8 +1,8 @@
 #include "main.hpp"
+#include "parse.hpp"
 #include "collfibril.hpp"
 
 /* Variables */
-extern parameters_ parameters;
 extern filePaths_ filePaths;
 extern flags_ flags;
 
@@ -232,6 +232,173 @@ double collagenFibril::compCD(double lat_gap, double rad_gap, double offset)
   return sum;
 }
 
+int collagenFibril::produce_xyz(int numatoms, int rows, double distatom, double latgap, double radgap, double offset, int id[], int type[], double charges[], double xpos[], double ypos[], double zpos[])
+{
+  int natoms = layers * rows * numatoms;
+
+  //cout << natoms << endl;
+  //cout << "Atoms. Timestep: 0" << endl;
+
+  std::map<int,int> typemap;
+  int typecount = 0;
+  for (int i = 0; i < numatoms; i++){
+    if(not typemap.count(mol.charges[i])){
+      typemap[mol.charges[i]] = typecount;
+      typecount += 1;
+    }
+  }
+
+  for (int l = 0; l < layers; l++){
+    for (int r = 0; r < rows; r++){
+      for (int a = 0; a < numatoms; a++){
+        int i = l * rows * numatoms + r * numatoms + a;
+        double drows = (double) rows;
+        double dr =(double) r;
+        double da =(double) a;
+        double dl =(double) l;
+        id[i] = i;
+        charges[i] = mol.charges[a];
+        type[i] = typemap[mol.charges[a]];
+        xpos[i] = (((double)numatoms)*dr*distatom) + (dr*radgap) + dl*offset + da*distatom;
+        ypos[i] = -dl*latgap;
+        zpos[i] = 0.0;
+        //cout << id[i] << "  " << xpos[i] << "  " << ypos[i] << "  " << zpos[i] << "  " << type[i] << "  " << charges[i] << endl;
+      }
+    }
+  }
+
+  return 1;
+
+}
+
+int collagenFibril::output_xyz(std::string filename, int rows, double latgap, double radgap, double offset)
+{
+
+  int natoms = layers * rows * mol.numAtoms;
+  int * id = new int[natoms];
+  int * type = new int[natoms];
+  double * charges = new double[natoms];
+  double * xpos = new double[natoms];
+  double * ypos = new double[natoms];
+  double * zpos = new double[natoms];
+
+  int err = produce_xyz(mol.numAtoms , rows, mol.distanceAtoms, latgap, radgap, offset, id, type, charges, xpos, ypos, zpos);
+
+  if(err != 1){
+    return 0;
+  }
+
+  FILE *xyzf;
+  xyzf = fopen(filename.c_str(), "w");
+
+  fprintf(xyzf, "%i\n", natoms);
+  fprintf(xyzf, "Atoms. Timestep: 0\n");
+  for(int i=0; i<natoms;i++){
+    std::string xyzrow =
+    std::to_string(id[i])
+    + "  "
+    + clean_to_string(xpos[i])
+    + "  "
+    + clean_to_string(ypos[i])
+    + "  "
+    + clean_to_string(zpos[i])
+    + "  "
+    + std::to_string(type[i])
+    + "  "
+    + clean_to_string(charges[i])
+    + "\n";
+    fprintf(xyzf, "%s",xyzrow.c_str());
+  }
+  fclose (xyzf);
+
+  return err;
+}
+
+std::string collagenFibril::hash_output()
+{
+  //create a unique code for the output file
+
+    unsigned long f_charges = 0;
+
+    std::string fflags = "";
+
+    unsigned long lulen = sizeof(unsigned long)*8;
+
+    int fcount = 0;
+
+    double chargesum=0.0;
+    int chargecount = 0;
+
+    for(int c = 0; c < (int) mol.charges.size(); c++)
+    {
+      if(mol.charges[c] != 0){
+        chargesum += mol.charges[c];
+        chargecount++;
+      }
+    }
+
+    double chargemean = chargesum / ((double) chargecount);
+
+    fflags += "-";
+    fflags += std::to_string(mol.numAtoms);
+    fflags += "-";
+    fflags += std::to_string(mol.distanceAtoms);
+    fflags += "-";
+    fflags += std::to_string(chargesum);
+    fflags += "-";
+    fflags += std::to_string(chargemean);
+    fflags += "-";
+
+
+
+    for(int i = 0; i < mol.numAtoms; i++)
+    {
+      if(fcount >= lulen){
+        fflags += std::to_string(f_charges);
+        fflags += "-";
+        f_charges = 0;
+        fcount = 0;
+      }
+      if((int) mol.charges[i] != 0)
+      {
+        f_charges += pow(2,(int) (lulen - fcount - 1));
+      }
+
+      fcount++;
+    }
+
+    fflags += std::to_string(f_charges);
+
+
+    if (filePaths.outputpath.find(filePaths.file_extension) != std::string::npos)
+    {
+      filePaths.outputpath = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
+    }
+
+    filePaths.outputpath += fflags;
+    return filePaths.outputpath;
+}
+
+void collagenFibril::header(std::string &file)
+{
+  FILE *outf;
+  outf = fopen(file.c_str(), "w");
+  fprintf(outf, "#atoms per molecule N = %i", mol.numAtoms);
+  fprintf(outf, "\n#distance_atoms = %.3f", mol.distanceAtoms);
+  fprintf(outf, "\n#molecule_length = %.3f", mol.length);
+  fprintf(outf, "\n#layers = %i", layers);
+  fprintf(outf, "\n\n#LJ_epsilon");
+  fprintf(outf, "\tCD_epsilon");
+  fprintf(outf, "\tlateral_gap_min");
+  fprintf(outf, "\tradial_gap_min");
+  fprintf(outf, "\toffset_min");
+  fprintf(outf, "\tD-periodicity_min");
+  fprintf(outf, "\tE_CD_min");
+  fprintf(outf, "\tE_LJ_min");
+  fprintf(outf, "\tE_total_min");
+  fclose(outf);
+}
+
 void collagenFibril::singleEmin()
 {
   double latGap_ = mol.diameterAtom;
@@ -283,6 +450,25 @@ void collagenFibril::singleEmin()
     }
   }
 
+  if(flags.charge_hashed_outputs)
+  {
+    hash_output();
+  }
+
+  std::string tmp;
+  if (filePaths.outputpath.find(filePaths.file_extension) != std::string::npos)
+  {
+      tmp = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
+  }
+  std::string xyzbasefile = "";
+
+  if(flags.xyz_outputs){
+    xyzbasefile = tmp;
+  }
+
+  /* Write header for outputfile */
+  header(filePaths.outputpath);
+
   /* Write results to file */
   FILE *outf;
   outf = fopen(filePaths.outputpath.c_str(), "a");
@@ -299,16 +485,16 @@ void collagenFibril::singleEmin()
           fprintf(outf, "\t%.3f", eCDmin[i][j]);                        //E_CD min
           fprintf(outf, "\t%.3f", eLJmin[i][j]);                        //E_LJ min
           fprintf(outf, "\t%.3f", eTotmin[i][j]);                       //E_tot min
-          // if(xyz_outputs){
-          //   string xyzfile = xyzbasefile;
-          //   xyzfile += "-"
-          //     + replace_char(clean_to_string(lj_min + (i) * lj_stepsize),'.','_')
-          //     + "-"
-          //     +  replace_char(clean_to_string(cd_min + (j) * cd_stepsize),'.','_')
-          //     + ".xyz";
-          //   // cout << xyzfile << endl;
-          //   output_xyz(xyzfile,3,latmin[i][j],radmin[i][j],offmin[i][j]);
-          // }
+          if(flags.xyz_outputs){
+            std::string xyzfile = xyzbasefile;
+            xyzfile += "-"
+              + replace_char(clean_to_string(parameters.lj_min + (i) * parameters.lj_stepsize),'.','_')
+              + "-"
+              +  replace_char(clean_to_string(parameters.cd_min + (j) * parameters.cd_stepsize),'.','_')
+              + ".xyz";
+            // cout << xyzfile << endl;
+            output_xyz(xyzfile,3,latmin[i][j],radmin[i][j],offmin[i][j]);
+          }
       }
       fprintf(outf, "\n");
   }

@@ -35,7 +35,7 @@ struct overrides_ {
 
 
 /* Functions */
-std::string hash_output(collagenFibril &fib);
+// std::string hash_output(collagenFibril &fib);
 int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &fib);
 int read_config_file(std::string path, collagenFibril &fib);
 int read_args(int argc, char const *argv[], collagenFibril &fib);
