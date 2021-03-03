@@ -34,6 +34,7 @@ struct flags_ {
   bool printMoleculeInfo = false;
   bool annesOutput = false;
   bool measureTime = false;
+  bool development = false;
 };
 
 #endif

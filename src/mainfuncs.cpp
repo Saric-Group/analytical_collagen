@@ -162,6 +162,11 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.measureTime = true;
     }
 
+    if(flag(strarg,d+"dev") || flag(strarg,dd+"development"))
+    {
+      flags.development = true;
+    }
+
 
     //io overrides
 
@@ -381,8 +386,11 @@ void printOptions()
       std::cout << "\n#\t  option xyz output";
     }
     std::cout << "\n#\t  writing to: " << filePaths.outputpath;
-    std::cout << "\n#";
   }
+  if (flags.development) {
+    std::cout << "\n#\trunning developmental part";
+  }
+  std::cout << "\n#";
 }
 
 void print_help()
