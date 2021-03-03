@@ -7,7 +7,7 @@ std::mt19937 generator(device());
 
 
 /* Functions */
-std::vector<double> createRandomChargeDistribution(int n, int nPos, int nNeg)
+std::vector<double> createRandomChargeDistribution(int n, int nPos, int nNeg, std::vector<int> types)
 {
   std::uniform_int_distribution<int> dis_int(0, n - 1);
   std::vector<double> vec;
@@ -17,7 +17,7 @@ std::vector<double> createRandomChargeDistribution(int n, int nPos, int nNeg)
 
   while (counter < nPos) {
     pos = dis_int(generator);
-    if (vec[pos] == 0) {
+    if (vec[pos] == 0 && types[pos] != 5) {
       vec[pos] += 22.4;
       counter++;
     }
@@ -25,7 +25,7 @@ std::vector<double> createRandomChargeDistribution(int n, int nPos, int nNeg)
   counter = 0;
   while (counter < nNeg) {
     pos = dis_int(generator);
-    if (vec[pos] == 0) {
+    if (vec[pos] == 0 && types[pos] != 5) {
       vec[pos] -= 22.4;
       counter++;
     }

@@ -2,6 +2,8 @@
 #define COLLFIBRIL
 
 #include "main.hpp"
+#include "parse.hpp"
+#include "funcs.hpp"
 #include "collmol.hpp"
 
 
@@ -23,7 +25,7 @@ struct parameters_ {
 struct collagenFibril {
   collagenMolecule mol;
   parameters_ parameters;
-  int layers = 0;
+  int layers = 2;
   double latGap = mol.diameterAtom;
   double radGap = mol.diameterAtom;
   double offset = mol.diameterAtom;

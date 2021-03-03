@@ -68,31 +68,31 @@ int parse_errs(const int err, const std::string arg, const bool verbose)
   if(err&d_parse_err){
     errstate = 1;
     if(verbose){
-      std::cout << "error parsing argument: " << arg << " as double" << std::endl;
+      std::cout << "#  ERROR: parsing argument: " << arg << " as double" << std::endl;
     }
   }
   if(err&d_limit_err){
     errstate = 1;
     if(verbose){
-      std::cout << "argument overflowed buffer: " << arg << " as double" << std::endl;
+      std::cout << "#  ERROR: argument overflowed buffer: " << arg << " as double" << std::endl;
     }
   }
   if(err&i_parse_err){
     errstate = 1;
     if(verbose){
-      std::cout << "error parsing argument: " << arg << " as integer" << std::endl;
+      std::cout << "#  ERROR: error parsing argument: " << arg << " as integer" << std::endl;
     }
   }
   if(err&i_limit_err){
     errstate = 1;
     if(verbose){
-      std::cout << "argument overflowed buffer: " << arg << " as integer" << std::endl;
+      std::cout << "#  ERROR: argument overflowed buffer: " << arg << " as integer" << std::endl;
     }
   }
   if(err&path_exist_err){
     errstate = 1;
     if(verbose){
-      std::cout << "path does not exist or could not be accessed: " << arg << std::endl;
+      std::cout << "\n#  ERROR: path does not exist or could not be accessed: " << arg << std::endl;
     }
   }
   return errstate;
@@ -124,15 +124,15 @@ std::string get_config_path(const int argc, char const *argv[])
   std::string cpath = "";
   if(argc > 0)
   {
-    for(int i=0; i<argc; ++i)
+    for(int i = 0; i < argc; ++i)
       {
         std::string strarg = argv[i];
-        if(has_config){
+        if(has_config) {
           configerr = 0;
           cpath = strarg;
           has_config = false;
         }
-        if(strarg.compare("--conf")==0 || strarg.compare("--config")==0 || strarg.compare("-f")==0){
+        if(strarg.compare("--conf") == 0 || strarg.compare("--config") == 0 || strarg.compare("-f") == 0) {
           has_config = true;
         }
       }

@@ -1,5 +1,3 @@
-#include "main.hpp"
-#include "parse.hpp"
 #include "collfibril.hpp"
 
 /* Variables */
@@ -401,6 +399,7 @@ void collagenFibril::header(std::string &file)
 
 void collagenFibril::singleEmin()
 {
+  std::cout << "\n#\n#";
   double latGap_ = mol.diameterAtom;
   double radGap_ = mol.diameterAtom;
   double offset_ = mol.diameterAtom;
@@ -421,6 +420,8 @@ void collagenFibril::singleEmin()
   eTotmin.assign(parameters.lj_steps, std::vector<double> (parameters.cd_steps, 1e6));
 
   /* Calculate min configurations for different energy settings */
+  int total = (latMax + 1) * (radMax + 1);
+  int counter = 0;
   for (int lat = 0; lat <= latMax; lat++) {
     latGap_ = lat * 0.1 * mol.diameterAtom;
     for (int rad = 0; rad <= radMax; rad++) {
@@ -447,6 +448,8 @@ void collagenFibril::singleEmin()
             }
         }
       }
+      counter++;
+      progresssBar(1.0 * counter / total, "Calculating minimized energy configurations");
     }
   }
 
@@ -508,12 +511,15 @@ void collagenFibril::minimizeEnergy()
   double radGap_ = mol.diameterAtom;
   double offset_ = mol.diameterAtom;
   double energy_ = 1e16;
+  double a = 1.0;
+  int N = 0.5 * (a * mol.numAtoms + 1) * (a * mol.numAtoms + 2);
+  int counter = 0;
 
   /* We do not vary the lateral gap here */
-  for (int rad = 0; rad <= mol.numAtoms; rad++) {
+  for (int rad = 0; rad <= a * mol.numAtoms; rad++) {
     // std::cout << "\nrad: " << rad;
     offset_ = radGap_;
-    for (int off = rad; off <= mol.numAtoms; off++) {
+    for (int off = rad; off <= a * mol.numAtoms; off++) {
       energy_ = compCD(latGap_, radGap_, offset_);
       // std::cout << "\nradGap: " << radGap_;
       // std::cout << "\toffset: " << offset_;
@@ -524,9 +530,11 @@ void collagenFibril::minimizeEnergy()
         radGap = radGap_;
         offset = offset_;
       }
-      offset_ += mol.distanceAtoms;
+      offset_ += mol.distanceAtoms / a;
+      counter++;
+      progresssBar(1.0 * counter / N, " fibril -> minimize energy ");
     }
-    radGap_ += mol.distanceAtoms;
+    radGap_ += mol.distanceAtoms / a;
   }
 }
 
@@ -575,29 +583,6 @@ void collagenFibril::writeXYZ()
 
 
 /* Functions  to clean up*/
-// void readTypes(string &file)
-// {
-//   int counter = 0;
-//   string line;
-//   ifstream myfile;
-//   myfile.open(file.c_str(), ios::in);
-//   while (myfile.peek() != EOF) {
-//     getline(myfile, line);
-//     if (line.at(0) != '#') {
-//       counter++;
-//       type.push_back(atoi(line.c_str()));
-//       if (type[counter - 1] == 2 ||
-//           type[counter - 1] == 10 ||
-//           type[counter - 1] == 13 ||
-//           type[counter - 1] == 15 ||
-//           type[counter - 1] == 20) {
-//           type_ind.push_back(counter - 1);
-//       }
-//     }
-//   }
-//   cout << "\n -> " << type_ind.size() << " hydrophobic atoms found.";
-// }
-
 // double newLJ_per_mol(double pos, double dx, double ref, double lat_gap)
 // {
 //   double d, sum;

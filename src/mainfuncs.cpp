@@ -21,10 +21,29 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       }
       overrides.input_override = false;
     }
+    if(overrides.charges_input_override)
+    {
+      if(verify_path(strarg,errcodes)==0){
+        filePaths.charges_inputpath = strarg;
+      }
+      overrides.charges_input_override = false;
+    }
+    if(overrides.types_input_override)
+    {
+      if(verify_path(strarg,errcodes)==0){
+        filePaths.types_inputpath = strarg;
+      }
+      overrides.types_input_override = false;
+    }
     if(overrides.output_override)
     {
       filePaths.outputpath = strarg;
       overrides.output_override = false;
+    }
+    if(overrides.md_output_override)
+    {
+      filePaths.md_outputpath = strarg;
+      overrides.md_output_override = false;
     }
 
     //spatial overrides
@@ -113,6 +132,31 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.xyz_outputs = true;
     }
 
+    if(flag(strarg,d+"rc") || flag(strarg,dd+"readCharges"))
+    {
+      flags.readCharges = true;
+    }
+
+    if(flag(strarg,d+"rt") || flag(strarg,dd+"readTypes"))
+    {
+      flags.readTypes = true;
+    }
+
+    if(flag(strarg,d+"pai") || flag(strarg,dd+"printAtomInfo"))
+    {
+      flags.printAtomInfo = true;
+    }
+
+    if(flag(strarg,d+"anneo") || flag(strarg,dd+"annesOutput"))
+    {
+      flags.annesOutput = true;
+    }
+
+    if(flag(strarg,d+"time") || flag(strarg,dd+"measureTime"))
+    {
+      flags.measureTime = true;
+    }
+
 
     //io overrides
 
@@ -120,9 +164,22 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     {
       overrides.input_override = true;
     }
+    if(flag(strarg,d+"ci") || flag(strarg,dd+"chargesinput"))
+    {
+      overrides.charges_input_override = true;
+    }
+    if(flag(strarg,d+"ti") || flag(strarg,dd+"typesinput"))
+    {
+      overrides.types_input_override = true;
+    }
+
     if(flag(strarg,d+"o") || flag(strarg,dd+"output"))
     {
       overrides.output_override = true;
+    }
+    if(flag(strarg,d+"mdo") || flag(strarg,dd+"mdoutput"))
+    {
+      overrides.md_output_override = true;
     }
 
     //spatial overrides
@@ -182,12 +239,15 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 int read_config_file(std::string path, collagenFibril &fib)
 {
   int errcodes = 0;
-  std::ifstream infile("default.config");
+  std::ifstream infile(path);
   std::string line;
   while (std::getline(infile, line))
   {
       errcodes = 0;
       std::string s = remove_spaces(line);
+      if (s.length() > 0 && s.at(0) == '#') {
+        continue;
+      }
       std::string delimiter = "=";
 
       size_t pos = 0;
@@ -221,22 +281,23 @@ int read_args(int argc, char const *argv[], collagenFibril &fib)
 
 int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
 {
+  std::cout << "\n# Parsing config file and command line arguments";
   std::string cpatharg = get_config_path(argc, argv);
   if (!cpatharg.empty()) {
     filePaths.configpath = cpatharg;
   }
 
   if (filePaths.configpath.empty()) {
-    std::cout << "no config file selected, using defaults" << std::endl;
+    std::cout << "\n#  -> no config file selected, using defaults" << std::endl;
   }
   else {
-    std::cout << "reading from config path " << filePaths.configpath << std::endl;
+    std::cout << "\n#  -> reading from config path " << filePaths.configpath << std::endl;
     read_config_file(filePaths.configpath, fib);
   }
 
   int argerr = read_args(argc, argv, fib);
   if (argerr > 0) {
-    std::cout << "improper arguments supplied, exiting now" << std::endl;
+    std::cout << "\n#  -> improper arguments supplied, exiting now" << std::endl;
     return 0;
   }
   else if (argerr < 0){
@@ -245,7 +306,64 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
   return 1;
 }
 
+void readAtomInfos(collagenFibril &fib)
+{
+  if (flags.readCharges) {
+    fib.mol.readCharges(filePaths.charges_inputpath);
+    fib.mol.genUniformType();
+  }
+  if (flags.readTypes) {
+    fib.mol.readTypes(filePaths.types_inputpath);
+    fib.mol.chargesFromTypes();
+  }
+  if (!flags.readCharges && !flags.readTypes) {
+    std::cout << "# \n WARNING: No collagen molecule information has been read!";
+  } else if (flags.printAtomInfo) {
+    fib.mol.printAtoms();
+  }
+}
+
+void programInfo()
+{
+  std::cout << "#";
+  std::cout << "\n# This is a program designed around the collagen type I";
+  std::cout << " molecule.";
+  std::cout << "\n# There are various functionalities.";
+  std::cout << "\n# See the readme, the config file, or run program with";
+  std::cout << " option \"-h\" for help.";
+  std::cout << "\n#";
+  std::cout << "\n# To use a config file, run program with option";
+  std::cout << " \"--config /path/to/config/file.config\".";
+  std::cout << "\n#";
+  std::cout << "\n#";
+  std::cout << "\n#";
+  std::cout << "\n# Running program...";
+  std::cout << "\n#";
+  std::cout << "\n#";
+  std::cout << "\n#";
+}
+
+void printOptions()
+{
+  if (flags.readTypes) {
+    std::cout << "\n#\treading atom types from " << filePaths.types_inputpath;
+  } else if (flags.readCharges) {
+    std::cout << "\n#\treading atom charges from " << filePaths.charges_inputpath;
+  }
+  if (flags.annesOutput) {
+    std::cout << "\n#\tcreating Anne's output";
+    if (flags.charge_hashed_outputs) {
+      std::cout << "\n#\t  option hashed output";
+    }
+    if (flags.xyz_outputs) {
+      std::cout << "\n#\t  option xyz output";
+    }
+    std::cout << "\n#\t  writing to: " << filePaths.outputpath;
+    std::cout << "\n#";
+  }
+}
+
 void print_help()
 {
-
+  std::cout << "\n\nHelp to be done!";
 }

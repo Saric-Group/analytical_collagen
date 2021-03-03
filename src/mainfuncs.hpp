@@ -12,7 +12,10 @@ struct overrides_ {
   //io settings
 
   bool input_override = false;
+  bool charges_input_override = false;
+  bool types_input_override = false;
   bool output_override = false;
+  bool md_output_override = false;
 
   //spatial settings
 
@@ -40,6 +43,9 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 int read_config_file(std::string path, collagenFibril &fib);
 int read_args(int argc, char const *argv[], collagenFibril &fib);
 int parse_all_args(int argc, char const *argv[], collagenFibril &fib);
+void readAtomInfos(collagenFibril &fib);
+void programInfo();
+void printOptions();
 void print_help();
 
 #endif
