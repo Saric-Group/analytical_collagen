@@ -341,6 +341,9 @@ void readAtomInfos(collagenFibril &fib)
     std::cout << "\n#    Molecule length: " << fib.mol.length;
     std::cout << "\n#    Interatomic distance: " << fib.mol.distanceAtoms;
     std::cout << "\n#    Atom diameter: " << fib.mol.diameterAtom;
+    std::cout << "\n#    Number of positive charges: " << fib.mol.numPos;
+    std::cout << "\n#    Number of negative charges: " << fib.mol.numNeg;
+    std::cout << "\n#    Total charge: " << fib.mol.totalCharge;
   }
 }
 

@@ -12,6 +12,9 @@ struct collagenMolecule {
   double diameterAtom = 1.12;
   double chargeAtom = 22.4;
   double length;
+  int numPos = 0;
+  int numNeg = 0;
+  double totalCharge = 0.;
   std::vector<double> charges, nonZeroChargesIndex;
   std::vector<int> atomTypes;
 
@@ -40,6 +43,7 @@ struct collagenMolecule {
   /* Constructors */
 
   /* Functions */
+  void countCharges();
   void readCharges(std::string &file);
   void readCharges(std::vector<double> vec);
   void readTypes(std::string &file);

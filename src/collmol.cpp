@@ -2,6 +2,17 @@
 
 
 /* Functions */
+void collagenMolecule::countCharges()
+{
+  double sum = 0.;
+  for (int i = 0; i < numAtoms; i++) {
+    // std::cout << "\n" << i << "\t" << charges[i];
+    sum += charges[i];
+    if (charges[i] < 0) numNeg++;
+    if (charges[i] > 0) numPos++;
+  }
+  totalCharge = sum;
+}
 void collagenMolecule::readCharges(std::string &file)
 {
   std::vector<double>().swap(charges);
@@ -20,6 +31,7 @@ void collagenMolecule::readCharges(std::string &file)
   }
   myfile.close();
   length = (numAtoms - 1) * distanceAtoms;
+  countCharges();
 }
 
 void collagenMolecule::readCharges(std::vector<double> vec)
@@ -35,6 +47,7 @@ void collagenMolecule::readCharges(std::vector<double> vec)
     }
   }
   length = (numAtoms - 1) * distanceAtoms;
+  countCharges();
 }
 
 void collagenMolecule::readTypes(std::string &file)
@@ -71,12 +84,13 @@ void collagenMolecule::chargesFromTypes()
   std::vector<double>().swap(nonZeroChargesIndex);
   // numAtoms = atomTypes.size();
   for (int i = 0; i < (int) atomTypes.size(); i++) {
+    // std::cout << "\n" << i << " " << typeCharge[atomTypes[i] - 1];
     charges.push_back(chargeAtom * typeCharge[atomTypes[i] - 1]);
     if(abs(charges[i]) > 1e-15) {
       nonZeroChargesIndex.push_back(i);
     }
   }
-  // length = (numAtoms - 1) * distanceAtoms;
+  countCharges();
 }
 
 void collagenMolecule::genUniformType()
