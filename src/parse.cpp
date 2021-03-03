@@ -92,7 +92,7 @@ int parse_errs(const int err, const std::string arg, const bool verbose)
   if(err&path_exist_err){
     errstate = 1;
     if(verbose){
-      std::cout << "\n#  ERROR: path does not exist or could not be accessed: " << arg << std::endl;
+      std::cout << "#  ERROR: path does not exist or could not be accessed: " << arg << std::endl;
     }
   }
   return errstate;

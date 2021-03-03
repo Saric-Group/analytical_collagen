@@ -31,6 +31,7 @@ struct flags_ {
   bool readCharges = false;
   bool readTypes = false;
   bool printAtomInfo = false;
+  bool printMoleculeInfo = false;
   bool annesOutput = false;
   bool measureTime = false;
 };

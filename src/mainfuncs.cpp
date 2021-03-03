@@ -147,6 +147,11 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.printAtomInfo = true;
     }
 
+    if(flag(strarg,d+"moli") || flag(strarg,dd+"printMoleculeInfo"))
+    {
+      flags.printMoleculeInfo = true;
+    }
+
     if(flag(strarg,d+"anneo") || flag(strarg,dd+"annesOutput"))
     {
       flags.annesOutput = true;
@@ -318,9 +323,19 @@ void readAtomInfos(collagenFibril &fib)
     fib.mol.chargesFromTypes();
   }
   if (!flags.readCharges && !flags.readTypes) {
-    std::cout << "# \n WARNING: No collagen molecule information has been read!";
+    std::cout << "#\n  WARNING: No collagen molecule information has been read!";
+    return;
   } else if (flags.printAtomInfo) {
     fib.mol.printAtoms();
+  }
+  if (flags.printMoleculeInfo) {
+    std::cout << "\n#";
+    std::cout << "\n# Molecule information:";
+    std::cout << "\n#    Number of atoms: " << fib.mol.numAtoms;
+    std::cout << "\n#    Number of types: " << fib.mol.numTypes;
+    std::cout << "\n#    Molecule length: " << fib.mol.length;
+    std::cout << "\n#    Interatomic distance: " << fib.mol.distanceAtoms;
+    std::cout << "\n#    Atom diameter: " << fib.mol.diameterAtom;
   }
 }
 
@@ -350,6 +365,9 @@ void printOptions()
     std::cout << "\n#\treading atom types from " << filePaths.types_inputpath;
   } else if (flags.readCharges) {
     std::cout << "\n#\treading atom charges from " << filePaths.charges_inputpath;
+  }
+  if (flags.printMoleculeInfo) {
+    std::cout << "\n#\tprinting molecule information";
   }
   if (flags.printAtomInfo) {
     std::cout << "\n#\tprinting atomic information";
