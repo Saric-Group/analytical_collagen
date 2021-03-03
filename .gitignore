@@ -47,6 +47,7 @@ energy_min.dat
 /build/*
 /scripts/*
 /md/*
+/molecule/others/*
 
 
 # General

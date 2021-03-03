@@ -90,9 +90,10 @@ void collagenMolecule::genUniformType()
 
 void collagenMolecule::printAtoms()
 {
-  std::cout << "\n\n-> Printing atoms for molecule of length " << length;
-  std::cout << "\n\tID\tType\tCharge";
+  std::cout << "\n#\n# Atomic information for collagen molecule of length ";
+  std::cout << length;
+  std::cout << "\n#\tID\tType\tCharge";
   for (int i = 0; i < numAtoms; i++) {
-    std::cout << "\n\t" << i << "\t" << atomTypes[i] << "\t" << charges[i];
+    std::cout << "\n#\t" << i << "\t" << atomTypes[i] << "\t" << charges[i];
   }
 }

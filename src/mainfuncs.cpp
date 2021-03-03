@@ -292,6 +292,7 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
   }
   else {
     std::cout << "\n#  -> reading from config path " << filePaths.configpath << std::endl;
+    std::cout << "#  -> Options:" << std::endl;
     read_config_file(filePaths.configpath, fib);
   }
 
@@ -349,6 +350,9 @@ void printOptions()
     std::cout << "\n#\treading atom types from " << filePaths.types_inputpath;
   } else if (flags.readCharges) {
     std::cout << "\n#\treading atom charges from " << filePaths.charges_inputpath;
+  }
+  if (flags.printAtomInfo) {
+    std::cout << "\n#\tprinting atomic information";
   }
   if (flags.annesOutput) {
     std::cout << "\n#\tcreating Anne's output";
