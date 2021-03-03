@@ -40,9 +40,8 @@ int main(int argc, char const *argv[])
   }
 
   if (flags.development) {
-    // for (int i = 0; i < fib.mol.numTypes; i++) {
-    //   std::cout << "\n" <<fib.mol.typeCharge[i];
-    // }
+    genTopologyZero(fib, 6);
+    genInSim(fib);
   }
 
   /************************************************************************/

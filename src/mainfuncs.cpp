@@ -16,30 +16,34 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     std::string dd = dashes ? "--" : "";
     if(overrides.input_override)
     {
-      if(verify_path(strarg,errcodes)==0){
+      if(verify_path(strarg,errcodes) == 0) {
         filePaths.inputpath = strarg;
       }
       overrides.input_override = false;
     }
+
     if(overrides.charges_input_override)
     {
-      if(verify_path(strarg,errcodes)==0){
+      if(verify_path(strarg,errcodes) == 0) {
         filePaths.charges_inputpath = strarg;
       }
       overrides.charges_input_override = false;
     }
+
     if(overrides.types_input_override)
     {
-      if(verify_path(strarg,errcodes)==0){
+      if(verify_path(strarg,errcodes) == 0) {
         filePaths.types_inputpath = strarg;
       }
       overrides.types_input_override = false;
     }
+
     if(overrides.output_override)
     {
       filePaths.outputpath = strarg;
       overrides.output_override = false;
     }
+
     if(overrides.md_output_override)
     {
       filePaths.md_outputpath = strarg;

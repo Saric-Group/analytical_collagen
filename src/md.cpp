@@ -16,7 +16,7 @@ void genTopologyZero(collagenFibril fib, int L)
   // total number of molecules in box
   int numMol = L * L * L;
   // int numMol = 2;
-  std::cout << "\nnumMol=" << numMol;
+  // std::cout << "\nnumMol=" << numMol;
 
   // defines the boundaries of cubic simulation box with length=boxlength
 	double boxlength = 100.; //L * fib.mol.length;
@@ -63,10 +63,10 @@ void genTopologyZero(collagenFibril fib, int L)
   /* Atoms */
   cubeGrid grid(boxlength - fib.mol.length, L);
   fprintf(outf, "\n\nAtoms");
-  std::cout << "\ngridPoints=" << grid.gridPoints.size();
+  // std::cout << "\ngridPoints=" << grid.gridPoints.size();
   std::uniform_real_distribution<double> dis_real(0.0, M_PI);
   double phi, theta;
-  std::cout << "\nmoleculeLength=" << fib.mol.length;
+  // std::cout << "\nmoleculeLength=" << fib.mol.length;
   fprintf(outf, "\n");
   for (int i = 0; i < numMol; i++) {
     phi = 0.;
@@ -129,7 +129,9 @@ void genInSim(collagenFibril fib)
   fprintf(outf, "\n\nunits\tlj");
   fprintf(outf,"\natom_style\tfull");
 
-  fprintf(outf, "\n\nread_data\ttopology.0time");
+  fprintf(outf, "\n\nread_data\t/home/ucapkkl/Scratch/collagen");
+  fprintf(outf, "%s", filePaths.md_outputpath.erase(0, 1).c_str());
+  fprintf(outf, "topology.0time");
 
   fprintf(outf, "\n\nvariable\tLANGEVIN_SEED\tequal\t1337");
 
