@@ -11,40 +11,40 @@
 struct overrides_ {
   //io settings
 
-  bool input_override = false;
-  bool charges_input_override = false;
-  bool types_input_override = false;
-  bool output_override = false;
-  bool md_output_override = false;
+  bool input = false;
+  bool charges_input = false;
+  bool types_input = false;
+  bool output = false;
+  bool md_output = false;
 
   //spatial settings
 
-  bool layers_override = false;
-  bool diameter_override = false;
-  bool distance_override = false;
+  bool layers = false;
+  bool diameter = false;
+  bool distance = false;
 
   //potential settings
 
-  bool ljsteps_override = false;
-  bool ljstepsize_override = false;
-  bool cdsteps_override = false;
-  bool cdstepsize_override = false;
-  bool ljmin_override = false;
-  bool cdmin_override = false;
+  bool ljsteps = false;
+  bool ljstepsize = false;
+  bool cdsteps = false;
+  bool cdstepsize = false;
+  bool ljmin = false;
+  bool cdmin = false;
 
-  bool cdcut_override = false;
-  bool ljcut_override = false;
+  bool cdcut = false;
+  bool ljcut = false;
 
   // MD settings
-  bool MD_walltime_override = false;
-  bool MD_cores_override = false;
-  bool MD_numMolperDim_override = false;
-  bool MD_dielectric_override = false;
-  bool MD_LJepsilon_override = false;
-  bool MD_LJcutoff_override = false;
-  bool MD_CDcutoff_override = false;
-  bool MD_timestep_override = false;
-  bool MD_runtime_override = false;
+  bool MD_walltime = false;
+  bool MD_cores = false;
+  bool MD_numMolperDim = false;
+  bool MD_dielectric = false;
+  bool MD_LJepsilon = false;
+  bool MD_LJcutoff = false;
+  bool MD_CDcutoff = false;
+  bool MD_timestep = false;
+  bool MD_runtime = false;
 };
 
 

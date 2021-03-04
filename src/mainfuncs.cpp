@@ -14,148 +14,148 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 
     std::string d = dashes ? "-" : "";
     std::string dd = dashes ? "--" : "";
-    if(overrides.input_override)
+    if(overrides.input)
     {
       if(verify_path(strarg,errcodes) == 0) {
         filePaths.inputpath = strarg;
       }
-      overrides.input_override = false;
+      overrides.input = false;
     }
 
-    if(overrides.charges_input_override)
+    if(overrides.charges_input)
     {
       if(verify_path(strarg,errcodes) == 0) {
         filePaths.charges_inputpath = strarg;
       }
-      overrides.charges_input_override = false;
+      overrides.charges_input = false;
     }
 
-    if(overrides.types_input_override)
+    if(overrides.types_input)
     {
       if(verify_path(strarg,errcodes) == 0) {
         filePaths.types_inputpath = strarg;
       }
-      overrides.types_input_override = false;
+      overrides.types_input = false;
     }
 
-    if(overrides.output_override)
+    if(overrides.output)
     {
       filePaths.outputpath = strarg;
-      overrides.output_override = false;
+      overrides.output = false;
     }
 
-    if(overrides.md_output_override)
+    if(overrides.md_output)
     {
       filePaths.md_outputpath = strarg;
-      overrides.md_output_override = false;
+      overrides.md_output = false;
     }
 
     //spatial overrides
 
-    if(overrides.layers_override)
+    if(overrides.layers)
     {
       fib.layers = safe_read_integer(fib.layers,strarg,errcodes);
-      overrides.layers_override = false;
+      overrides.layers = false;
     }
-    if(overrides.diameter_override)
+    if(overrides.diameter)
     {
       fib.mol.diameterAtom = safe_read_double(fib.mol.diameterAtom,strarg,errcodes);
-      overrides.diameter_override = false;
+      overrides.diameter = false;
     }
-    if(overrides.distance_override)
+    if(overrides.distance)
     {
       fib.mol.distanceAtoms = safe_read_double(fib.mol.distanceAtoms,strarg,errcodes);
-      overrides.distance_override = false;
+      overrides.distance = false;
     }
 
     //potential overrides
 
-    if(overrides.ljsteps_override)
+    if(overrides.ljsteps)
     {
       fib.parameters.lj_steps = safe_read_integer(fib.parameters.lj_steps,strarg,errcodes);
-      overrides.ljsteps_override = false;
+      overrides.ljsteps = false;
     }
-    if(overrides.ljstepsize_override)
+    if(overrides.ljstepsize)
     {
       fib.parameters.lj_stepsize = safe_read_double(fib.parameters.lj_stepsize,strarg,errcodes);
-      overrides.ljstepsize_override = false;
+      overrides.ljstepsize = false;
     }
-    if(overrides.cdsteps_override)
+    if(overrides.cdsteps)
     {
       fib.parameters.cd_steps = safe_read_integer(fib.parameters.cd_steps,strarg,errcodes);
-      overrides.cdsteps_override = false;
+      overrides.cdsteps = false;
     }
-    if(overrides.cdstepsize_override)
+    if(overrides.cdstepsize)
     {
       fib.parameters.cd_stepsize = safe_read_double(fib.parameters.cd_stepsize,strarg,errcodes);
-      overrides.cdstepsize_override = false;
+      overrides.cdstepsize = false;
     }
-    if(overrides.ljmin_override)
+    if(overrides.ljmin)
     {
       fib.parameters.lj_min = safe_read_double(fib.parameters.lj_min,strarg,errcodes);
-      overrides.ljmin_override = false;
+      overrides.ljmin = false;
     }
-    if(overrides.cdmin_override)
+    if(overrides.cdmin)
     {
       fib.parameters.cd_min = safe_read_double(fib.parameters.cd_min,strarg,errcodes);
-      overrides.cdmin_override = false;
+      overrides.cdmin = false;
     }
-    if(overrides.ljcut_override)
+    if(overrides.ljcut)
     {
       fib.parameters.lj_cutoff = safe_read_double(fib.parameters.lj_cutoff,strarg,errcodes);
-      overrides.ljcut_override = false;
+      overrides.ljcut = false;
     }
-    if(overrides.cdcut_override)
+    if(overrides.cdcut)
     {
       fib.parameters.cd_cutoff = safe_read_double(fib.parameters.cd_cutoff,strarg,errcodes);
-      overrides.cdcut_override = false;
+      overrides.cdcut = false;
     }
 
     // MD related
-    if(overrides.MD_walltime_override)
+    if(overrides.MD_walltime)
     {
       fib.parametersMD.walltime = safe_read_integer(fib.parametersMD.walltime,strarg,errcodes);;
-      overrides.MD_walltime_override = false;
+      overrides.MD_walltime = false;
     }
-    if(overrides.MD_cores_override)
+    if(overrides.MD_cores)
     {
       fib.parametersMD.cores = safe_read_integer(fib.parametersMD.cores,strarg,errcodes);;
-      overrides.MD_cores_override = false;
+      overrides.MD_cores = false;
     }
-    if(overrides.MD_numMolperDim_override)
+    if(overrides.MD_numMolperDim)
     {
       fib.parametersMD.numMolperDim = safe_read_integer(fib.parametersMD.numMolperDim,strarg,errcodes);;
-      overrides.MD_numMolperDim_override = false;
+      overrides.MD_numMolperDim = false;
     }
-    if(overrides.MD_dielectric_override)
+    if(overrides.MD_dielectric)
     {
       fib.parametersMD.dielectric = safe_read_double(fib.parametersMD.dielectric,strarg,errcodes);
-      overrides.MD_dielectric_override = false;
+      overrides.MD_dielectric = false;
     }
-    if(overrides.MD_LJepsilon_override)
+    if(overrides.MD_LJepsilon)
     {
       fib.parametersMD.LJepsilon = safe_read_double(fib.parametersMD.LJepsilon,strarg,errcodes);
-      overrides.MD_LJepsilon_override = false;
+      overrides.MD_LJepsilon = false;
     }
-    if(overrides.MD_LJcutoff_override)
+    if(overrides.MD_LJcutoff)
     {
       fib.parametersMD.lj_cutoff = safe_read_double(fib.parametersMD.lj_cutoff,strarg,errcodes);
-      overrides.MD_LJcutoff_override = false;
+      overrides.MD_LJcutoff = false;
     }
-    if(overrides.MD_CDcutoff_override)
+    if(overrides.MD_CDcutoff)
     {
       fib.parametersMD.cd_cutoff = safe_read_double(fib.parametersMD.cd_cutoff,strarg,errcodes);
-      overrides.MD_CDcutoff_override = false;
+      overrides.MD_CDcutoff = false;
     }
-    if(overrides.MD_timestep_override)
+    if(overrides.MD_timestep)
     {
       fib.parametersMD.timestep = safe_read_double(fib.parametersMD.timestep,strarg,errcodes);
-      overrides.MD_timestep_override = false;
+      overrides.MD_timestep = false;
     }
-    if(overrides.MD_runtime_override)
+    if(overrides.MD_runtime)
     {
       fib.parametersMD.runtime = safe_read_integer(fib.parametersMD.runtime,strarg,errcodes);
-      overrides.MD_runtime_override = false;
+      overrides.MD_runtime = false;
     }
 
     //error handling
@@ -223,76 +223,76 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 
     if(flag(strarg,d+"i") || flag(strarg,dd+"input"))
     {
-      overrides.input_override = true;
+      overrides.input = true;
     }
     if(flag(strarg,d+"ci") || flag(strarg,dd+"chargesinput"))
     {
-      overrides.charges_input_override = true;
+      overrides.charges_input = true;
     }
     if(flag(strarg,d+"ti") || flag(strarg,dd+"typesinput"))
     {
-      overrides.types_input_override = true;
+      overrides.types_input = true;
     }
 
     if(flag(strarg,d+"o") || flag(strarg,dd+"output"))
     {
-      overrides.output_override = true;
+      overrides.output = true;
     }
     if(flag(strarg,d+"mdo") || flag(strarg,dd+"mdoutput"))
     {
-      overrides.md_output_override = true;
+      overrides.md_output = true;
     }
 
     //spatial overrides
 
     if(flag(strarg,d+"l") || flag(strarg,dd+"layers"))
     {
-      overrides.layers_override = true;
+      overrides.layers = true;
     }
     if(flag(strarg,d+"dia") || flag(strarg,dd+"diameter"))
     {
-      overrides.diameter_override = true;
+      overrides.diameter = true;
     }
     if(flag(strarg,d+"d") || flag(strarg,dd+"dist"))
     {
-      overrides.distance_override = true;
+      overrides.distance = true;
     }
 
     //potential overrides
 
     if(flag(strarg,d+"slj") || flag(strarg,dd+"ljsteps"))
     {
-      overrides.ljsteps_override = true;
+      overrides.ljsteps = true;
     }
     if(flag(strarg,d+"sslj") || flag(strarg,dd+"ljstepssize"))
     {
-      overrides.ljstepsize_override = true;
+      overrides.ljstepsize = true;
     }
     if(flag(strarg,d+"scd") || flag(strarg,dd+"cdsteps"))
     {
-      overrides.cdsteps_override = true;
+      overrides.cdsteps = true;
     }
     if(flag(strarg,d+"sscd") || flag(strarg,dd+"cdstepssize"))
     {
-      overrides.cdstepsize_override = true;
+      overrides.cdstepsize = true;
     }
     if(flag(strarg,d+"mcd") || flag(strarg,dd+"cdmin"))
     {
-      overrides.cdmin_override = true;
+      overrides.cdmin = true;
     }
     if(flag(strarg,d+"mlj") || flag(strarg,dd+"ljmin"))
     {
-      overrides.ljmin_override = true;
+      overrides.ljmin = true;
     }
 
 
     if(flag(strarg,d+"ccd") || flag(strarg,dd+"cdcut"))
     {
-      overrides.cdcut_override = true;
+      overrides.cdcut = true;
     }
     if(flag(strarg,d+"clj") || flag(strarg,dd+"ljcut"))
     {
-      overrides.ljcut_override = true;
+      overrides.ljcut = true;
     }
 
     // MD related
@@ -318,39 +318,39 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     }
     if(flag(strarg,d+"md_wt") || flag(strarg,dd+"MD_walltime"))
     {
-      overrides.MD_walltime_override = true;
+      overrides.MD_walltime = true;
     }
     if(flag(strarg,d+"md_c") || flag(strarg,dd+"MD_cores"))
     {
-      overrides.MD_cores_override = true;
+      overrides.MD_cores = true;
     }
     if(flag(strarg,d+"md_N") || flag(strarg,dd+"MD_N"))
     {
-      overrides.MD_numMolperDim_override = true;
+      overrides.MD_numMolperDim = true;
     }
     if(flag(strarg,d+"md_die") || flag(strarg,dd+"MD_dielectric"))
     {
-      overrides.MD_dielectric_override = true;
+      overrides.MD_dielectric = true;
     }
     if(flag(strarg,d+"md_lje") || flag(strarg,dd+"MD_LJepsilon"))
     {
-      overrides.MD_LJepsilon_override = true;
+      overrides.MD_LJepsilon = true;
     }
     if(flag(strarg,d+"md_ljc") || flag(strarg,dd+"MD_LJcutoff"))
     {
-      overrides.MD_LJcutoff_override = true;
+      overrides.MD_LJcutoff = true;
     }
     if(flag(strarg,d+"md_cdc") || flag(strarg,dd+"MD_CDcutoff"))
     {
-      overrides.MD_CDcutoff_override = true;
+      overrides.MD_CDcutoff = true;
     }
     if(flag(strarg,d+"md_ts") || flag(strarg,dd+"MD_timestep"))
     {
-      overrides.MD_timestep_override = true;
+      overrides.MD_timestep = true;
     }
     if(flag(strarg,d+"md_rt") || flag(strarg,dd+"MD_runtime"))
     {
-      overrides.MD_runtime_override = true;
+      overrides.MD_runtime = true;
     }
 
     return errstate;
