@@ -2,9 +2,20 @@
 
 
 /* Functions */
+void collagenMolecule::genUniformType()
+{
+  std::vector<int>().swap(atomTypes);
+  for (int i = 0; i < numAtoms; i++) {
+    atomTypes.push_back(999);
+  }
+  numTypes = 1;
+}
 void collagenMolecule::countCharges()
 {
   double sum = 0.;
+  totalCharge = 0.0;
+  numNeg = 0;
+  numPos = 0;
   for (int i = 0; i < numAtoms; i++) {
     // std::cout << "\n" << i << "\t" << charges[i];
     sum += charges[i];
@@ -12,6 +23,20 @@ void collagenMolecule::countCharges()
     if (charges[i] > 0) numPos++;
   }
   totalCharge = sum;
+}
+void collagenMolecule::chargesFromTypes()
+{
+  std::vector<double>().swap(charges);
+  std::vector<double>().swap(nonZeroChargesIndex);
+  // numAtoms = atomTypes.size();
+  for (int i = 0; i < (int) atomTypes.size(); i++) {
+    // std::cout << "\n" << i << " " << typeCharge[atomTypes[i] - 1];
+    charges.push_back(chargeAtom * typeCharge[atomTypes[i] - 1]);
+    if(abs(charges[i]) > 1e-15) {
+      nonZeroChargesIndex.push_back(i);
+    }
+  }
+  countCharges();
 }
 void collagenMolecule::readCharges(std::string &file)
 {
@@ -31,6 +56,7 @@ void collagenMolecule::readCharges(std::string &file)
   }
   myfile.close();
   length = (numAtoms - 1) * distanceAtoms;
+  genUniformType();
   countCharges();
 }
 
@@ -47,6 +73,7 @@ void collagenMolecule::readCharges(std::vector<double> vec)
     }
   }
   length = (numAtoms - 1) * distanceAtoms;
+  genUniformType();
   countCharges();
 }
 
@@ -65,6 +92,7 @@ void collagenMolecule::readTypes(std::string &file)
     }
   }
   length = (numAtoms - 1) * distanceAtoms;
+  chargesFromTypes();
 }
 
 void collagenMolecule::readTypes(std::vector<int> vec)
@@ -76,30 +104,7 @@ void collagenMolecule::readTypes(std::vector<int> vec)
     numAtoms++;
   }
   length = (numAtoms - 1) * distanceAtoms;
-}
-
-void collagenMolecule::chargesFromTypes()
-{
-  std::vector<double>().swap(charges);
-  std::vector<double>().swap(nonZeroChargesIndex);
-  // numAtoms = atomTypes.size();
-  for (int i = 0; i < (int) atomTypes.size(); i++) {
-    // std::cout << "\n" << i << " " << typeCharge[atomTypes[i] - 1];
-    charges.push_back(chargeAtom * typeCharge[atomTypes[i] - 1]);
-    if(abs(charges[i]) > 1e-15) {
-      nonZeroChargesIndex.push_back(i);
-    }
-  }
-  countCharges();
-}
-
-void collagenMolecule::genUniformType()
-{
-  std::vector<int>().swap(atomTypes);
-  for (int i = 0; i < numAtoms; i++) {
-    atomTypes.push_back(1);
-  }
-  numTypes = 1;
+  chargesFromTypes();
 }
 
 void collagenMolecule::printAtoms()
@@ -110,4 +115,5 @@ void collagenMolecule::printAtoms()
   for (int i = 0; i < numAtoms; i++) {
     std::cout << "\n#\t" << i << "\t" << atomTypes[i] << "\t" << charges[i];
   }
+  std::cout << "\n#";
 }

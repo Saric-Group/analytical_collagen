@@ -581,6 +581,20 @@ void collagenFibril::writeXYZ()
   fclose(outf);
 }
 
+void collagenFibril::printMoleculeInfo()
+{
+  std::cout << "\n#";
+  std::cout << "\n# Molecule information:";
+  std::cout << "\n#    Number of atoms: " << mol.numAtoms;
+  std::cout << "\n#    Number of types: " << mol.numTypes;
+  std::cout << "\n#    Molecule length: " << mol.length;
+  std::cout << "\n#    Interatomic distance: " << mol.distanceAtoms;
+  std::cout << "\n#    Atom diameter: " << mol.diameterAtom;
+  std::cout << "\n#    Number of positive charges: " << mol.numPos;
+  std::cout << "\n#    Number of negative charges: " << mol.numNeg;
+  std::cout << "\n#    Total charge: " << mol.totalCharge;
+  std::cout << "\n#";
+}
 
 /* Functions  to clean up*/
 // double newLJ_per_mol(double pos, double dx, double ref, double lat_gap)

@@ -37,7 +37,7 @@ struct parametersMD_ {
   double LJepsilon = 0.01;
   double cd_cutoff = 5.0;
   double lj_cutoff = 5.0;
-  double timestep = 0.02;
+  double timestep = 0.002;
   int runtime = 6000001;
 };
 
@@ -77,6 +77,7 @@ struct collagenFibril {
   /* New functions */
   void minimizeEnergy();
   void writeXYZ();
+  void printMoleculeInfo();
 };
 
 #endif

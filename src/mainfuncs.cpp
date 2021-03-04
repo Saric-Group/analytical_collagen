@@ -431,11 +431,9 @@ void readAtomInfos(collagenFibril &fib)
 {
   if (flags.readCharges) {
     fib.mol.readCharges(filePaths.charges_inputpath);
-    fib.mol.genUniformType();
   }
   if (flags.readTypes) {
     fib.mol.readTypes(filePaths.types_inputpath);
-    fib.mol.chargesFromTypes();
   }
   if (!flags.readCharges && !flags.readTypes) {
     std::cout << "#\n  WARNING: No collagen molecule information has been read!";
@@ -444,17 +442,7 @@ void readAtomInfos(collagenFibril &fib)
     fib.mol.printAtoms();
   }
   if (flags.printMoleculeInfo) {
-    std::cout << "\n#";
-    std::cout << "\n# Molecule information:";
-    std::cout << "\n#    Number of atoms: " << fib.mol.numAtoms;
-    std::cout << "\n#    Number of types: " << fib.mol.numTypes;
-    std::cout << "\n#    Molecule length: " << fib.mol.length;
-    std::cout << "\n#    Interatomic distance: " << fib.mol.distanceAtoms;
-    std::cout << "\n#    Atom diameter: " << fib.mol.diameterAtom;
-    std::cout << "\n#    Number of positive charges: " << fib.mol.numPos;
-    std::cout << "\n#    Number of negative charges: " << fib.mol.numNeg;
-    std::cout << "\n#    Total charge: " << fib.mol.totalCharge;
-    std::cout << "\n#";
+    fib.printMoleculeInfo();
   }
 }
 

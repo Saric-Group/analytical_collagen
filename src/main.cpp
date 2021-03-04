@@ -7,6 +7,7 @@
 #include "xyz.hpp"
 #include "funcs.hpp"
 #include "md.hpp"
+#include "cg.hpp"
 
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 
@@ -40,7 +41,15 @@ int main(int argc, char const *argv[])
   }
 
   if (flags.development) {
-    createLAMMPSfiles(fib);
+    // createLAMMPSfiles(fib);
+    collagenFibril fibc = fib;
+    fib.mol.readCharges(binNormalize(100, smoothenSMCA(25, fib.mol.charges, true)));
+    // fibc.mol.printAtoms();
+    // createLAMMPSfiles(fib);
+    // fib.mol.printAtoms();
+
+    fib.printMoleculeInfo();
+    fibc.printMoleculeInfo();
   }
 
   /************************************************************************/
