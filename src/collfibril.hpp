@@ -8,7 +8,7 @@
 
 
 /* Classes and structures */
-struct parameters_ {
+struct parametersAnne_ {
   double lj_min = 0.01;
   double lj_stepsize = 0.01;
   int lj_steps = 50;
@@ -22,9 +22,29 @@ struct parameters_ {
   double max_cutoff = std::max(cd_cutoff, lj_cutoff);
 };
 
+struct parametersMD_ {
+  bool outputScript = false;
+  bool outputTopology = false;
+  bool outputLAMMPSinput = false;
+  bool scriptbuild = false;
+  bool rigid = false;
+
+  int walltime = 24;
+  int cores = 1;
+
+  int numMolperDim = 5;
+  double dielectric = 10.0;
+  double LJepsilon = 0.01;
+  double cd_cutoff = 5.0;
+  double lj_cutoff = 5.0;
+  double timestep = 0.02;
+  int runtime = 6000001;
+};
+
 struct collagenFibril {
   collagenMolecule mol;
-  parameters_ parameters;
+  parametersAnne_ parameters;
+  parametersMD_ parametersMD;
   int layers = 2;
   double latGap = mol.diameterAtom;
   double radGap = mol.diameterAtom;

@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
     std::cout << "#\tmeasuring computation time";
     start = std::chrono::high_resolution_clock::now();
   }
-  printOptions();
+  printOptions(fib);
 
   readAtomInfos(fib);
 
@@ -40,8 +40,7 @@ int main(int argc, char const *argv[])
   }
 
   if (flags.development) {
-    genTopologyZero(fib, 6);
-    genInSim(fib);
+    createLAMMPSfiles(fib);
   }
 
   /************************************************************************/

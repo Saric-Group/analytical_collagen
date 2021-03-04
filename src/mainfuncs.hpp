@@ -34,6 +34,17 @@ struct overrides_ {
 
   bool cdcut_override = false;
   bool ljcut_override = false;
+
+  // MD settings
+  bool MD_walltime_override = false;
+  bool MD_cores_override = false;
+  bool MD_numMolperDim_override = false;
+  bool MD_dielectric_override = false;
+  bool MD_LJepsilon_override = false;
+  bool MD_LJcutoff_override = false;
+  bool MD_CDcutoff_override = false;
+  bool MD_timestep_override = false;
+  bool MD_runtime_override = false;
 };
 
 
@@ -45,7 +56,7 @@ int read_args(int argc, char const *argv[], collagenFibril &fib);
 int parse_all_args(int argc, char const *argv[], collagenFibril &fib);
 void readAtomInfos(collagenFibril &fib);
 void programInfo();
-void printOptions();
+void printOptions(collagenFibril fib);
 void print_help();
 
 #endif

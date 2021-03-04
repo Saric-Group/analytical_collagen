@@ -10,6 +10,7 @@
 #include <map>
 #include <algorithm>        /* std::remove */
 #include <iomanip>          /* std::setw() */
+#include <sys/stat.h>       /* chmod */
 
 
 /* Classes and structures */

@@ -111,6 +111,53 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       overrides.cdcut_override = false;
     }
 
+    // MD related
+    if(overrides.MD_walltime_override)
+    {
+      fib.parametersMD.walltime = safe_read_integer(fib.parametersMD.walltime,strarg,errcodes);;
+      overrides.MD_walltime_override = false;
+    }
+    if(overrides.MD_cores_override)
+    {
+      fib.parametersMD.cores = safe_read_integer(fib.parametersMD.cores,strarg,errcodes);;
+      overrides.MD_cores_override = false;
+    }
+    if(overrides.MD_numMolperDim_override)
+    {
+      fib.parametersMD.numMolperDim = safe_read_integer(fib.parametersMD.numMolperDim,strarg,errcodes);;
+      overrides.MD_numMolperDim_override = false;
+    }
+    if(overrides.MD_dielectric_override)
+    {
+      fib.parametersMD.dielectric = safe_read_double(fib.parametersMD.dielectric,strarg,errcodes);
+      overrides.MD_dielectric_override = false;
+    }
+    if(overrides.MD_LJepsilon_override)
+    {
+      fib.parametersMD.LJepsilon = safe_read_double(fib.parametersMD.LJepsilon,strarg,errcodes);
+      overrides.MD_LJepsilon_override = false;
+    }
+    if(overrides.MD_LJcutoff_override)
+    {
+      fib.parametersMD.lj_cutoff = safe_read_double(fib.parametersMD.lj_cutoff,strarg,errcodes);
+      overrides.MD_LJcutoff_override = false;
+    }
+    if(overrides.MD_CDcutoff_override)
+    {
+      fib.parametersMD.cd_cutoff = safe_read_double(fib.parametersMD.cd_cutoff,strarg,errcodes);
+      overrides.MD_CDcutoff_override = false;
+    }
+    if(overrides.MD_timestep_override)
+    {
+      fib.parametersMD.timestep = safe_read_double(fib.parametersMD.timestep,strarg,errcodes);
+      overrides.MD_timestep_override = false;
+    }
+    if(overrides.MD_runtime_override)
+    {
+      fib.parametersMD.runtime = safe_read_integer(fib.parametersMD.runtime,strarg,errcodes);
+      overrides.MD_runtime_override = false;
+    }
+
     //error handling
 
     if (parse_errs(*errcodes,strarg,true) != 0)
@@ -239,14 +286,73 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     }
 
 
-    if(flag(strarg,"-ccd") || flag(strarg,dd+"cdcut"))
+    if(flag(strarg,d+"ccd") || flag(strarg,dd+"cdcut"))
     {
       overrides.cdcut_override = true;
     }
-    if(flag(strarg,"-clj") || flag(strarg,dd+"ljcut"))
+    if(flag(strarg,d+"clj") || flag(strarg,dd+"ljcut"))
     {
       overrides.ljcut_override = true;
     }
+
+    // MD related
+    if(flag(strarg,d+"md_s") || flag(strarg,dd+"MD_script"))
+    {
+      fib.parametersMD.outputScript = true;
+    }
+    if(flag(strarg,d+"md_t") || flag(strarg,dd+"MD_topology"))
+    {
+      fib.parametersMD.outputTopology = true;
+    }
+    if(flag(strarg,d+"md_li") || flag(strarg,dd+"MD_LAMMPS_input"))
+    {
+      fib.parametersMD.outputLAMMPSinput = true;
+    }
+    if(flag(strarg,d+"md_sb"))
+    {
+      fib.parametersMD.scriptbuild = true;
+    }
+    if(flag(strarg,d+"md_rigid") || flag(strarg,dd+"MD_rigid"))
+    {
+      fib.parametersMD.rigid = true;
+    }
+    if(flag(strarg,d+"md_wt") || flag(strarg,dd+"MD_walltime"))
+    {
+      overrides.MD_walltime_override = true;
+    }
+    if(flag(strarg,d+"md_c") || flag(strarg,dd+"MD_cores"))
+    {
+      overrides.MD_cores_override = true;
+    }
+    if(flag(strarg,d+"md_N") || flag(strarg,dd+"MD_N"))
+    {
+      overrides.MD_numMolperDim_override = true;
+    }
+    if(flag(strarg,d+"md_die") || flag(strarg,dd+"MD_dielectric"))
+    {
+      overrides.MD_dielectric_override = true;
+    }
+    if(flag(strarg,d+"md_lje") || flag(strarg,dd+"MD_LJepsilon"))
+    {
+      overrides.MD_LJepsilon_override = true;
+    }
+    if(flag(strarg,d+"md_ljc") || flag(strarg,dd+"MD_LJcutoff"))
+    {
+      overrides.MD_LJcutoff_override = true;
+    }
+    if(flag(strarg,d+"md_cdc") || flag(strarg,dd+"MD_CDcutoff"))
+    {
+      overrides.MD_CDcutoff_override = true;
+    }
+    if(flag(strarg,d+"md_ts") || flag(strarg,dd+"MD_timestep"))
+    {
+      overrides.MD_timestep_override = true;
+    }
+    if(flag(strarg,d+"md_rt") || flag(strarg,dd+"MD_runtime"))
+    {
+      overrides.MD_runtime_override = true;
+    }
+
     return errstate;
 }
 
@@ -348,6 +454,7 @@ void readAtomInfos(collagenFibril &fib)
     std::cout << "\n#    Number of positive charges: " << fib.mol.numPos;
     std::cout << "\n#    Number of negative charges: " << fib.mol.numNeg;
     std::cout << "\n#    Total charge: " << fib.mol.totalCharge;
+    std::cout << "\n#";
   }
 }
 
@@ -371,7 +478,7 @@ void programInfo()
   std::cout << "\n#";
 }
 
-void printOptions()
+void printOptions(collagenFibril fib)
 {
   if (flags.readTypes) {
     std::cout << "\n#\treading atom types from " << filePaths.types_inputpath;
@@ -396,6 +503,19 @@ void printOptions()
   }
   if (flags.development) {
     std::cout << "\n#\trunning developmental part";
+    if (fib.parametersMD.outputTopology) {
+      std::cout << "\n#\t  generating LAAMPS topology file for ";
+      std::cout << pow(fib.parametersMD.numMolperDim, 3) << " molecules";
+      std::cout << " in " << filePaths.md_outputpath;
+    }
+    if (fib.parametersMD.outputLAMMPSinput) {
+      std::cout << "\n#\t  generating input file for LAMMPS";
+      std::cout << " in " << filePaths.md_outputpath;
+    }
+    if (fib.parametersMD.outputScript) {
+      std::cout << "\n#\t  generating bash scripts for LAMMPS content";
+      std::cout << " in " << filePaths.md_outputpath;
+    }
   }
   std::cout << "\n#";
 }
