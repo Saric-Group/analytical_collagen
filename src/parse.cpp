@@ -156,6 +156,13 @@ std::string remove_spaces(std::string input)
   return input;
 }
 
+std::string remove_formatting(std::string input)
+{
+  input.erase(std::remove(input.begin(), input.end(), '\r'), input.end());
+  input.erase(std::remove(input.begin(), input.end(), '\n'), input.end());
+  return input;
+}
+
 int safe_read_integer(int orig, std::string strarg, int* errcodes)
 {
   int parsed = read_integer(strarg,errcodes);

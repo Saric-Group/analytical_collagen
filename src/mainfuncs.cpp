@@ -22,22 +22,6 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       overrides.input = false;
     }
 
-    if(overrides.charges_input)
-    {
-      if(verify_path(strarg,errcodes) == 0) {
-        filePaths.charges_inputpath = strarg;
-      }
-      overrides.charges_input = false;
-    }
-
-    if(overrides.types_input)
-    {
-      if(verify_path(strarg,errcodes) == 0) {
-        filePaths.types_inputpath = strarg;
-      }
-      overrides.types_input = false;
-    }
-
     if(overrides.output)
     {
       filePaths.outputpath = strarg;
@@ -167,6 +151,11 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 
     //bool flags and help
 
+    if(flag(strarg,d+"co") || flag(strarg,dd+"consoleOutput"))
+    {
+      flags.consoleOutput = true;
+    }
+
     if(flag(strarg,d+"h") || flag(strarg,dd+"help"))
     {
       print_help();
@@ -183,14 +172,9 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.xyz_outputs = true;
     }
 
-    if(flag(strarg,d+"rc") || flag(strarg,dd+"readCharges"))
+    if(flag(strarg,d+"csv") || flag(strarg,dd+"csv"))
     {
-      flags.readCharges = true;
-    }
-
-    if(flag(strarg,d+"rt") || flag(strarg,dd+"readTypes"))
-    {
-      flags.readTypes = true;
+      flags.csv_output = true;
     }
 
     if(flag(strarg,d+"pai") || flag(strarg,dd+"printAtomInfo"))
@@ -198,14 +182,14 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.printAtomInfo = true;
     }
 
-    if(flag(strarg,d+"moli") || flag(strarg,dd+"printMoleculeInfo"))
+    if(flag(strarg,d+"pmi") || flag(strarg,dd+"printMoleculeInfo"))
     {
       flags.printMoleculeInfo = true;
     }
 
-    if(flag(strarg,d+"anneo") || flag(strarg,dd+"annesOutput"))
+    if(flag(strarg,d+"oo") || flag(strarg,dd+"originalOutput"))
     {
-      flags.annesOutput = true;
+      flags.originalOutput = true;
     }
 
     if(flag(strarg,d+"time") || flag(strarg,dd+"measureTime"))
@@ -224,14 +208,6 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     if(flag(strarg,d+"i") || flag(strarg,dd+"input"))
     {
       overrides.input = true;
-    }
-    if(flag(strarg,d+"ci") || flag(strarg,dd+"chargesinput"))
-    {
-      overrides.charges_input = true;
-    }
-    if(flag(strarg,d+"ti") || flag(strarg,dd+"typesinput"))
-    {
-      overrides.types_input = true;
     }
 
     if(flag(strarg,d+"o") || flag(strarg,dd+"output"))
@@ -412,7 +388,7 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
   }
   else {
     std::cout << "\n#  -> reading from config path " << filePaths.configpath << std::endl;
-    std::cout << "#  -> Options:" << std::endl;
+    std::cout << "#  -> Options:";
     read_config_file(filePaths.configpath, fib);
   }
 
@@ -429,49 +405,93 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
 
 void readAtomInfos(collagenFibril &fib)
 {
-  if (flags.readCharges) {
-    fib.mol.readCharges(filePaths.charges_inputpath);
+  if (flags.consoleOutput) {
+    std::cout << "\n#\n# Reading atomic collagen information from file ";
+    std::cout << filePaths.inputpath;
   }
-  if (flags.readTypes) {
-    fib.mol.readTypes(filePaths.types_inputpath);
-  }
-  if (!flags.readCharges && !flags.readTypes) {
-    std::cout << "#\n  WARNING: No collagen molecule information has been read!";
+
+  if(path_exists(filePaths.inputpath) == 1) {
+    std::cout << "\n#  ERROR: path does not exist or could not be accessed: ";
+    std::cout << filePaths.inputpath;
     return;
-  } else if (flags.printAtomInfo) {
+  }
+  int err = 0;
+  std::string line;
+  std::ifstream file;
+  file.open(filePaths.inputpath, std::ios::in);
+  std::getline(file, line);
+  file.close();
+  if (line.at(0) == '#') {
+    line = line.erase(0, 1);
+    line = remove_spaces(line);
+    line = remove_formatting(line);
+    if (line == "charges") {
+      if (flags.consoleOutput) {
+        std::cout << "\n#  -> file contains charge information";
+      }
+      fib.mol.readCharges(filePaths.inputpath);
+    } else if (line == "types") {
+      if (flags.consoleOutput) {
+        std::cout << "\n#  -> file contains type information";
+      }
+      fib.mol.readTypes(filePaths.inputpath);
+    } else {
+      err = 2;
+    }
+  } else {
+    err = 1;
+  }
+
+  if (err == 1) {
+    std::cout << "\n# ERROR: Input file missing header file information!";
+    return;
+  }
+  if (err == 2) {
+    std::cout << "\n# ERROR: Input file has illegal header type '";
+    std::cout << line << "'!";
+    return;
+  }
+
+  if (flags.printAtomInfo && flags.consoleOutput) {
     fib.mol.printAtoms();
   }
-  if (flags.printMoleculeInfo) {
+  if (flags.printMoleculeInfo && flags.consoleOutput) {
     fib.printMoleculeInfo();
   }
+
+  std::cout << "\n#";
 }
 
 void programInfo()
 {
   std::cout << "#";
-  std::cout << "\n# This is a program designed around the collagen type I";
-  std::cout << " molecule.";
-  std::cout << "\n# There are various functionalities.";
-  std::cout << "\n# See the readme, the config file, or run program with";
-  std::cout << " option \"-h\" for help.";
-  std::cout << "\n#";
-  std::cout << "\n# To use a config file, run program with option";
-  std::cout << " \"--config /path/to/config/file.config\".";
-  std::cout << "\n#";
-  std::cout << "\n#";
-  std::cout << "\n#";
-  std::cout << "\n# Running program...";
-  std::cout << "\n#";
+  // std::cout << "\n# This is a program designed around the collagen type I";
+  // std::cout << " molecule.";
+  std::cout << "\n# run with option '-h' for help.";
+  // std::cout << "\n# There are various functionalities.";
+  // std::cout << "\n# See the readme, the config file, or run program with";
+  // std::cout << " option \"-h\" for help.";
+  // std::cout << "\n#";
+  // std::cout << "\n# To use a config file, run program with option";
+  // std::cout << " \"--config /path/to/config/file.config\".";
+  // std::cout << "\n#";
+  // std::cout << "\n#";
+  // std::cout << "\n#";
+  // std::cout << "\n# Running program...";
   std::cout << "\n#";
   std::cout << "\n#";
 }
 
 void printOptions(collagenFibril fib)
 {
-  if (flags.readTypes) {
-    std::cout << "\n#\treading atom types from " << filePaths.types_inputpath;
-  } else if (flags.readCharges) {
-    std::cout << "\n#\treading atom charges from " << filePaths.charges_inputpath;
+  if (flags.consoleOutput) {
+    std::cout << "\n#\tconsole output active";
+  } else {
+    std::cout << "\n#\tconsole output inactive";
+    return;
+  }
+  if (flags.measureTime && flags.consoleOutput) {
+    std::cout << "\n#\tmeasuring computation time";
   }
   if (flags.printMoleculeInfo) {
     std::cout << "\n#\tprinting molecule information";
@@ -479,13 +499,22 @@ void printOptions(collagenFibril fib)
   if (flags.printAtomInfo) {
     std::cout << "\n#\tprinting atomic information";
   }
-  if (flags.annesOutput) {
-    std::cout << "\n#\tcreating Anne's output";
+  if (flags.originalOutput) {
+    std::cout << "\n#\tcreating original/inital output file";
     if (flags.charge_hashed_outputs) {
       std::cout << "\n#\t  option hashed output";
     }
     if (flags.xyz_outputs) {
       std::cout << "\n#\t  option xyz output";
+    }
+    if (filePaths.outputpath.find(filePaths.file_extension) != std::string::npos)
+    {
+        filePaths.outputpath = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
+    }
+    if (flags.csv_output) {
+      filePaths.outputpath += filePaths.csv_extension;
+    } else {
+      filePaths.outputpath += filePaths.file_extension;
     }
     std::cout << "\n#\t  writing to: " << filePaths.outputpath;
   }
@@ -506,6 +535,19 @@ void printOptions(collagenFibril fib)
     }
   }
   std::cout << "\n#";
+}
+
+void getTime(time_point &tp)
+{
+  tp = std::chrono::high_resolution_clock::now();
+}
+
+void printCompTime(time_point start, time_point end)
+{
+  std::chrono::seconds duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+  if (flags.measureTime && flags.consoleOutput) {
+    std::cout << "\n#\n#\n# Run time: " << duration.count() << " s.";
+  }
 }
 
 void print_help()

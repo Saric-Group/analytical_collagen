@@ -8,7 +8,7 @@
 
 
 /* Classes and structures */
-struct parametersAnne_ {
+struct parameters_ {
   double lj_min = 0.01;
   double lj_stepsize = 0.01;
   int lj_steps = 50;
@@ -43,7 +43,7 @@ struct parametersMD_ {
 
 struct collagenFibril {
   collagenMolecule mol;
-  parametersAnne_ parameters;
+  parameters_ parameters;
   parametersMD_ parametersMD;
   int layers = 2;
   double latGap = mol.diameterAtom;

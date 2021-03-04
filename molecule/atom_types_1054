@@ -1,25 +1,4 @@
-# Index	Type	Name	hydrophobic
-# 01	GLN	Glutamine	no
-# 02	MET	Methionine	yes
-# 03	SER	Serine	no
-# 04	TYR	Tyrosine	no
-# 05	GLY	Glycine	no
-# 06	ASP	Aspartic Acid	no
-# 07	GLU	Glutamic Acid	no
-# 08	LYS	Lysine	no
-# 09	ALA	Alanine	no
-# 10	VAL	Valine	yes
-# 11	PRO	Proline	no
-# 12	ARG	Arginine	no
-# 13	LEU	Leucine	yes
-# 14	HYP	(Hydroxyproline)	no
-# 15	PHE Phenylalanine	yes
-# 16	ASN	Asparagine	no
-# 17	THR	Threonine	no
-# 18	LYZ	?	no
-# 19	HIS	Histidine	no
-# 20	ILE	Isoleucine	yes
-#
+# types
 1
 2
 3

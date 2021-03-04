@@ -9,8 +9,6 @@
 #include "md.hpp"
 #include "cg.hpp"
 
-typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
-
 
 /* Settings */
 filePaths_ filePaths;       /* IO File paths */
@@ -27,42 +25,30 @@ int main(int argc, char const *argv[])
     return 0;
   }
 
-  time_point start;
-  if (flags.measureTime) {
-    std::cout << "#\tmeasuring computation time";
-    start = std::chrono::high_resolution_clock::now();
-  }
+  time_point start, end;
+  getTime(start);
+
   printOptions(fib);
 
   readAtomInfos(fib);
 
-  if (flags.annesOutput) {
+  if (flags.originalOutput) {
     fib.singleEmin();
   }
 
   if (flags.development) {
-    // createLAMMPSfiles(fib);
-    collagenFibril fibc = fib;
-    fib.mol.readCharges(binNormalize(100, smoothenSMCA(25, fib.mol.charges, true)));
-    // fibc.mol.printAtoms();
-    // createLAMMPSfiles(fib);
-    // fib.mol.printAtoms();
-
-    fib.printMoleculeInfo();
-    fibc.printMoleculeInfo();
+    createLAMMPSfiles(fib);
   }
 
   /************************************************************************/
 
-  if (flags.measureTime) {
-    time_point end = std::chrono::high_resolution_clock::now();
-    std::chrono::seconds duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    std::cout << "\n#\n#\n# Run time: " << duration.count() << " s.";
-  }
+  getTime(end);
+  printCompTime(start, end);
 
   /************************************************************************/
 
-  std::cout << "\n#\n# Exiting...\n#\n";
+  std::cout << "\n#\n# exiting...\n#\n";
+
   return 0;
 
 }

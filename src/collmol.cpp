@@ -2,13 +2,21 @@
 
 
 /* Functions */
-void collagenMolecule::genUniformType()
+void collagenMolecule::typesFromCharges()
 {
   std::vector<int>().swap(atomTypes);
+  int type = 0;
   for (int i = 0; i < numAtoms; i++) {
-    atomTypes.push_back(999);
+    if (charges[i] < 0) {
+      type = maxNumTypes + 1;
+    } else if (charges[i] > 0) {
+      type = maxNumTypes + 3;
+    } else {
+      type = maxNumTypes + 2;
+    }
+    atomTypes.push_back(type);
   }
-  numTypes = 1;
+  numTypes = maxNumTypes + 3;
 }
 void collagenMolecule::countCharges()
 {
@@ -48,15 +56,17 @@ void collagenMolecule::readCharges(std::string &file)
   myfile.open(file.c_str(), std::ios::in);
   while (myfile.peek() != EOF) {
     getline(myfile, line);
-    numAtoms++;
-    charges.push_back(atof(line.c_str()));
-    if (charges[numAtoms - 1] != 0) {
-      nonZeroChargesIndex.push_back(numAtoms - 1);
+    if (line.at(0) != '#') {
+      numAtoms++;
+      charges.push_back(atof(line.c_str()));
+      if (charges[numAtoms - 1] != 0) {
+        nonZeroChargesIndex.push_back(numAtoms - 1);
+      }
     }
   }
   myfile.close();
   length = (numAtoms - 1) * distanceAtoms;
-  genUniformType();
+  typesFromCharges();
   countCharges();
 }
 
@@ -73,7 +83,7 @@ void collagenMolecule::readCharges(std::vector<double> vec)
     }
   }
   length = (numAtoms - 1) * distanceAtoms;
-  genUniformType();
+  typesFromCharges();
   countCharges();
 }
 
@@ -91,6 +101,7 @@ void collagenMolecule::readTypes(std::string &file)
       atomTypes.push_back(atoi(line.c_str()));
     }
   }
+  myfile.close();
   length = (numAtoms - 1) * distanceAtoms;
   chargesFromTypes();
 }
@@ -109,11 +120,10 @@ void collagenMolecule::readTypes(std::vector<int> vec)
 
 void collagenMolecule::printAtoms()
 {
-  std::cout << "\n#\n# Atomic information for collagen molecule of length ";
+  std::cout << "\n#\n#\n# Atomic information for collagen molecule of length ";
   std::cout << length;
   std::cout << "\n#\tID\tType\tCharge";
   for (int i = 0; i < numAtoms; i++) {
     std::cout << "\n#\t" << i << "\t" << atomTypes[i] << "\t" << charges[i];
   }
-  std::cout << "\n#";
 }

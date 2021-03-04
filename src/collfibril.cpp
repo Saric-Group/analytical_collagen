@@ -462,33 +462,57 @@ void collagenFibril::singleEmin()
   {
       filePaths.outputpath = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.file_extension));
   }
+  if (filePaths.outputpath.find(filePaths.csv_extension) != std::string::npos)
+  {
+      filePaths.outputpath = filePaths.outputpath.substr(0, filePaths.outputpath.find(filePaths.csv_extension));
+  }
   std::string xyzbasefile = "";
 
   if(flags.xyz_outputs){
     xyzbasefile = filePaths.outputpath;
   }
 
-  filePaths.outputpath += ".dat";
-
-  /* Write header for outputfile */
-  header(filePaths.outputpath);
+  FILE *outf;
+  if (flags.csv_output) {
+    filePaths.outputpath += filePaths.csv_extension;
+    outf = fopen(filePaths.outputpath.c_str(), "w");
+    fprintf(outf, "LJ_epsilon,");
+    fprintf(outf, "CD_epsilon,");
+    fprintf(outf, "lateral_gap_min,");
+    fprintf(outf, "radial_gap_min,");
+    fprintf(outf, "offset_min,");
+    fprintf(outf, "D-periodicity_min,");
+    fprintf(outf, "E_CD_min,");
+    fprintf(outf, "E_LJ_min,");
+    fprintf(outf, "E_total_min");
+    fclose(outf);
+  } else {
+    filePaths.outputpath += filePaths.file_extension;
+    /* Write header for outputfile */
+    header(filePaths.outputpath);
+  }
 
   /* Write results to file */
-  FILE *outf;
   outf = fopen(filePaths.outputpath.c_str(), "a");
   /* Both LJ and CD potential */
+  std::string separator;
+  if (flags.csv_output) {
+    separator = ",";
+  } else {
+    separator = "\t";
+  }
   for (int i = 0; i < parameters.lj_steps; i++) {
       for (int j = 0; j < parameters.cd_steps; j++) {
           fprintf(outf, "\n");
           fprintf(outf, "%.3f", parameters.lj_min + (i) * parameters.lj_stepsize);            //LJ_epsilon
-          fprintf(outf, "\t%.3f", parameters.cd_min + (j) * parameters.cd_stepsize);          //CD_epsilon
-          fprintf(outf, "\t%.3f", latmin[i][j]);                        //lateral gap min
-          fprintf(outf, "\t%.3f", radmin[i][j]);                        //radial gap min
-          fprintf(outf, "\t%.3f", offmin[i][j]);                        //offset min
-          fprintf(outf, "\t%.3f", mol.length + radmin[i][j] - offmin[i][j]);     //D-periodicity min
-          fprintf(outf, "\t%.3f", eCDmin[i][j]);                        //E_CD min
-          fprintf(outf, "\t%.3f", eLJmin[i][j]);                        //E_LJ min
-          fprintf(outf, "\t%.3f", eTotmin[i][j]);                       //E_tot min
+          fprintf(outf, "%s%.3f", separator.c_str(), parameters.cd_min + (j) * parameters.cd_stepsize);          //CD_epsilon
+          fprintf(outf, "%s%.3f", separator.c_str(), latmin[i][j]);                        //lateral gap min
+          fprintf(outf, "%s%.3f", separator.c_str(), radmin[i][j]);                        //radial gap min
+          fprintf(outf, "%s%.3f", separator.c_str(), offmin[i][j]);                        //offset min
+          fprintf(outf, "%s%.3f", separator.c_str(), mol.length + radmin[i][j] - offmin[i][j]);     //D-periodicity min
+          fprintf(outf, "%s%.3f", separator.c_str(), eCDmin[i][j]);                        //E_CD min
+          fprintf(outf, "%s%.3f", separator.c_str(), eLJmin[i][j]);                        //E_LJ min
+          fprintf(outf, "%s%.3f", separator.c_str(), eTotmin[i][j]);                       //E_tot min
           if(flags.xyz_outputs){
             std::string xyzfile = xyzbasefile;
             xyzfile += "-"
@@ -583,7 +607,7 @@ void collagenFibril::writeXYZ()
 
 void collagenFibril::printMoleculeInfo()
 {
-  std::cout << "\n#";
+  std::cout << "\n#\n#";
   std::cout << "\n# Molecule information:";
   std::cout << "\n#    Number of atoms: " << mol.numAtoms;
   std::cout << "\n#    Number of types: " << mol.numTypes;
@@ -593,7 +617,6 @@ void collagenFibril::printMoleculeInfo()
   std::cout << "\n#    Number of positive charges: " << mol.numPos;
   std::cout << "\n#    Number of negative charges: " << mol.numNeg;
   std::cout << "\n#    Total charge: " << mol.totalCharge;
-  std::cout << "\n#";
 }
 
 /* Functions  to clean up*/

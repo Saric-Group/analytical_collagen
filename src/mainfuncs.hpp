@@ -12,8 +12,6 @@ struct overrides_ {
   //io settings
 
   bool input = false;
-  bool charges_input = false;
-  bool types_input = false;
   bool output = false;
   bool md_output = false;
 
@@ -49,7 +47,6 @@ struct overrides_ {
 
 
 /* Functions */
-// std::string hash_output(collagenFibril &fib);
 int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &fib);
 int read_config_file(std::string path, collagenFibril &fib);
 int read_args(int argc, char const *argv[], collagenFibril &fib);
@@ -57,6 +54,8 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib);
 void readAtomInfos(collagenFibril &fib);
 void programInfo();
 void printOptions(collagenFibril fib);
+void getTime(time_point &tp);
+void printCompTime(time_point start, time_point end);
 void print_help();
 
 #endif

@@ -16,6 +16,7 @@ int verify_path(const std::string path, int* err);
 std::string get_config_path(const int argc, char const *argv[]);
 bool flag(std::string arg, std::string str);
 std::string remove_spaces(std::string input);
+std::string remove_formatting(std::string input);
 int safe_read_integer(int orig, std::string strarg, int* errcodes);
 double safe_read_double(double orig, std::string strarg, int* errcodes);
 

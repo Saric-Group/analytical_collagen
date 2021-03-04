@@ -13,6 +13,9 @@
 #include <sys/stat.h>       /* chmod */
 
 
+typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
+
+
 /* Classes and structures */
 struct filePaths_ {
   std::string inputpath = "./charge_distribution";
@@ -20,20 +23,21 @@ struct filePaths_ {
   std::string types_inputpath = "./molecule/atom_types_1054";
   std::string outputpath = "./energy_min.dat";
   std::string file_extension = ".dat";
+  std::string csv_extension = ".csv";
   std::string configpath = "";
 
   std::string md_outputpath = "./md/";
 };
 
 struct flags_ {
+  bool consoleOutput = false;
   bool set_output = false; // @Joel: what is this used for?
+  bool csv_output = false;
   bool charge_hashed_outputs = false;
   bool xyz_outputs = false;
-  bool readCharges = false;
-  bool readTypes = false;
   bool printAtomInfo = false;
   bool printMoleculeInfo = false;
-  bool annesOutput = false;
+  bool originalOutput = false;
   bool measureTime = false;
   bool development = false;
 };

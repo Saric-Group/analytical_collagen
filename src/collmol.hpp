@@ -7,7 +7,7 @@
 /* Classes and structures */
 struct collagenMolecule {
   int numAtoms = 0;
-  int numTypes = 20;
+  int numTypes = 0;
   int numPos = 0;
   int numNeg = 0;
 
@@ -20,6 +20,7 @@ struct collagenMolecule {
   std::vector<double> charges, nonZeroChargesIndex;
   std::vector<int> atomTypes;
 
+  const int maxNumTypes = 20;
   int typeCharge [20] = {0,   // 01 Glutamine GLN
                          0,   // 02 Methionine MET
                          0,   // 03 Serine SER
@@ -45,7 +46,7 @@ struct collagenMolecule {
   /* Constructors */
 
   /* Functions */
-  void genUniformType();
+  void typesFromCharges();
   void countCharges();
   void chargesFromTypes();
   void readCharges(std::string &file);

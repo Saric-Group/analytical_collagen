@@ -86,9 +86,6 @@ void genTopologyZero(collagenFibril fib, int L)
       fprintf(outf, "\n\t%i", i * fib.mol.numAtoms + j + 1);  // Atom ID
       fprintf(outf, " %i", i + 1);  // Molecule ID
       fprintf(outf, " %i", fib.mol.atomTypes[j]);   // Atom type
-      if (fib.mol.atomTypes[j] == 21) {
-        std::cout << "\n21 at " << i * fib.mol.numAtoms + j + 1;
-      }
       fprintf(outf, " %.6f", fib.mol.charges[j]);   // Atom charge
       fprintf(outf, " %.6f", grid.gridPoints[i].x - (0.5 * fib.mol.length - j * fib.mol.distanceAtoms) * cos(phi) * sin(theta));
       fprintf(outf, " %.6f", grid.gridPoints[i].y - (0.5 * fib.mol.length - j * fib.mol.distanceAtoms) * sin(phi) * sin(theta));
