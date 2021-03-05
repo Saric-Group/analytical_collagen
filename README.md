@@ -7,7 +7,7 @@
 ***
 ***
 *** To avoid retyping too much info. Do a search and replace for the following:
-*** Saric-Group, analytical_collagen, @vkevinqt, ucapkkl@ucl.ac.uk, analytical_collagen, project_description
+*** Saric-Group, analytical_collagen, twitter_handle, email, project_title, project_description
 -->
 
 
@@ -89,7 +89,7 @@
 
 Here's a blank template to get started:
 **To avoid retyping too much info. Do a search and replace with your text editor for the following:**
-`Saric-Group`, `analytical_collagen`, `@vkevinqt`, `ucapkkl@ucl.ac.uk`, `project_title`, `project_description`
+`Saric-Group`, `analytical_collagen`, `twitter_handle`, `email`, `project_title`, `project_description`
 
 
 ### Built With
@@ -165,7 +165,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@@vkevinqt](https://twitter.com/@vkevinqt) - ucapkkl@ucl.ac.uk
+Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
 
 Project Link: [https://github.com/Saric-Group/analytical_collagen](https://github.com/Saric-Group/analytical_collagen)
 
@@ -185,14 +185,14 @@ Project Link: [https://github.com/Saric-Group/analytical_collagen](https://githu
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/Saric-Group/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/Saric-Group/analytical_collagen/repo/graphs/contributors
+[contributors-url]: https://github.com/Saric-Group/analytical_collagen/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/Saric-Group/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/Saric-Group/analytical_collagen/repo/network/members
+[forks-url]: https://github.com/Saric-Group/analytical_collagen/network/members
 [stars-shield]: https://img.shields.io/github/stars/Saric-Group/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/Saric-Group/analytical_collagen/repo/stargazers
+[stars-url]: https://github.com/Saric-Group/analytical_collagen/stargazers
 [issues-shield]: https://img.shields.io/github/issues/Saric-Group/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/Saric-Group/analytical_collagen/repo/issues
+[issues-url]: https://github.com/Saric-Group/analytical_collagen/issues
 [license-shield]: https://img.shields.io/github/license/Saric-Group/repo.svg?style=for-the-badge
-[license-url]: https://github.com/Saric-Group/analytical_collagen/repo/blob/master/LICENSE.txt
+[license-url]: https://github.com/Saric-Group/analytical_collagen/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/Saric-Group
