@@ -34,13 +34,29 @@ struct overrides_ {
   bool ljcut = false;
 
   // MD settings
+  bool MD_mpi_dir = false;
   bool MD_walltime = false;
   bool MD_cores = false;
   bool MD_numMolperDim = false;
+
+  bool MD_kAngle = false;
+  bool MD_kAngle_start = false;
+  bool MD_kAngle_inc = false;
+  bool MD_kAngle_end = false;
+
   bool MD_dielectric = false;
+  bool MD_dielectric_start = false;
+  bool MD_dielectric_inc = false;
+  bool MD_dielectric_end = false;
+
   bool MD_LJepsilon = false;
+  bool MD_LJepsilon_start = false;
+  bool MD_LJepsilon_inc = false;
+  bool MD_LJepsilon_end = false;
+
   bool MD_LJcutoff = false;
   bool MD_CDcutoff = false;
+
   bool MD_timestep = false;
   bool MD_runtime = false;
 };

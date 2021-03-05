@@ -449,7 +449,7 @@ void collagenFibril::singleEmin()
         }
       }
       counter++;
-      progresssBar(1.0 * counter / total, "Calculating minimized energy configurations");
+      // progresssBar(1.0 * counter / total, "Calculating minimized energy configurations");
     }
   }
 
@@ -556,7 +556,7 @@ void collagenFibril::minimizeEnergy()
       }
       offset_ += mol.distanceAtoms / a;
       counter++;
-      progresssBar(1.0 * counter / N, " fibril -> minimize energy ");
+      // progresssBar(1.0 * counter / N, " fibril -> minimize energy ");
     }
     radGap_ += mol.distanceAtoms / a;
   }

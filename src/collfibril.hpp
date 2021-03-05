@@ -33,12 +33,29 @@ struct parametersMD_ {
   int cores = 1;
 
   int numMolperDim = 5;
+
+  double kAngle = 50.0;
+  double kAngle_start = 50.0;
+  double kAngle_inc = 50.0;
+  double kAngle_end = 50.0;
+
   double dielectric = 10.0;
+  double dielectric_start = 10.0;
+  double dielectric_inc = 10.0;
+  double dielectric_end = 100.0;
+
   double LJepsilon = 0.01;
+  double LJepsilon_start = 0.01;
+  double LJepsilon_inc = 0.01;
+  double LJepsilon_end = 0.5;
+
   double cd_cutoff = 5.0;
   double lj_cutoff = 5.0;
+
   double timestep = 0.002;
   int runtime = 6000001;
+
+  std::string lmp_mpi = "~/Scratch/lammps-29Oct20/src/lmp_mpi";
 };
 
 struct collagenFibril {
