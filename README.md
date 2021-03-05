@@ -185,14 +185,14 @@ Project Link: [https://github.com/Saric-Group/analytical_collagen](https://githu
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/Saric-Group/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/Saric-Group/repo/graphs/contributors
+[contributors-url]: https://github.com/Saric-Group/analytical_collagen/repo/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/Saric-Group/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/Saric-Group/repo/network/members
+[forks-url]: https://github.com/Saric-Group/analytical_collagen/repo/network/members
 [stars-shield]: https://img.shields.io/github/stars/Saric-Group/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/Saric-Group/repo/stargazers
+[stars-url]: https://github.com/Saric-Group/analytical_collagen/repo/stargazers
 [issues-shield]: https://img.shields.io/github/issues/Saric-Group/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/Saric-Group/repo/issues
+[issues-url]: https://github.com/Saric-Group/analytical_collagen/repo/issues
 [license-shield]: https://img.shields.io/github/license/Saric-Group/repo.svg?style=for-the-badge
-[license-url]: https://github.com/Saric-Group/repo/blob/master/LICENSE.txt
+[license-url]: https://github.com/Saric-Group/analytical_collagen/repo/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/Saric-Group
