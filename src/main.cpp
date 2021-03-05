@@ -36,8 +36,11 @@ int main(int argc, char const *argv[])
     fib.singleEmin();
   }
 
-  if (flags.development) {
+  if (flags.mdOutput) {
     createLAMMPSfiles(fib);
+  }
+
+  if (flags.development) {
   }
 
   /************************************************************************/

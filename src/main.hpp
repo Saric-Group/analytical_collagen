@@ -38,6 +38,7 @@ struct flags_ {
   bool printAtomInfo = false;
   bool printMoleculeInfo = false;
   bool originalOutput = false;
+  bool mdOutput = false;
   bool measureTime = false;
   bool development = false;
 };

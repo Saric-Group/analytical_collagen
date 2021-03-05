@@ -96,30 +96,87 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     }
 
     // MD related
+    if(overrides.MD_mpi_dir)
+    {
+      fib.parametersMD.lmp_mpi = strarg;
+      overrides.MD_mpi_dir = false;
+    }
     if(overrides.MD_walltime)
     {
-      fib.parametersMD.walltime = safe_read_integer(fib.parametersMD.walltime,strarg,errcodes);;
+      fib.parametersMD.walltime = safe_read_integer(fib.parametersMD.walltime,strarg,errcodes);
       overrides.MD_walltime = false;
     }
     if(overrides.MD_cores)
     {
-      fib.parametersMD.cores = safe_read_integer(fib.parametersMD.cores,strarg,errcodes);;
+      fib.parametersMD.cores = safe_read_integer(fib.parametersMD.cores,strarg,errcodes);
       overrides.MD_cores = false;
     }
     if(overrides.MD_numMolperDim)
     {
-      fib.parametersMD.numMolperDim = safe_read_integer(fib.parametersMD.numMolperDim,strarg,errcodes);;
+      fib.parametersMD.numMolperDim = safe_read_integer(fib.parametersMD.numMolperDim,strarg,errcodes);
       overrides.MD_numMolperDim = false;
     }
+
+    if(overrides.MD_kAngle)
+    {
+      fib.parametersMD.kAngle = safe_read_double(fib.parametersMD.kAngle,strarg,errcodes);
+      overrides.MD_kAngle = false;
+    }
+    if(overrides.MD_kAngle_start)
+    {
+      fib.parametersMD.kAngle_start = safe_read_double(fib.parametersMD.kAngle_start,strarg,errcodes);
+      overrides.MD_kAngle_start = false;
+    }
+    if(overrides.MD_kAngle_inc)
+    {
+      fib.parametersMD.kAngle_inc = safe_read_double(fib.parametersMD.kAngle_inc,strarg,errcodes);
+      overrides.MD_kAngle_inc = false;
+    }
+    if(overrides.MD_kAngle_end)
+    {
+      fib.parametersMD.kAngle_end = safe_read_double(fib.parametersMD.kAngle_end,strarg,errcodes);
+      overrides.MD_kAngle_end = false;
+    }
+
     if(overrides.MD_dielectric)
     {
       fib.parametersMD.dielectric = safe_read_double(fib.parametersMD.dielectric,strarg,errcodes);
       overrides.MD_dielectric = false;
     }
+    if(overrides.MD_dielectric_start)
+    {
+      fib.parametersMD.dielectric_start = safe_read_double(fib.parametersMD.dielectric_start,strarg,errcodes);
+      overrides.MD_dielectric_start = false;
+    }
+    if(overrides.MD_dielectric_inc)
+    {
+      fib.parametersMD.dielectric_inc = safe_read_double(fib.parametersMD.dielectric_inc,strarg,errcodes);
+      overrides.MD_dielectric_inc = false;
+    }
+    if(overrides.MD_dielectric_end)
+    {
+      fib.parametersMD.dielectric_end = safe_read_double(fib.parametersMD.dielectric_end,strarg,errcodes);
+      overrides.MD_dielectric_end = false;
+    }
     if(overrides.MD_LJepsilon)
     {
       fib.parametersMD.LJepsilon = safe_read_double(fib.parametersMD.LJepsilon,strarg,errcodes);
       overrides.MD_LJepsilon = false;
+    }
+    if(overrides.MD_LJepsilon_start)
+    {
+      fib.parametersMD.LJepsilon_start = safe_read_double(fib.parametersMD.LJepsilon_start,strarg,errcodes);
+      overrides.MD_LJepsilon_start = false;
+    }
+    if(overrides.MD_LJepsilon_inc)
+    {
+      fib.parametersMD.LJepsilon_inc = safe_read_double(fib.parametersMD.LJepsilon_inc,strarg,errcodes);
+      overrides.MD_LJepsilon_inc = false;
+    }
+    if(overrides.MD_LJepsilon_end)
+    {
+      fib.parametersMD.LJepsilon_end = safe_read_double(fib.parametersMD.LJepsilon_end,strarg,errcodes);
+      overrides.MD_LJepsilon_end = false;
     }
     if(overrides.MD_LJcutoff)
     {
@@ -190,6 +247,11 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     if(flag(strarg,d+"oo") || flag(strarg,dd+"originalOutput"))
     {
       flags.originalOutput = true;
+    }
+
+    if(flag(strarg,d+"mdo") || flag(strarg,dd+"MDoutput"))
+    {
+      flags.mdOutput = true;
     }
 
     if(flag(strarg,d+"time") || flag(strarg,dd+"measureTime"))
@@ -292,6 +354,10 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     {
       fib.parametersMD.rigid = true;
     }
+    if(flag(strarg,d+"md_mpid") || flag(strarg,dd+"MD_lmp_mpi"))
+    {
+      overrides.MD_mpi_dir = true;
+    }
     if(flag(strarg,d+"md_wt") || flag(strarg,dd+"MD_walltime"))
     {
       overrides.MD_walltime = true;
@@ -304,13 +370,53 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     {
       overrides.MD_numMolperDim = true;
     }
+    if(flag(strarg,d+"md_ka") || flag(strarg,dd+"MD_kAngle"))
+    {
+      overrides.MD_kAngle = true;
+    }
+    if(flag(strarg,d+"md_kas") || flag(strarg,dd+"MD_kAngle_start"))
+    {
+      overrides.MD_kAngle_start = true;
+    }
+    if(flag(strarg,d+"md_kai") || flag(strarg,dd+"MD_kAngle_inc"))
+    {
+      overrides.MD_kAngle_inc = true;
+    }
+    if(flag(strarg,d+"md_kae") || flag(strarg,dd+"MD_kAngle_end"))
+    {
+      overrides.MD_kAngle_end = true;
+    }
     if(flag(strarg,d+"md_die") || flag(strarg,dd+"MD_dielectric"))
     {
       overrides.MD_dielectric = true;
     }
+    if(flag(strarg,d+"md_ds") || flag(strarg,dd+"MD_dielectric_start"))
+    {
+      overrides.MD_dielectric_start = true;
+    }
+    if(flag(strarg,d+"md_di") || flag(strarg,dd+"MD_dielectric_inc"))
+    {
+      overrides.MD_dielectric_inc = true;
+    }
+    if(flag(strarg,d+"md_de") || flag(strarg,dd+"MD_dielectric_end"))
+    {
+      overrides.MD_dielectric_end = true;
+    }
     if(flag(strarg,d+"md_lje") || flag(strarg,dd+"MD_LJepsilon"))
     {
       overrides.MD_LJepsilon = true;
+    }
+    if(flag(strarg,d+"md_es") || flag(strarg,dd+"MD_LJepsilon_start"))
+    {
+      overrides.MD_LJepsilon_start = true;
+    }
+    if(flag(strarg,d+"md_ei") || flag(strarg,dd+"MD_LJepsilon_inc"))
+    {
+      overrides.MD_LJepsilon_inc = true;
+    }
+    if(flag(strarg,d+"md_ee") || flag(strarg,dd+"MD_LJepsilon_end"))
+    {
+      overrides.MD_LJepsilon_end = true;
     }
     if(flag(strarg,d+"md_ljc") || flag(strarg,dd+"MD_LJcutoff"))
     {
@@ -406,7 +512,8 @@ int parse_all_args(int argc, char const *argv[], collagenFibril &fib)
 void readAtomInfos(collagenFibril &fib)
 {
   if (flags.consoleOutput) {
-    std::cout << "\n#\n# Reading atomic collagen information from file ";
+    std::cout << "\n#\n#";
+    std::cout << "\n# Reading atomic collagen information from file ";
     std::cout << filePaths.inputpath;
   }
 
@@ -458,8 +565,6 @@ void readAtomInfos(collagenFibril &fib)
   if (flags.printMoleculeInfo && flags.consoleOutput) {
     fib.printMoleculeInfo();
   }
-
-  std::cout << "\n#";
 }
 
 void programInfo()
@@ -485,22 +590,25 @@ void programInfo()
 void printOptions(collagenFibril fib)
 {
   if (flags.consoleOutput) {
-    std::cout << "\n#\tconsole output active";
+    std::cout << "\n#\t.console output active";
   } else {
-    std::cout << "\n#\tconsole output inactive";
+    std::cout << "\n#\t.console output inactive";
     return;
   }
-  if (flags.measureTime && flags.consoleOutput) {
-    std::cout << "\n#\tmeasuring computation time";
+
+  if (flags.measureTime) {
+    std::cout << "\n#\t.measuring computation time";
   }
+
   if (flags.printMoleculeInfo) {
-    std::cout << "\n#\tprinting molecule information";
+    std::cout << "\n#\t.printing molecule information";
   }
   if (flags.printAtomInfo) {
-    std::cout << "\n#\tprinting atomic information";
+    std::cout << "\n#\t.printing atomic information";
   }
+
   if (flags.originalOutput) {
-    std::cout << "\n#\tcreating original/inital output file";
+    std::cout << "\n#\t.creating original/inital output file";
     if (flags.charge_hashed_outputs) {
       std::cout << "\n#\t  option hashed output";
     }
@@ -518,23 +626,23 @@ void printOptions(collagenFibril fib)
     }
     std::cout << "\n#\t  writing to: " << filePaths.outputpath;
   }
-  if (flags.development) {
-    std::cout << "\n#\trunning developmental part";
+
+  if (flags.mdOutput) {
+    std::cout << "\n#\t.creating LAMMPS files";
+    if (fib.parametersMD.outputScript) {
+      std::cout << "\n#\t  option bash scripts";
+    }
     if (fib.parametersMD.outputTopology) {
-      std::cout << "\n#\t  generating LAAMPS topology file for ";
-      std::cout << pow(fib.parametersMD.numMolperDim, 3) << " molecules";
-      std::cout << " in " << filePaths.md_outputpath;
+      std::cout << "\n#\t  option topology";
     }
     if (fib.parametersMD.outputLAMMPSinput) {
-      std::cout << "\n#\t  generating input file for LAMMPS";
-      std::cout << " in " << filePaths.md_outputpath;
-    }
-    if (fib.parametersMD.outputScript) {
-      std::cout << "\n#\t  generating bash scripts for LAMMPS content";
-      std::cout << " in " << filePaths.md_outputpath;
+      std::cout << "\n#\t  option LAMMPS input";
     }
   }
-  std::cout << "\n#";
+
+  if (flags.development) {
+    std::cout << "\n#\t.running developmental part";
+  }
 }
 
 void getTime(time_point &tp)
