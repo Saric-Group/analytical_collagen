@@ -127,6 +127,10 @@ This is an example of how to list things you need to use the software and how to
    ```sh
    make
    ```
+3. (Optional but recommended) Enter the path to the folder where you installed the program in the config file at
+  ```sh
+  mainPath = mainPath = /path/to/main/folder/
+  ```
 
 
 
