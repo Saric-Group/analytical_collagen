@@ -2,6 +2,7 @@ emin
 main
 random_charges
 energy_min.dat
+my.config
 ./*.dat
 *.dat
 *.xyz
