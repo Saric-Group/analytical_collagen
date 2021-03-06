@@ -188,9 +188,9 @@ This is a necessary information for finding the program when running the LAMMPS 
 
 * Path to the folder where the main program is located.
   ```sh
-  mainPath = /path/to/md/folder/
+  mainPath = /path/to/main/folder/
   ```
-  Command line option: `-mp /path/to/md/folder/`.
+  Command line option: `-mp /path/to/main/folder/`.
 
 #### Flags
 
