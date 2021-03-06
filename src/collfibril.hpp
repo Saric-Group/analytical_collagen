@@ -20,6 +20,11 @@ struct parameters_ {
   double cd_cutoff = 2.0;     /* cutoff of cd potential */
   double lj_cutoff = 2.0;     /* cutoff of lj potential */
   double max_cutoff = std::max(cd_cutoff, lj_cutoff);
+
+  /* Functions */
+  void calcCutoff() {
+    max_cutoff = std::max(cd_cutoff, lj_cutoff);
+  }
 };
 
 struct parametersMD_ {

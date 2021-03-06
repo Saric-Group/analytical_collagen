@@ -4,7 +4,6 @@
 #include "collmol.hpp"
 #include "collfibril.hpp"
 #include "random.hpp"
-#include "xyz.hpp"
 #include "funcs.hpp"
 #include "md.hpp"
 #include "cg.hpp"

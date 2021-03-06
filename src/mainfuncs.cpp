@@ -87,11 +87,13 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     if(overrides.ljcut)
     {
       fib.parameters.lj_cutoff = safe_read_double(fib.parameters.lj_cutoff,strarg,errcodes);
+      fib.parameters.calcCutoff();
       overrides.ljcut = false;
     }
     if(overrides.cdcut)
     {
       fib.parameters.cd_cutoff = safe_read_double(fib.parameters.cd_cutoff,strarg,errcodes);
+      fib.parameters.calcCutoff();
       overrides.cdcut = false;
     }
 
