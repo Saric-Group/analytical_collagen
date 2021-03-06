@@ -33,7 +33,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/Saric-Group/analytical_collagen">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="img/logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Analytical Collagen</h3>
@@ -167,7 +167,7 @@ Depending on your queuing system, you might need to adjust the file *run.qsub*. 
 
 The config file is used to control all major aspects and parameters of the program. To use a config file, call the program via
    ```sh
-   ./main --config /path/to/config/file.config.
+   ./main --config /path/to/config/file.config
    ```
 The syntax for the config file is as follows:
 
