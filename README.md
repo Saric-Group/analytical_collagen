@@ -33,7 +33,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/Saric-Group/analytical_collagen">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="img/logo.png" alt="Logo" width="500" height="500">
   </a>
 
   <h3 align="center">Analytical Collagen</h3>
@@ -137,7 +137,7 @@ The main options and parameters can be accessed and controlled via the config fi
 
 ### Preparing and running LAMMPS simulations
 
-The code conveniently automizes almost all necessary steps to set up and run molecular dynamics simulations on a remote cluster using the LAMMPS software package.
+The code conveniently automizes almost all necessary steps to set up and run molecular dynamics simulations on a remote cluster using the LAMMPS software package. Whether you want to simulate a single set of parameters or a broad range of parameters, it is all taken care of. Currently, we support the variation of the Lennard-Jones and Coloumb-Debye interaction strength as well as the rigidity parameter for the atomar angles. More options to come!
 
 To do so, follow below steps:
 
@@ -167,7 +167,7 @@ Depending on your queuing system, you might need to adjust the file *run.qsub*. 
 
 The config file is used to control all major aspects and parameters of the program. To use a config file, call the program via
    ```sh
-   ./main --config /path/to/config/file.config.
+   ./main --config /path/to/config/file.config
    ```
 The syntax for the config file is as follows:
 
@@ -373,7 +373,7 @@ This is a main function of the code that automizes the creation of topology file
   ```
   Command line option: `-md_rigid`.
 
-* Sets the angle rigidities for which simulations are run. First value to simulate is given by `-MD_kAngle_start`. Then this value is incremented by `MD_kAngle_inc` until `MD_kAngle_end` is reached.
+* Sets the angle rigidities for which simulations are run. First value to simulate is given by `-MD_kAngle_start`. Then this value is incremented by `MD_kAngle_inc` until `MD_kAngle_end` is reached. If `MD_kAngle_end < MD_kAngle_start + MD_kAngle_inc`, only `-MD_kAngle_start` will be considered for simulations.
   ```sh
   MD_kAngle_start = 50.0
   MD_kAngle_inc = 50.0
@@ -381,7 +381,7 @@ This is a main function of the code that automizes the creation of topology file
   ```
   Command line options: `-md_kas 50.0`, `-md_kai 50.0`, `-md_kae 50.0`.
 
-* Sets the dielectric Coulomb-Debye constant for which simulations are run. First value to simulate is given by `-MD_dielectric_start`. Then this value is incremented by `MD_dielectric_inc` until `MD_dielectric_end` is reached.
+* Sets the dielectric Coulomb-Debye constant for which simulations are run. First value to simulate is given by `-MD_dielectric_start`. Then this value is incremented by `MD_dielectric_inc` until `MD_dielectric_end` is reached. If `MD_dielectric_end < MD_dielectric_start + MD_dielectric_inc`, only `-MD_dielectric_start` will be considered for simulations.
   ```sh
   MD_dielectric_start = 10.0
   MD_dielectric_inc = 10.0
@@ -395,7 +395,7 @@ This is a main function of the code that automizes the creation of topology file
   ```
   Command line option: `-md_cdc 5.0`.
 
-* Sets the epsilon Lennard-Jones constant for which simulations are run. First value to simulate is given by `-MD_epsilon_start`. Then this value is incremented by `MD_epsilon_inc` until `MD_epsilon_end` is reached.
+* Sets the epsilon Lennard-Jones constant for which simulations are run. First value to simulate is given by `-MD_epsilon_start`. Then this value is incremented by `MD_epsilon_inc` until `MD_epsilon_end` is reached. If `MD_epsilon_end < MD_epsilon_start + MD_epsilon_inc`, only `-MD_epsilon_start` will be considered for simulations.
   ```sh
   MD_epsilon_start = 0.01
   MD_epsilon_inc = 0.01

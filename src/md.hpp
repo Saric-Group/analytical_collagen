@@ -7,6 +7,33 @@
 
 
 /* Classes and structures */
+struct md_var {
+  std::string abr;
+  int size;
+  int prec = 3;
+  std::vector<void *> vars;
+  void *var;
+
+  /* Constructors */
+  md_var(std::string abr_, int size_, double *var_, std::vector<double *> vars_, int prec_) {
+    abr = abr_;
+    size = size_;
+    prec = prec_;
+    var = var_;
+    for (int i = 0; i < (int) vars_.size(); i++) {
+      vars.push_back(vars_[i]);
+    }
+  }
+  md_var(std::string abr_, int size_, int *var_, std::vector<int *> vars_) {
+    abr = abr_;
+    size = size_;
+    var = var_;
+    for (int i = 0; i < (int) vars_.size(); i++) {
+      vars.push_back(vars_[i]);
+    }
+  }
+};
+
 struct position {
   double x = 0.;
   double y = 0.;
@@ -48,8 +75,12 @@ struct cubeGrid {
 
 /* Functions */
 void genTopologyZero(collagenFibril fib, int L);
+void printScriptVars(FILE *outf, md_var var, int tabs);
+std::vector<md_var> collectMDvars(collagenFibril fib);
+std::string getDir(std::vector<md_var> md_vars, bool pvalues = false);
+std::string getCargs(std::vector<md_var> md_vars);
 void genInSim(collagenFibril fib);
 void genQsub(collagenFibril fib);
-void genBashScript();
+void genBashScript(collagenFibril fib);
 void createLAMMPSfiles(collagenFibril fib);
 #endif

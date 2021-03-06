@@ -24,7 +24,7 @@ void genTopologyZero(collagenFibril fib, int L)
   result /= (fib.mol.numAtoms - 1) * fib.mol.distanceAtoms * numMol;
   result = 1 / result;
   result = pow(result, 1. / 3.);
-  // Increased the box, lowered the volume fraction to keep molecules in box
+  // Increased the box => lower volume fraction, to keep molecules in box
   // might need to think about boxsize again
 	double boxlength = result + fib.mol.length;
 	double xlo = -0.5 * boxlength;
@@ -119,6 +119,107 @@ void genTopologyZero(collagenFibril fib, int L)
   fclose(outf);
 }
 
+void printScriptVars(FILE *outf, md_var var, int tabs)
+{
+  fprintf(outf, "\n");
+  for (int i = 0; i < tabs; i++) {
+    fprintf(outf, "\t");
+  }
+  fprintf(outf, "for %s in $(seq", var.abr.c_str());
+
+  if (var.size == sizeof(int)) {
+    fprintf(outf, " %.i", *(int *) var.vars[0]);
+    fprintf(outf, " %.i", *(int *) var.vars[1]);
+    fprintf(outf, " %.i)", *(int *) var.vars[2]);
+  }
+  if (var.size == sizeof(double)) {
+    fprintf(outf, " %.*f", var.prec, *(double *) var.vars[0]);
+    fprintf(outf, " %.*f", var.prec, *(double *) var.vars[1]);
+    fprintf(outf, " %.*f)", var.prec, *(double *) var.vars[2]);
+  }
+
+  fprintf(outf, "\n");
+  for (int i = 0; i < tabs; i++) {
+    fprintf(outf, "\t");
+  }
+  fprintf(outf, "do");
+}
+
+std::vector<md_var> collectMDvars(collagenFibril fib)
+{
+  std::vector<md_var> md_vars;
+
+  if (fib.parametersMD.kAngle_start + fib.parametersMD.kAngle_inc <= fib.parametersMD.kAngle_end) {
+    md_vars.push_back(md_var("ka", sizeof(fib.parametersMD.kAngle_start),
+                &fib.parametersMD.kAngle,
+                std::vector<double *>{&fib.parametersMD.kAngle_start,
+                                      &fib.parametersMD.kAngle_inc,
+                                      &fib.parametersMD.kAngle_end}, 1));
+  }
+
+  if (fib.parametersMD.LJepsilon_start + fib.parametersMD.LJepsilon_inc <= fib.parametersMD.LJepsilon_end) {
+    md_vars.push_back(md_var("lje", sizeof(fib.parametersMD.LJepsilon_start),
+                &fib.parametersMD.LJepsilon,
+                std::vector<double *>{&fib.parametersMD.LJepsilon_start,
+                                      &fib.parametersMD.LJepsilon_inc,
+                                      &fib.parametersMD.LJepsilon_end}, 3));
+  }
+
+  if (fib.parametersMD.dielectric_start + fib.parametersMD.dielectric_inc <= fib.parametersMD.dielectric_end) {
+    md_vars.push_back(md_var("die", sizeof(fib.parametersMD.dielectric_start),
+                &fib.parametersMD.dielectric,
+                std::vector<double *>{&fib.parametersMD.dielectric_start,
+                                      &fib.parametersMD.dielectric_inc,
+                                      &fib.parametersMD.dielectric_end}, 1));
+  }
+
+  return md_vars;
+}
+
+std::string getDir(std::vector<md_var> md_vars, bool pvalues /*= false*/)
+{
+  std::string dir = "";
+  for (int i = 0; i < (int) md_vars.size(); i++) {
+    if (i > 0) {
+      dir += "_";
+    }
+    dir += md_vars[i].abr;
+    dir += "=";
+    if (pvalues) {
+      if (md_vars[i].size == sizeof(int)) {
+        dir += *(int *) md_vars[i].var;
+      } else if (md_vars[i].size == sizeof(double)) {
+        std::ostringstream oss;
+        oss << std::setprecision(md_vars[i].prec);
+        oss << std::fixed;
+        oss << *(double *) md_vars[i].var;
+        dir += oss.str();
+      }
+    } else {
+      dir += "${" + md_vars[i].abr + "}";
+    }
+  }
+  if (md_vars.size() > 0) {
+    dir += "/";
+  }
+  return dir;
+}
+
+std::string getCargs(std::vector<md_var> md_vars)
+{
+  std::string cargs = "";
+  for (int i = 0; i < (int) md_vars.size(); i++) {
+    if (i > 0) {
+      cargs += " ";
+    }
+    cargs += "-md_";
+    cargs += md_vars[i].abr;
+    cargs += " ";
+    cargs += "${" + md_vars[i].abr + "}";
+  }
+  return cargs;
+}
+
 void genInSim(collagenFibril fib)
 {
   std::string file = filePaths.md_outputpath;
@@ -126,12 +227,11 @@ void genInSim(collagenFibril fib)
   FILE *outf;
   outf = fopen(file.c_str(), "w");
 
-  fprintf(outf, "log\t");
-  fprintf(outf, "./lje=%.3f_die=%.1f", fib.parametersMD.LJepsilon, fib.parametersMD.dielectric);
-  fprintf(outf, "_ka=%.1f", fib.parametersMD.kAngle);
-  fprintf(outf, "_cdc=%.1f_ljc=%.1f", fib.parametersMD.cd_cutoff, fib.parametersMD.lj_cutoff);
-  fprintf(outf, "_ts=%.6f_rt=%.i", fib.parametersMD.timestep, fib.parametersMD.runtime);
-  fprintf(outf, "/log.sim");
+  std::vector<md_var> md_vars = collectMDvars(fib);
+  std::string dir = getDir(md_vars, true);
+
+  fprintf(outf, "log");
+  fprintf(outf, "\t./%slog.sim", dir.c_str());
 
   fprintf(outf, "\n\nunits\tlj");
   fprintf(outf,"\natom_style\tfull");
@@ -158,12 +258,8 @@ void genInSim(collagenFibril fib)
   fprintf(outf, "\nvelocity\tall zero angular");
   fprintf(outf, "\nvelocity\tall zero linear");
 
-  fprintf(outf, "\n\ndump\tmydump all custom 10000");
-  fprintf(outf, " ./lje=%.3f_die=%.1f", fib.parametersMD.LJepsilon, fib.parametersMD.dielectric);
-  fprintf(outf, "_ka=%.1f", fib.parametersMD.kAngle);
-  fprintf(outf, "_cdc=%.1f_ljc=%.1f", fib.parametersMD.cd_cutoff, fib.parametersMD.lj_cutoff);
-  fprintf(outf, "_ts=%.6f_rt=%.i", fib.parametersMD.timestep, fib.parametersMD.runtime);
-  fprintf(outf, "/out_sim.xyz type q x y z");
+  fprintf(outf, "\n\ndump\tmydump all custom 10000 ./%s", dir.c_str());
+  fprintf(outf, "out_sim.xyz type q x y z");
   fprintf(outf, "\ndump_modify\tmydump sort id");
 
   if (fib.parametersMD.rigid) {
@@ -199,13 +295,12 @@ void genQsub(collagenFibril fib)
   fprintf(outf, "\n#$ -pe mpi %i", fib.parametersMD.cores);
   fprintf(outf, "\n#$ -cwd");
 
+  std::vector<md_var> md_vars = collectMDvars(fib);
+  std::string dir = getDir(md_vars);
+
   fprintf(outf, "\n");
-  // fprintf(outf, "\ngerun /home/ucapkkl/Scratch/lammps-29Oct20/src/lmp_mpi");
   fprintf(outf, "\ngerun %s", fib.parametersMD.lmp_mpi.c_str());
-  fprintf(outf, " -in ./lje=${lje}_die=${die}");
-  fprintf(outf, "_ka=${ka}");
-  fprintf(outf, "_cdc=${cdc}_ljc=${ljc}");
-  fprintf(outf, "_ts=${ts}_rt=${rt}/");
+  fprintf(outf, " -in ./%s" , dir.c_str());
   fprintf(outf, "in.sim");
 
   fclose(outf);
@@ -213,8 +308,6 @@ void genQsub(collagenFibril fib)
 
 void genBashScript(collagenFibril fib)
 {
-  // might want to use subfunctions for the creation of the script files
-  // but for now this suffices
   std::string file = filePaths.md_outputpath;
   file += "sim.sh";
   FILE *outf;
@@ -227,8 +320,6 @@ void genBashScript(collagenFibril fib)
   fprintf(outf, "\nhelpFunction()");
   fprintf(outf, "\n{");
   fprintf(outf, "\n\techo \"\"");
-  // fprintf(outf, "\n\techo \"Usage: $0");
-  // fprintf(outf, " -a paramA -b paramB -c paramC\"");
   fprintf(outf, "\n\techo \"Usage: $0");
   fprintf(outf, " [-c]");
   fprintf(outf, " [-r]");
@@ -245,26 +336,14 @@ void genBashScript(collagenFibril fib)
 
   fprintf(outf, "\n");
   fprintf(outf, "\nwhile getopts \"cr\" opt");
-  // fprintf(outf, "\nwhile getopts \"a:b:c:\" opt");
   fprintf(outf, "\ndo");
   fprintf(outf, "\n\tcase \"$opt\" in");
   fprintf(outf, "\n\t\tc ) create=true ;;");
   fprintf(outf, "\n\t\tr ) run=true ;;");
-  // fprintf(outf, "\n\t\ta ) paramA=\"$OPTARG\" ;;");
-  // fprintf(outf, "\n\t\tb ) paramB=\"$OPTARG\" ;;");
-  // fprintf(outf, "\n\t\tc ) paramC=\"$OPTARG\" ;;");
   fprintf(outf, "\n\t\t? ) helpFunction ;;");
   fprintf(outf, "\n\tesac");
   fprintf(outf, "\ndone");
 
-  // fprintf(outf, "\n");
-  // fprintf(outf, "\nif [ -z \"$paramA\" ] ");
-  // fprintf(outf, "|| [ -z \"$paramB\" ]");
-  // fprintf(outf, "|| [ -z \"$paramC\" ]");
-  // fprintf(outf, "\nthen");
-  // fprintf(outf, "\n\techo \"Some or all parameters are empty\";");
-  // fprintf(outf, "\n\thelpFunction");
-  // fprintf(outf, "\nfi");
 
   fprintf(outf, "\n");
   fprintf(outf, "\nif [ \"$create\" = false ]");
@@ -274,129 +353,51 @@ void genBashScript(collagenFibril fib)
   fprintf(outf, "\n\thelpFunction");
   fprintf(outf, "\nfi");
 
+  std::vector<md_var> md_vars = collectMDvars(fib);
+  std::string dir = getDir(md_vars);
+  std::string cargs = getCargs(md_vars);
+  std::string tabs = "\t";
+  int i;
+
   fprintf(outf, "\n");
   fprintf(outf, "\nif [ \"$create\" = true ]");
   fprintf(outf, "\nthen");
-  fprintf(outf, "\n\tfor lje in $(seq");
-  fprintf(outf, " %.3f", fib.parametersMD.LJepsilon_start);
-  fprintf(outf, " %.3f", fib.parametersMD.LJepsilon_inc);
-  fprintf(outf, " %.3f)", fib.parametersMD.LJepsilon_end);
-  fprintf(outf, "\n\tdo");
-  fprintf(outf, "\n\t\tfor die in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.dielectric_start);
-  fprintf(outf, " %.1f", fib.parametersMD.dielectric_inc);
-  fprintf(outf, " %.1f)", fib.parametersMD.dielectric_end);
-  fprintf(outf, "\n\t\tdo");
-  fprintf(outf, "\n\t\t\tfor ka in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.kAngle_start);
-  fprintf(outf, " %.1f", fib.parametersMD.kAngle_inc);
-  fprintf(outf, " %.1f)", fib.parametersMD.kAngle_end);
-  fprintf(outf, "\n\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\tfor cdc in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.cd_cutoff);
-  fprintf(outf, " %.1f", fib.parametersMD.cd_cutoff);
-  fprintf(outf, " %.1f)", fib.parametersMD.cd_cutoff);
-  fprintf(outf, "\n\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\tfor ljc in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.lj_cutoff);
-  fprintf(outf, " %.1f", fib.parametersMD.lj_cutoff);
-  fprintf(outf, " %.1f)", fib.parametersMD.lj_cutoff);
-  fprintf(outf, "\n\t\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\t\tfor ts in $(seq");
-  fprintf(outf, " %.6f", fib.parametersMD.timestep);
-  fprintf(outf, " %.6f", fib.parametersMD.timestep);
-  fprintf(outf, " %.6f)", fib.parametersMD.timestep);
-  fprintf(outf, "\n\t\t\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\t\t\tfor rt in $(seq");
-  fprintf(outf, " %.i", fib.parametersMD.runtime);
-  fprintf(outf, " %.i", fib.parametersMD.runtime);
-  fprintf(outf, " %.i)", fib.parametersMD.runtime);
-  fprintf(outf, "\n\t\t\t\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\t\t\t\tmkdir lje=${lje}_die=${die}");
-  fprintf(outf, "_ka=${ka}");
-  fprintf(outf, "_cdc=${cdc}_ljc=${ljc}");
-  fprintf(outf, "_ts=${ts}_rt=${rt}");
-  fprintf(outf, "\n\t\t\t\t\t\t\t\tcd ../../");
-  fprintf(outf, "\n\t\t\t\t\t\t\t\t./main --config ./default.config");
-  fprintf(outf, " -mdo %s", filePaths.md_outputpath.c_str());
-  fprintf(outf, "lje=${lje}_die=${die}");
-  fprintf(outf, "_ka=${ka}");
-  fprintf(outf, "_cdc=${cdc}_ljc=${ljc}");
-  fprintf(outf, "_ts=${ts}_rt=${rt}/");
-  fprintf(outf, " -md_li");
-  fprintf(outf, " -md_sb");
-  fprintf(outf, " -md_lje ${lje}");
-  fprintf(outf, " -md_die ${die}");
-  fprintf(outf, " -md_ka ${ka}");
-  fprintf(outf, " -md_cdc ${cdc}");
-  fprintf(outf, " -md_ljc ${ljc}");
-  fprintf(outf, " -md_ts ${ts}");
-  fprintf(outf, " -md_rt ${rt}");
-  fprintf(outf, "\n\t\t\t\t\t\t\t\tcd %s", filePaths.md_outputpath.c_str());
-  fprintf(outf, "\n\t\t\t\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\tdone");
-  fprintf(outf, "\n\t\tdone");
-  fprintf(outf, "\n\tdone");
+  for (i = 0; i < (int) md_vars.size(); i++) {
+    tabs += "\t";
+    printScriptVars(outf, md_vars[i], i + 1);
+  }
+  fprintf(outf, "\n%smkdir %s", tabs.c_str() , dir.c_str());
+  fprintf(outf, "\n%scd ../../", tabs.c_str());
+  fprintf(outf, "\n%s./main --config %s", tabs.c_str(), filePaths.configpath.c_str());
+  fprintf(outf, " -mdo %s -md_li %s", (filePaths.md_outputpath + dir).c_str(), cargs.c_str());
+  fprintf(outf, "\n%scd %s", tabs.c_str(), filePaths.md_outputpath.c_str());
+  for (int j = i; j >= 1; j--) {
+    tabs.erase(0, 1);
+    fprintf(outf, "\n%sdone", tabs.c_str());
+  }
   fprintf(outf, "\nfi");
 
   fprintf(outf, "\n");
   fprintf(outf, "\nif [ \"$run\" = true ]");
   fprintf(outf, "\nthen");
-  fprintf(outf, "\n\tfor lje in $(seq");
-  fprintf(outf, " %.3f", fib.parametersMD.LJepsilon_start);
-  fprintf(outf, " %.3f", fib.parametersMD.LJepsilon_inc);
-  fprintf(outf, " %.3f)", fib.parametersMD.LJepsilon_end);
-  fprintf(outf, "\n\tdo");
-  fprintf(outf, "\n\t\tfor die in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.dielectric_start);
-  fprintf(outf, " %.1f", fib.parametersMD.dielectric_inc);
-  fprintf(outf, " %.1f)", fib.parametersMD.dielectric_end);
-  fprintf(outf, "\n\t\tdo");
-  fprintf(outf, "\n\t\t\tfor ka in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.kAngle_start);
-  fprintf(outf, " %.1f", fib.parametersMD.kAngle_inc);
-  fprintf(outf, " %.1f)", fib.parametersMD.kAngle_end);
-  fprintf(outf, "\n\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\tfor cdc in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.cd_cutoff);
-  fprintf(outf, " %.1f", fib.parametersMD.cd_cutoff);
-  fprintf(outf, " %.1f)", fib.parametersMD.cd_cutoff);
-  fprintf(outf, "\n\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\tfor ljc in $(seq");
-  fprintf(outf, " %.1f", fib.parametersMD.lj_cutoff);
-  fprintf(outf, " %.1f", fib.parametersMD.lj_cutoff);
-  fprintf(outf, " %.1f)", fib.parametersMD.lj_cutoff);
-  fprintf(outf, "\n\t\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\t\tfor ts in $(seq");
-  fprintf(outf, " %.6f", fib.parametersMD.timestep);
-  fprintf(outf, " %.6f", fib.parametersMD.timestep);
-  fprintf(outf, " %.6f)", fib.parametersMD.timestep);
-  fprintf(outf, "\n\t\t\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\t\t\tfor rt in $(seq");
-  fprintf(outf, " %.i", fib.parametersMD.runtime);
-  fprintf(outf, " %.i", fib.parametersMD.runtime);
-  fprintf(outf, " %.i)", fib.parametersMD.runtime);
-  fprintf(outf, "\n\t\t\t\t\t\t\tdo");
-  fprintf(outf, "\n\t\t\t\t\t\t\t\tqsub");
-  fprintf(outf, " -N l=${lje}_c=${die}");
-  fprintf(outf, "_ka=${ka}");
-  fprintf(outf, "_lc=${ljc}_cc=${cdc}");
-  fprintf(outf, "_ts=${ts}_rt=${rt}");
-  fprintf(outf, " -v lje=${lje},die=${die}");
-  fprintf(outf, ",ka=${ka}");
-  fprintf(outf, ",cdc=${cdc},ljc=${ljc}");
-  fprintf(outf, ",ts=${ts},rt=${rt}");
+  for (i = 0; i < (int) md_vars.size(); i++) {
+    tabs += "\t";
+    printScriptVars(outf, md_vars[i], i + 1);
+  }
+  fprintf(outf, "\n%sqsub", tabs.c_str());
+  std::replace(dir.begin(), dir.end(), '_', ',');
+  if (!dir.empty()) {
+    dir.pop_back();
+    fprintf(outf, " -N %s", dir.c_str());
+    fprintf(outf, " -v %s", dir.c_str());
+  } else {
+    fprintf(outf, " -N single_sim");
+  }
   fprintf(outf, " run.qsub");
-  fprintf(outf, "\n\t\t\t\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\t\tdone");
-  fprintf(outf, "\n\t\t\tdone");
-  fprintf(outf, "\n\t\tdone");
-  fprintf(outf, "\n\tdone");
+  for (int j = i; j >= 1; j--) {
+    tabs.erase(0, 1);
+    fprintf(outf, "\n%sdone", tabs.c_str());
+  }
   fprintf(outf, "\nfi");
 
   fclose(outf);
