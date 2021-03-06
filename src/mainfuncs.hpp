@@ -9,6 +9,9 @@
 
 /* Classes and structures */
 struct overrides_ {
+  // general
+  bool mainPath = false;
+
   //io settings
 
   bool input = false;

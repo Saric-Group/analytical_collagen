@@ -367,7 +367,7 @@ void genBashScript(collagenFibril fib)
     printScriptVars(outf, md_vars[i], i + 1);
   }
   fprintf(outf, "\n%smkdir %s", tabs.c_str() , dir.c_str());
-  fprintf(outf, "\n%scd ../../", tabs.c_str());
+  fprintf(outf, "\n%scd %s", tabs.c_str(), filePaths.mainpath.c_str());
   fprintf(outf, "\n%s./main --config %s", tabs.c_str(), filePaths.configpath.c_str());
   fprintf(outf, " -mdo %s -md_li %s", (filePaths.md_outputpath + dir).c_str(), cargs.c_str());
   fprintf(outf, "\n%scd %s", tabs.c_str(), filePaths.md_outputpath.c_str());

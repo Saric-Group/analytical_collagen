@@ -14,6 +14,13 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
 
     std::string d = dashes ? "-" : "";
     std::string dd = dashes ? "--" : "";
+    if(overrides.mainPath)
+    {
+      if(verify_path(strarg,errcodes) == 0) {
+        filePaths.mainpath = strarg;
+      }
+      overrides.mainPath = false;
+    }
     if(overrides.input)
     {
       if(verify_path(strarg,errcodes) == 0) {
@@ -208,6 +215,8 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       errstate = 1;
     }
 
+
+
     //bool flags and help
 
     if(flag(strarg,d+"co") || flag(strarg,dd+"consoleOutput"))
@@ -266,6 +275,11 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.development = true;
     }
 
+    // general overrides
+    if(flag(strarg,d+"mp") || flag(strarg,dd+"mainPath"))
+    {
+      overrides.mainPath = true;
+    }
 
     //io overrides
 

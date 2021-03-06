@@ -182,6 +182,16 @@ Furthermore, the config file is separated into logical areas that group together
 
 The default config file provided in the repository contains little information about the options. Further details are given below.
 
+#### General
+
+This is a necessary information for finding the program when running the LAMMPS creation scripts.
+
+* Path to the folder where the main program is located.
+  ```sh
+  mainPath = /path/to/md/folder/
+  ```
+  Command line option: `-mp /path/to/md/folder/`.
+
 #### Flags
 
 Mostly used to activate certain parts of the program.

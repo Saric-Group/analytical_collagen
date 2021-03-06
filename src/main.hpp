@@ -18,6 +18,7 @@ typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 
 /* Classes and structures */
 struct filePaths_ {
+  std::string mainpath = "";
   std::string inputpath = "./molecule/charges_distribution_36";
   std::string outputpath = "./energy_min.dat";
   std::string file_extension = ".dat";
