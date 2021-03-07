@@ -102,8 +102,8 @@ bool capsuleOverlap(int a, int b, collagenFibril fib,
   bestA = closestPtOnLineSegment(a_A, a_B, bestB);
 
   position pen_normal = normal(bestA, bestB);
-  // 5% safety margin
-  double pen_depth = fib.mol.diameterAtom * 1.05 - pen_normal.length;
+  // 50% safety margin
+  double pen_depth = fib.mol.diameterAtom * 1.5 - pen_normal.length;
 
   return pen_depth > 0;
 }

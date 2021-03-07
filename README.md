@@ -33,7 +33,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/Saric-Group/analytical_collagen">
-    <img src="img/logo.png" alt="Logo" width="500" height="500">
+    <img src="img/logo2.png" alt="Logo" width="500" height="500">
   </a>
 
   <h3 align="center">Analytical Collagen</h3>
