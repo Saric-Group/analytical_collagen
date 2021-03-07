@@ -145,8 +145,8 @@ The code conveniently automizes almost all necessary steps to set up and run mol
 
 To do so, follow below steps:
 
-1. Set `MDoutput` flag in the config file.
-2. Set local folder path `mdoutput = /path/to/folder/` to create files there.
+1. Set `MD` flag in the config file.
+2. Set local folder path `mdoutput = /path/to/folder/` to create files there (must exist).
 3. Adjust key parameters (such as the number of molecules to be simulated).
 4. Run
    ```sh
@@ -165,6 +165,12 @@ To do so, follow below steps:
    to queue the simulations.
 
 Depending on your queuing system, you might need to adjust the file *run.qsub*. When the simulations are done, you will find LAMMPS xyz output files for each simulation in the corresponding folder. Transfer them back to your local machine to analyze or manipulate them.
+
+Alternatively, you can run
+```sh
+./main --config ./your.config -md_li -md_t
+```
+to create the LAMMPS input file via `-md_li` and the topology file via `-md_t` to use them to either run simulations locally or to manipulate them.
 
 
 ### Config options
@@ -331,13 +337,13 @@ This is a main function of the code and represents the very first implementation
 
 #### Molecular dynamics and LAMMPS parameters
 
-This is a main function of the code that automizes the creation of topology files, LAMMPS input scripts, and bash scripts to run the simulations on a remote cluster. For usage on a local installation of LAMMPS, some parts of the created scripts need to be adjusted manually. Alternatively, one can entirely skip using the scripts and just use the topology and LAMMPS input files, for instance.
+This is a main function of the code that automizes the creation of topology files, LAMMPS input scripts, and bash scripts to run the simulations on a remote cluster. For usage on a local installation of LAMMPS, some parts of the created scripts need to be adjusted manually. Alternatively, one can entirely skip using the scripts and just use the topology and LAMMPS input files, for instance, to run simulations locally.
 
 * Toggles this part of the program.
   ```sh
-  MDoutput
+  MD
   ```
-  Command line option: `-mdo`.
+  Command line option: `-md`.
 
 * Path of LAMMPS mpi installation on the remote cluster.
   ```sh

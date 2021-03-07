@@ -369,6 +369,7 @@ void genBashScript(collagenFibril fib)
   fprintf(outf, "\n%smkdir %s", tabs.c_str() , dir.c_str());
   fprintf(outf, "\n%scd %s", tabs.c_str(), filePaths.mainpath.c_str());
   fprintf(outf, "\n%s./main --config %s", tabs.c_str(), filePaths.configpath.c_str());
+  fprintf(outf, " -md_sb");
   fprintf(outf, " -mdo %s -md_li %s", (filePaths.md_outputpath + dir).c_str(), cargs.c_str());
   fprintf(outf, "\n%scd %s", tabs.c_str(), filePaths.md_outputpath.c_str());
   for (int j = i; j >= 1; j--) {
@@ -436,7 +437,17 @@ void createLAMMPSfiles(collagenFibril fib)
     if (flags.consoleOutput) {
       std::cout << "\n#  -> creating input file";
     }
-    genInSim(fib);
+    if (fib.parametersMD.scriptbuild) {
+      genInSim(fib);
+    } else {
+      // TODO cycle through all variable parameters and create multiple in.sim
+      // std::vector<md_var> md_vars = collectMDvars(fib);
+      std::cout << " using *_start values for variable parameters";
+      fib.parametersMD.kAngle = fib.parametersMD.kAngle_start;
+      fib.parametersMD.dielectric = fib.parametersMD.dielectric_start;
+      fib.parametersMD.LJepsilon = fib.parametersMD.LJepsilon_start;
+      genInSim(fib);
+    }
   }
 
   if (fib.parametersMD.outputScript) {

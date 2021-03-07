@@ -260,7 +260,7 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       flags.originalOutput = true;
     }
 
-    if(flag(strarg,d+"mdo") || flag(strarg,dd+"MDoutput"))
+    if(flag(strarg,d+"md") || flag(strarg,dd+"MD"))
     {
       flags.mdOutput = true;
     }
