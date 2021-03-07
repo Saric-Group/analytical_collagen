@@ -398,7 +398,7 @@ This is a main function of the code that automizes the creation of topology file
   MD_phi = 0.0
   MD_theta = 0.94247779607
   ```
-  Command line options: `-md_phi 0.0`, `-md_theta 0.94247779607`.
+  Command line options: `-md_phi 0.0`, `-md_the 0.94247779607`.
 
 * Toggles rigid molecules for the LAMMPS simulation.
   ```sh
