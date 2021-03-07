@@ -3,7 +3,7 @@
 CC = g++
 
 # Options for compiler
-CFLAGS = -march=native -O2 -c
+CFLAGS = -march=native -O2 -std=c++11 -Wall -c
 
 # cpp files & objects
 SRC = $(wildcard src/*.cpp)

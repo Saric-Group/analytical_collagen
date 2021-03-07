@@ -232,7 +232,6 @@ double collagenFibril::compCD(double lat_gap, double rad_gap, double offset)
 
 int collagenFibril::produce_xyz(int numatoms, int rows, double distatom, double latgap, double radgap, double offset, int id[], int type[], double charges[], double xpos[], double ypos[], double zpos[])
 {
-  int natoms = layers * rows * numatoms;
 
   //cout << natoms << endl;
   //cout << "Atoms. Timestep: 0" << endl;
@@ -250,7 +249,6 @@ int collagenFibril::produce_xyz(int numatoms, int rows, double distatom, double 
     for (int r = 0; r < rows; r++){
       for (int a = 0; a < numatoms; a++){
         int i = l * rows * numatoms + r * numatoms + a;
-        double drows = (double) rows;
         double dr =(double) r;
         double da =(double) a;
         double dl =(double) l;
@@ -351,7 +349,7 @@ std::string collagenFibril::hash_output()
 
     for(int i = 0; i < mol.numAtoms; i++)
     {
-      if(fcount >= lulen){
+      if(fcount >= (int) lulen){
         fflags += std::to_string(f_charges);
         fflags += "-";
         f_charges = 0;
@@ -420,8 +418,8 @@ void collagenFibril::singleEmin()
   eTotmin.assign(parameters.lj_steps, std::vector<double> (parameters.cd_steps, 1e6));
 
   /* Calculate min configurations for different energy settings */
-  int total = (latMax + 1) * (radMax + 1);
-  int counter = 0;
+  // int total = (latMax + 1) * (radMax + 1);
+  // int counter = 0;
   for (int lat = 0; lat <= latMax; lat++) {
     latGap_ = lat * 0.1 * mol.diameterAtom;
     for (int rad = 0; rad <= radMax; rad++) {
@@ -448,7 +446,7 @@ void collagenFibril::singleEmin()
             }
         }
       }
-      counter++;
+      // counter++;
       // progresssBar(1.0 * counter / total, "Calculating minimized energy configurations");
     }
   }
@@ -536,8 +534,8 @@ void collagenFibril::minimizeEnergy()
   double offset_ = mol.diameterAtom;
   double energy_ = 1e16;
   double a = 1.0;
-  int N = 0.5 * (a * mol.numAtoms + 1) * (a * mol.numAtoms + 2);
-  int counter = 0;
+  // int N = 0.5 * (a * mol.numAtoms + 1) * (a * mol.numAtoms + 2);
+  // int counter = 0;
 
   /* We do not vary the lateral gap here */
   for (int rad = 0; rad <= a * mol.numAtoms; rad++) {
@@ -555,7 +553,7 @@ void collagenFibril::minimizeEnergy()
         offset = offset_;
       }
       offset_ += mol.distanceAtoms / a;
-      counter++;
+      // counter++;
       // progresssBar(1.0 * counter / N, " fibril -> minimize energy ");
     }
     radGap_ += mol.distanceAtoms / a;
