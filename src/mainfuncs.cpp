@@ -125,6 +125,16 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
       fib.parametersMD.numMolperDim = safe_read_integer(fib.parametersMD.numMolperDim,strarg,errcodes);
       overrides.MD_numMolperDim = false;
     }
+    if(overrides.MD_phi)
+    {
+      fib.parametersMD.phi = safe_read_double(fib.parametersMD.phi,strarg,errcodes);
+      overrides.MD_phi = false;
+    }
+    if(overrides.MD_theta)
+    {
+      fib.parametersMD.theta = safe_read_double(fib.parametersMD.theta,strarg,errcodes);
+      overrides.MD_theta = false;
+    }
 
     if(overrides.MD_kAngle)
     {
@@ -386,6 +396,18 @@ int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &
     {
       overrides.MD_numMolperDim = true;
     }
+    if(flag(strarg,d+"md_ran") || flag(strarg,dd+"MD_random"))
+    {
+      fib.parametersMD.random = true;
+    }
+    if(flag(strarg,d+"md_phi") || flag(strarg,dd+"MD_phi"))
+    {
+      overrides.MD_phi = true;
+    }
+    if(flag(strarg,d+"md_the") || flag(strarg,dd+"MD_theta"))
+    {
+      overrides.MD_theta = true;
+    }
     if(flag(strarg,d+"md_ka") || flag(strarg,dd+"MD_kAngle"))
     {
       overrides.MD_kAngle = true;
@@ -536,6 +558,7 @@ void readAtomInfos(collagenFibril &fib)
   if(path_exists(filePaths.inputpath) == 1) {
     std::cout << "\n#  ERROR: path does not exist or could not be accessed: ";
     std::cout << filePaths.inputpath;
+    std::cout << " -> using default";
     return;
   }
   int err = 0;
@@ -624,7 +647,7 @@ void printOptions(collagenFibril fib)
   }
 
   if (flags.originalOutput) {
-    std::cout << "\n#\t.creating original/inital output file";
+    std::cout << "\n#\t.original output active";
     if (flags.charge_hashed_outputs) {
       std::cout << "\n#\t  option hashed output";
     }
@@ -644,7 +667,7 @@ void printOptions(collagenFibril fib)
   }
 
   if (flags.mdOutput) {
-    std::cout << "\n#\t.creating LAMMPS files";
+    std::cout << "\n#\t.MD active";
     if (fib.parametersMD.outputScript) {
       std::cout << "\n#\t  option bash scripts";
     }

@@ -42,6 +42,9 @@ struct overrides_ {
   bool MD_cores = false;
   bool MD_numMolperDim = false;
 
+  bool MD_phi = false;
+  bool MD_theta = false;
+
   bool MD_kAngle = false;
   bool MD_kAngle_start = false;
   bool MD_kAngle_inc = false;

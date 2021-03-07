@@ -9,6 +9,130 @@ extern flags_ flags;
 
 
 /* Functions */
+void position::calcLength()
+{
+  length = x * x + y * y + z * z;
+  length = sqrt(length);
+}
+
+void position::normalize()
+{
+  calcLength();
+  if (length != 0) {
+    x /= length;
+    y /= length;
+    z /= length;
+  }
+  calcLength();
+}
+
+void position::printPos()
+{
+  std::cout << "(" << x << ", " << y << ", " << z << ")";
+}
+
+double dot(position a, position b)
+{
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+position normal(position a, position b)
+{
+  position n{a.x - b.x, a.y - b.y, a.z - b.z};
+  return n;
+}
+
+position getCapsuleA(position centerPoint, double length, double phi,
+                          double theta)
+{
+  double x = centerPoint.x + 0.5 * length * cos(phi) * sin(theta);
+  double y = centerPoint.y + 0.5 * length * sin(phi) * sin(theta);
+  double z = centerPoint.z + 0.5 * length * cos(theta);
+  position A{x, y, z};
+  return A;
+}
+position getCapsuleB(position centerPoint, double length, double phi,
+                          double theta)
+{
+  double x = centerPoint.x - 0.5 * length * cos(phi) * sin(theta);
+  double y = centerPoint.y - 0.5 * length * sin(phi) * sin(theta);
+  double z = centerPoint.z - 0.5 * length * cos(theta);
+  position B{x, y, z};
+  return B;
+}
+
+position closestPtOnLineSegment(position a, position b, position p)
+{
+  position ab = normal(b, a);
+  double t = dot(normal(p, a), ab) / dot(ab, ab);
+  t = std::min(std::max(t, 0.0), 1.0);
+  position closest{a.x + ab.x * t, a.y + ab.y * t, a.z + ab.z * t};
+  return closest;
+}
+
+bool capsuleOverlap(int a, int b, collagenFibril fib,
+                  std::vector<position> &gridPoints,
+                  std::vector<double> &phi_mem,
+                  std::vector<double> &theta_mem)
+{
+  double length = fib.mol.length;
+  position a_A = getCapsuleA(gridPoints[a], length, phi_mem[a], theta_mem[a]);
+  position a_B = getCapsuleB(gridPoints[a], length, phi_mem[a], theta_mem[a]);
+  position b_A = getCapsuleA(gridPoints[b], length, phi_mem[b], theta_mem[b]);
+  position b_B = getCapsuleB(gridPoints[b], length, phi_mem[b], theta_mem[b]);
+
+  position v0 = normal(b_A, a_A);
+  position v1 = normal(b_B, a_A);
+  position v2 = normal(b_A, a_B);
+  position v3 = normal(b_B, a_B);
+
+  double d0 = dot(v0, v0);
+  double d1 = dot(v1, v1);
+  double d2 = dot(v2, v2);
+  double d3 = dot(v3, v3);
+
+  position bestA;
+  if (d2 < d0 || d2 < d1 || d3 < d0 || d3 < d1) {
+    bestA = a_B;
+  } else {
+    bestA = a_A;
+  }
+
+  position bestB = closestPtOnLineSegment(b_A, b_B, bestA);
+  bestA = closestPtOnLineSegment(a_A, a_B, bestB);
+
+  position pen_normal = normal(bestA, bestB);
+  // 5% safety margin
+  double pen_depth = fib.mol.diameterAtom * 1.05 - pen_normal.length;
+
+  return pen_depth > 0;
+}
+
+bool checkOverlap(int i, int L, std::vector<position> &gridPoints,
+                  std::vector<double> &phi_mem,
+                  std::vector<double> &theta_mem,
+                  collagenFibril fib)
+{
+  // based on the intersection of two capsules
+  // https://wickedengine.net/2020/04/26/capsule-collision-detection/
+  bool overlap = false;
+
+  position b_A, b_B, b_n;
+  if (i - 1 >= 0 && i % L != 0) {
+    // capsule below
+    overlap = overlap ? overlap : capsuleOverlap(i, i - 1, fib, gridPoints, phi_mem, theta_mem);
+  }
+  if (!overlap && i - L >= 0 && i % (L * L) >= L) {
+    // capsule to the left
+    overlap = overlap ? overlap : capsuleOverlap(i, i - L, fib, gridPoints, phi_mem, theta_mem);
+  }
+  if (!overlap && i - L * L >= 0) {
+    // capsule behind
+    overlap = overlap ? overlap : capsuleOverlap(i, i - L * L, fib, gridPoints, phi_mem, theta_mem);
+  }
+  return overlap;
+}
+
 void genTopologyZero(collagenFibril fib, int L)
 {
   // number of molecules per sidelength of cubic box
@@ -26,7 +150,7 @@ void genTopologyZero(collagenFibril fib, int L)
   result = pow(result, 1. / 3.);
   // Increased the box => lower volume fraction, to keep molecules in box
   // might need to think about boxsize again
-	double boxlength = result + fib.mol.length;
+	double boxlength = result + 1.0 * fib.mol.length;
 	double xlo = -0.5 * boxlength;
 	double ylo = -0.5 * boxlength;
 	double zlo = -0.5 * boxlength;
@@ -69,15 +193,35 @@ void genTopologyZero(collagenFibril fib, int L)
 
   /* Atoms */
   cubeGrid grid(boxlength, L);
+  std::vector<double> phi_mem, theta_mem;
   fprintf(outf, "\n\nAtoms");
-  std::uniform_real_distribution<double> dis_real(0.0, M_PI);
-  double phi, theta;
   fprintf(outf, "\n");
+  std::uniform_real_distribution<double> dis_real(0.0, M_PI);
+  double phi = fib.parametersMD.phi;
+  double theta = fib.parametersMD.theta;
+  if (!fib.parametersMD.random) {
+    phi_mem.assign(numMol, phi);
+    theta_mem.assign(numMol, theta);
+    if (checkOverlap(numMol / 2, L, grid.gridPoints, phi_mem, theta_mem, fib)) {
+      std::cout << "\n#  ERROR: overlapping molecules, choose other orientation angles! ";
+      return;
+    }
+  }
   for (int i = 0; i < numMol; i++) {
-    phi = 0.;
-    theta = 0.3 * M_PI;
-    // phi = 2 * dis_real(generator);
-    // theta = dis_real(generator);
+    if (fib.parametersMD.random) {
+      bool overlap = false;
+      do {
+        if (overlap) {
+          phi_mem.pop_back();
+          theta_mem.pop_back();
+        }
+        phi = 2 * dis_real(generator);
+        theta = dis_real(generator);
+        phi_mem.push_back(phi);
+        theta_mem.push_back(theta);
+        overlap = checkOverlap(i, L, grid.gridPoints, phi_mem, theta_mem, fib);
+      } while(overlap);
+    }
     for (int j = 0; j < fib.mol.numAtoms; j++) {
       fprintf(outf, "\n\t%i", i * fib.mol.numAtoms + j + 1);  // Atom ID
       fprintf(outf, " %i", i + 1);  // Molecule ID
@@ -88,7 +232,6 @@ void genTopologyZero(collagenFibril fib, int L)
       fprintf(outf, " %.6f", grid.gridPoints[i].z - (0.5 * fib.mol.length - j * fib.mol.distanceAtoms) * cos(theta));
     }
   }
-
 
   /* Bonds */
   fprintf(outf, "\n\nBonds");
