@@ -38,6 +38,9 @@ struct parametersMD_ {
   int cores = 1;
 
   int numMolperDim = 5;
+  bool random = false;
+  double phi = 0.0;
+  double theta = 0.3 * M_PI;
 
   double kAngle = 50.0;
   double kAngle_start = 50.0;

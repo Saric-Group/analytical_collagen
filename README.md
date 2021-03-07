@@ -128,9 +128,9 @@ This is an example of how to list things you need to use the software and how to
    make
    ```
 3. (Optional but recommended) Enter the path to the folder where you installed the program in the config file at
-  ```sh
-  mainPath = /path/to/main/folder/
-  ```
+   ```sh
+   mainPath = /path/to/main/folder/
+   ```
 
 
 
@@ -386,6 +386,19 @@ This is a main function of the code that automizes the creation of topology file
   MD_N = 5
   ```
   Command line option: `-md_N 5`.
+
+* Toggles random orientations for the molecules, i.e. each molecule will have a purely random orientation in the simulation box.
+  ```sh
+  MD_random
+  ```
+  Command line option: `-md_ran`.
+
+* Sets the angles for a homogeneous orientation of all molecules, i.e. all molecules will be parallel with an orientation according to the given angles. This is only functional if random orientations are not toggled.
+  ```sh
+  MD_phi = 0.0
+  MD_theta = 0.94247779607
+  ```
+  Command line options: `-md_phi 0.0`, `-md_theta 0.94247779607`.
 
 * Toggles rigid molecules for the LAMMPS simulation.
   ```sh

@@ -35,9 +35,24 @@ struct md_var {
 };
 
 struct position {
-  double x = 0.;
-  double y = 0.;
-  double z = 0.;
+  double x;
+  double y;
+  double z;
+  double length = 0.;
+
+  /* Constructors */
+  position(double x_ = 0., double y_ = 0., double z_ = 0.)
+  {
+    x = x_;
+    y = y_;
+    z = z_;
+    calcLength();
+  }
+
+  /* Functions */
+  void calcLength();
+  void normalize();
+  void printPos();
 };
 
 struct cubeGrid {
@@ -53,16 +68,13 @@ struct cubeGrid {
     numPoints = numPoints_;
     double shift = length / (numPoints + 1);
     double x, y, z;
-    position pos;
     for (int i = 1; i <= numPoints; i++) {
       x = i * shift - length / 2.0;
       for (int j = 1; j <= numPoints; j++) {
         y = j * shift - length / 2.0;
         for (int k = 1; k <= numPoints; k++) {
           z = k * shift - length / 2.0;
-          pos.x = x;
-          pos.y = y;
-          pos.z = z;
+          position pos{x, y, z};
           gridPoints.push_back(pos);
         }
       }
@@ -74,6 +86,22 @@ struct cubeGrid {
 
 
 /* Functions */
+double dot(position a, position b);
+position normal(position a, position b);
+position getCapsuleA(position centerPoint, double length, double phi,
+                          double theta);
+position getCapsuleB(position centerPoint, double length, double phi,
+                          double theta);
+position closestPtOnLineSegment(position a, position b, position p);
+bool capsuleOverlap(int a, int b, collagenFibril fib,
+                  std::vector<position> &gridPoints,
+                  std::vector<double> &phi_mem,
+                  std::vector<double> &theta_mem);
+bool checkOverlap(int i, int L, std::vector<position> &gridPoints,
+                  std::vector<double> &phi_mem,
+                  std::vector<double> &theta_mem,
+                  collagenFibril fib);
+
 void genTopologyZero(collagenFibril fib, int L);
 void printScriptVars(FILE *outf, md_var var, int tabs);
 std::vector<md_var> collectMDvars(collagenFibril fib);
