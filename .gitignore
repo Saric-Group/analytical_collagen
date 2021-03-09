@@ -1,7 +1,11 @@
 emin
+main
 random_charges
 energy_min.dat
+my.config
 ./*.dat
+*.dat
+*.xyz
 
 # Prerequisites
 *.d
@@ -41,6 +45,11 @@ energy_min.dat
 /dis/*
 /gnuplot/*
 /papers/*
+/build/*
+/scripts/*
+/md/*
+/molecule/others/*
+/storage/*
 
 
 # General
