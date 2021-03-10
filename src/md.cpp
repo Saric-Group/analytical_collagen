@@ -75,6 +75,10 @@ bool capsuleOverlap(int a, int b, collagenFibril fib,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem)
 {
+  if (b < 1) {
+    return false;
+  }
+
   double length = fib.mol.length;
   position a_A = getCapsuleA(gridPoints[a], length, phi_mem[a], theta_mem[a]);
   position a_B = getCapsuleB(gridPoints[a], length, phi_mem[a], theta_mem[a]);
@@ -102,8 +106,8 @@ bool capsuleOverlap(int a, int b, collagenFibril fib,
   bestA = closestPtOnLineSegment(a_A, a_B, bestB);
 
   position pen_normal = normal(bestA, bestB);
-  // 50% safety margin
-  double pen_depth = fib.mol.diameterAtom * 1.5 - pen_normal.length;
+  // 100% safety margin
+  double pen_depth = fib.mol.diameterAtom * 2.0 - pen_normal.length;
 
   return pen_depth > 0;
 }
@@ -115,22 +119,74 @@ bool checkOverlap(int i, int L, std::vector<position> &gridPoints,
 {
   // based on the intersection of two capsules
   // https://wickedengine.net/2020/04/26/capsule-collision-detection/
-  bool overlap = false;
+  int j;
+  /*
+   * max 13 capsules are already placed before the focus capsule i that could
+   * overlapt with it, i.e. the 9 molecules in the layer behind it, three
+   * molecules in the column to the left of it, and finally one atom below it
+   */
 
-  position b_A, b_B, b_n;
-  if (i - 1 >= 0 && i % L != 0) {
-    // capsule below
-    overlap = overlap ? overlap : capsuleOverlap(i, i - 1, fib, gridPoints, phi_mem, theta_mem);
+  // if second param in capsuleOverlap is < 1 it returns false
+
+  // capsule below
+  if (i % L != 0) { // i % L = 0 are the bottom molecules
+    if (capsuleOverlap(i, i - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
   }
-  if (!overlap && i - L >= 0 && i % (L * L) >= L) {
-    // capsule to the left
-    overlap = overlap ? overlap : capsuleOverlap(i, i - L, fib, gridPoints, phi_mem, theta_mem);
+
+  // capsules to the left
+  if (i % (L * L) >= L) { // i % (L * L) < L are the outer left molecules
+    j = i - L;
+    // capsule center left
+    if (capsuleOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
+    // capsule below left
+    if (i % L != 0) {
+      if (capsuleOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    }
+    // capsule above left
+    if (i % L != L - 1) {
+      if (capsuleOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    }
   }
-  if (!overlap && i - L * L >= 0) {
-    // capsule behind
-    overlap = overlap ? overlap : capsuleOverlap(i, i - L * L, fib, gridPoints, phi_mem, theta_mem);
+
+  // capsules in layer behind
+  j = i - L * L;
+  // capsule center behind
+  if (capsuleOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
+  // capsule below center behind
+  if (i % L != 0) {
+    if (capsuleOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
   }
-  return overlap;
+  // capsule above center behind
+  if (i % L != L - 1) {
+    if (capsuleOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+  }
+  if (i % (L * L) >= L) {
+    // capsule center left behind
+    if (capsuleOverlap(i, j - L, fib, gridPoints, phi_mem, theta_mem)) return true;
+    // capsule below left behind
+    if (i % L != 0) {
+      if (capsuleOverlap(i, j - L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    }
+    // capsule above left behind
+    if (i % L != L - 1) {
+      if (capsuleOverlap(i, j - L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    }
+  }
+  if (i % (L * L) >= L * (L - 1)) { // i % (L * L) < L * (L - 1) are the outer right molecules
+    // capsule center right behind
+    if (capsuleOverlap(i, j + L, fib, gridPoints, phi_mem, theta_mem)) return true;
+    // capsule below right behind
+    if (i % L != 0) {
+      if (capsuleOverlap(i, j + L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    }
+    // capsule above right behind
+    if (i % L != L - 1) {
+      if (capsuleOverlap(i, j + L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    }
+  }
+
+  // if there was not a single overlap, return false
+  return false;
 }
 
 void genTopologyZero(collagenFibril fib, int L)
