@@ -8,184 +8,178 @@ extern filePaths_ filePaths;
 extern flags_ flags;
 
 
-/* Functions */
-void position::calcLength()
+/* Operators */
+vec3d operator*(const double &k, const vec3d &a)
 {
-  length = x * x + y * y + z * z;
+  return a * k;
+}
+
+std::ostream& operator<<(std::ostream &os, const vec3d &a)
+{
+  os << "(" << a.x << ", " << a.y << ", " << a.z << ")";
+  return os;
+}
+
+
+/* Functions */
+void vec3d::calcLength()
+{
+  length = *this * *this;
   length = sqrt(length);
 }
 
-void position::normalize()
+void vec3d::normalize()
 {
   calcLength();
   if (length != 0) {
-    x /= length;
-    y /= length;
-    z /= length;
+    *this /= length;
   }
   calcLength();
 }
 
-void position::printPos()
+vec3d crossproduct(vec3d a, vec3d b)
 {
-  std::cout << "(" << x << ", " << y << ", " << z << ")";
+  vec3d v(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+  return v;
 }
 
-double dot(position a, position b)
-{
-  return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-position normal(position a, position b)
-{
-  position n{a.x - b.x, a.y - b.y, a.z - b.z};
-  return n;
-}
-
-position getCapsuleA(position centerPoint, double length, double phi,
-                          double theta)
-{
-  double x = centerPoint.x + 0.5 * length * cos(phi) * sin(theta);
-  double y = centerPoint.y + 0.5 * length * sin(phi) * sin(theta);
-  double z = centerPoint.z + 0.5 * length * cos(theta);
-  position A{x, y, z};
-  return A;
-}
-position getCapsuleB(position centerPoint, double length, double phi,
-                          double theta)
+vec3d getLinePtA(vec3d centerPoint, double length, double phi, double theta)
 {
   double x = centerPoint.x - 0.5 * length * cos(phi) * sin(theta);
   double y = centerPoint.y - 0.5 * length * sin(phi) * sin(theta);
   double z = centerPoint.z - 0.5 * length * cos(theta);
-  position B{x, y, z};
-  return B;
+  return vec3d(x, y, z);
 }
 
-position closestPtOnLineSegment(position a, position b, position p)
+vec3d getLinePtB(vec3d centerPoint, double length, double phi, double theta)
 {
-  position ab = normal(b, a);
-  double t = dot(normal(p, a), ab) / dot(ab, ab);
-  t = std::min(std::max(t, 0.0), 1.0);
-  position closest{a.x + ab.x * t, a.y + ab.y * t, a.z + ab.z * t};
-  return closest;
+  double x = centerPoint.x + 0.5 * length * cos(phi) * sin(theta);
+  double y = centerPoint.y + 0.5 * length * sin(phi) * sin(theta);
+  double z = centerPoint.z + 0.5 * length * cos(theta);
+  return vec3d(x, y, z);
 }
 
-bool capsuleOverlap(int a, int b, collagenFibril fib,
-                  std::vector<position> &gridPoints,
+double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2)
+{
+  // just Algebra things
+  vec3d a = a2 - a1;
+  vec3d b = b2 - b1;
+  vec3d n = crossproduct(a, b);
+
+  if (n.length == 0) {
+    return crossproduct(a, b1 - a1).length / a.length;
+  } else {
+    double s = b1 * a - a1 * a;
+    s *= a * b;
+    s /= a * a;
+    s -= b1 * b;
+    s += a1 * b;
+    s /= b * b - (b * a) * (a * b) / (a * a);
+    double t = (b1 * a + s * b * a - a1 * a) / (a * a);
+    s = std::min(std::max(s, 0.0), 1.0);
+    t = std::min(std::max(t, 0.0), 1.0);
+    vec3d c1 = a1 + t * a;
+    vec3d c2 = b1 + s * b;
+    return (c2 - c1).length;
+  }
+}
+
+bool moleculesOverlap(int a, int b, collagenFibril fib,
+                  std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem)
 {
-  if (b < 1) {
+  if (b < 0) {  // no molecules exist with index b < 0
     return false;
   }
 
   double length = fib.mol.length;
-  position a_A = getCapsuleA(gridPoints[a], length, phi_mem[a], theta_mem[a]);
-  position a_B = getCapsuleB(gridPoints[a], length, phi_mem[a], theta_mem[a]);
-  position b_A = getCapsuleA(gridPoints[b], length, phi_mem[b], theta_mem[b]);
-  position b_B = getCapsuleB(gridPoints[b], length, phi_mem[b], theta_mem[b]);
+  vec3d a_A = getLinePtA(gridPoints[a], length, phi_mem[a], theta_mem[a]);
+  vec3d a_B = getLinePtB(gridPoints[a], length, phi_mem[a], theta_mem[a]);
+  vec3d b_A = getLinePtA(gridPoints[b], length, phi_mem[b], theta_mem[b]);
+  vec3d b_B = getLinePtB(gridPoints[b], length, phi_mem[b], theta_mem[b]);
 
-  position v0 = normal(b_A, a_A);
-  position v1 = normal(b_B, a_A);
-  position v2 = normal(b_A, a_B);
-  position v3 = normal(b_B, a_B);
+  double dist = shortestDistBetweenLines(a_A, a_B, b_A, b_B);
 
-  double d0 = dot(v0, v0);
-  double d1 = dot(v1, v1);
-  double d2 = dot(v2, v2);
-  double d3 = dot(v3, v3);
-
-  position bestA;
-  if (d2 < d0 || d2 < d1 || d3 < d0 || d3 < d1) {
-    bestA = a_B;
-  } else {
-    bestA = a_A;
-  }
-
-  position bestB = closestPtOnLineSegment(b_A, b_B, bestA);
-  bestA = closestPtOnLineSegment(a_A, a_B, bestB);
-
-  position pen_normal = normal(bestA, bestB);
-  // 100% safety margin
-  double pen_depth = fib.mol.diameterAtom * 2.0 - pen_normal.length;
-
-  return pen_depth > 0;
+  // 100% safety margin -> distance of double atom diameter enforced
+  return fib.mol.diameterAtom * 2.0 > dist;
 }
 
-bool checkOverlap(int i, int L, std::vector<position> &gridPoints,
+bool checkOverlap(int i, int L, std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem,
                   collagenFibril fib)
 {
-  // based on the intersection of two capsules
-  // https://wickedengine.net/2020/04/26/capsule-collision-detection/
   int j;
   /*
-   * max 13 capsules are already placed before the focus capsule i that could
-   * overlapt with it, i.e. the 9 molecules in the layer behind it, three
-   * molecules in the column to the left of it, and finally one atom below it
+   * Max 13 molecules are already placed that need to be considered when
+   * placing new molecule i, i.e. the 9 molecules in the layer behind it,
+   * three molecules in the column to the left of it,
+   * and finally one molecule below it.
+   * If only one of those overlaps, we can exit and randomize i's position
+   * anew.
    */
 
-  // if second param in capsuleOverlap is < 1 it returns false
+  // if second param in moleculesOverlap is < 1 it returns false
 
-  // capsule below
+  // one molecule below
   if (i % L != 0) { // i % L = 0 are the bottom molecules
-    if (capsuleOverlap(i, i - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, i - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
   }
 
-  // capsules to the left
+  // three molecules to the left
   if (i % (L * L) >= L) { // i % (L * L) < L are the outer left molecules
     j = i - L;
-    // capsule center left
-    if (capsuleOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
-    // capsule below left
+    // molecule center left
+    if (moleculesOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
+    // molecule below left
     if (i % L != 0) {
-      if (capsuleOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
     }
-    // capsule above left
+    // molecule above left
     if (i % L != L - 1) {
-      if (capsuleOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
     }
   }
 
-  // capsules in layer behind
+  // nine molecules in layer behind
   j = i - L * L;
-  // capsule center behind
-  if (capsuleOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
-  // capsule below center behind
+  // molecule center behind
+  if (moleculesOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
+  // molecule below center behind
   if (i % L != 0) {
-    if (capsuleOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
   }
-  // capsule above center behind
+  // molecule above center behind
   if (i % L != L - 1) {
-    if (capsuleOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
   }
   if (i % (L * L) >= L) {
-    // capsule center left behind
-    if (capsuleOverlap(i, j - L, fib, gridPoints, phi_mem, theta_mem)) return true;
-    // capsule below left behind
+    // molecule center left behind
+    if (moleculesOverlap(i, j - L, fib, gridPoints, phi_mem, theta_mem)) return true;
+    // molecule below left behind
     if (i % L != 0) {
-      if (capsuleOverlap(i, j - L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j - L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
     }
-    // capsule above left behind
+    // molecule above left behind
     if (i % L != L - 1) {
-      if (capsuleOverlap(i, j - L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j - L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
     }
   }
-  if (i % (L * L) >= L * (L - 1)) { // i % (L * L) < L * (L - 1) are the outer right molecules
-    // capsule center right behind
-    if (capsuleOverlap(i, j + L, fib, gridPoints, phi_mem, theta_mem)) return true;
-    // capsule below right behind
+  if (i % (L * L) < L * (L - 1)) { // i % (L * L) >= L * (L - 1) are the outer right molecules
+    // molecule center right behind
+    if (moleculesOverlap(i, j + L, fib, gridPoints, phi_mem, theta_mem)) return true;
+    // molecule below right behind
     if (i % L != 0) {
-      if (capsuleOverlap(i, j + L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j + L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
     }
-    // capsule above right behind
+    // molecule above right behind
     if (i % L != L - 1) {
-      if (capsuleOverlap(i, j + L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j + L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
     }
   }
 
-  // if there was not a single overlap, return false
+  // placement of molecule i is good, no overlap, return false
   return false;
 }
 
@@ -204,7 +198,7 @@ void genTopologyZero(collagenFibril fib, int L)
   result /= (fib.mol.numAtoms - 1) * fib.mol.distanceAtoms * numMol;
   result = 1 / result;
   result = pow(result, 1. / 3.);
-  // Increased the box => lower volume fraction, to keep molecules in box
+  // Increased the box ==> lower volume fraction, to keep molecules in box
   // might need to think about boxsize again
 	double boxlength = result + 1.0 * fib.mol.length;
 	double xlo = -0.5 * boxlength;
