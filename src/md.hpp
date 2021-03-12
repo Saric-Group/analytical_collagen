@@ -34,14 +34,12 @@ struct md_var {
   }
 };
 
-struct position {
-  double x;
-  double y;
-  double z;
+struct vec3d {
+  double x, y, z;
   double length = 0.;
 
   /* Constructors */
-  position(double x_ = 0., double y_ = 0., double z_ = 0.)
+  vec3d(double x_ = 0., double y_ = 0., double z_ = 0.)
   {
     x = x_;
     y = y_;
@@ -52,17 +50,55 @@ struct position {
   /* Functions */
   void calcLength();
   void normalize();
-  void printPos();
+
+  /* Operators */
+  vec3d operator+(const vec3d &a) const
+  {
+    return vec3d(x + a.x, y + a.y, z + a.z);
+  }
+  vec3d operator-(const vec3d &a) const
+  {
+    return vec3d(x - a.x, y - a.y, z - a.z);
+  }
+  vec3d operator*(const double &k) const
+  {
+    return vec3d(k * x, k * y, k * z);
+  }
+  double operator*(const vec3d &a) const
+  {
+    return a.x * x + a.y * y + a.z * z;
+  }
+  vec3d operator*=(const double &k)
+  {
+    x *= k;
+    y *= k;
+    z *= k;
+    return *this;
+  }
+  vec3d operator/(const double &k)
+  {
+    return vec3d(x / k, y / k, z / k);
+  }
+  vec3d operator/=(const double &k)
+  {
+    x /= k;
+    y /= k;
+    z /= k;
+    return *this;
+  }
 };
+vec3d operator*(const double &k, const vec3d &a);
+std::ostream& operator<<(std::ostream &os, const vec3d &a);
+
 
 struct cubeGrid {
   double length;    // length of cube side
   int numPoints;    // points per side, total #points = numPoints^3
-  std::vector<position> gridPoints;
+  std::vector<vec3d> gridPoints;
 
 
   /* Constructors */
-  cubeGrid(double length_, int numPoints_)
+  cubeGrid(double length_ = 100, int numPoints_ = 1)
   {
     length = length_;
     numPoints = numPoints_;
@@ -74,7 +110,7 @@ struct cubeGrid {
         y = j * shift - length / 2.0;
         for (int k = 1; k <= numPoints; k++) {
           z = k * shift - length / 2.0;
-          position pos{x, y, z};
+          vec3d pos(x, y, z);
           gridPoints.push_back(pos);
         }
       }
@@ -86,18 +122,15 @@ struct cubeGrid {
 
 
 /* Functions */
-double dot(position a, position b);
-position normal(position a, position b);
-position getCapsuleA(position centerPoint, double length, double phi,
-                          double theta);
-position getCapsuleB(position centerPoint, double length, double phi,
-                          double theta);
-position closestPtOnLineSegment(position a, position b, position p);
-bool capsuleOverlap(int a, int b, collagenFibril fib,
-                  std::vector<position> &gridPoints,
+vec3d crossproduct(vec3d a, vec3d b);
+vec3d getLinePtA(vec3d centerPoint, double length, double phi, double theta);
+vec3d getLinePtB(vec3d centerPoint, double length, double phi, double theta);
+double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2);
+bool moleculesOverlap(int a, int b, collagenFibril fib,
+                  std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem);
-bool checkOverlap(int i, int L, std::vector<position> &gridPoints,
+bool checkOverlap(int i, int L, std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem,
                   collagenFibril fib);

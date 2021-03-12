@@ -2,8 +2,10 @@
 
 
 /* Variables */
+// int seed = 1337;
 std::random_device device;
 std::mt19937 generator(device());
+// std::mt19937 generator(seed);
 
 
 /* Functions */
