@@ -55,6 +55,7 @@ struct collagenMolecule {
   void readTypes(std::vector<int> vec);
 
   void printAtoms();
+  void printMoleculeInfo();
 };
 
 #endif

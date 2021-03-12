@@ -127,3 +127,17 @@ void collagenMolecule::printAtoms()
     std::cout << "\n#\t" << i << "\t" << atomTypes[i] << "\t" << charges[i];
   }
 }
+
+void collagenMolecule::printMoleculeInfo()
+{
+  std::cout << "\n#\n#";
+  std::cout << "\n# Molecule information:";
+  std::cout << "\n#    Number of atoms: " << numAtoms;
+  std::cout << "\n#    Number of types: " << numTypes;
+  std::cout << "\n#    Molecule length: " << length;
+  std::cout << "\n#    Interatomic distance: " << distanceAtoms;
+  std::cout << "\n#    Atom diameter: " << diameterAtom;
+  std::cout << "\n#    Number of positive charges: " << numPos;
+  std::cout << "\n#    Number of negative charges: " << numNeg;
+  std::cout << "\n#    Total charge: " << totalCharge;
+}
