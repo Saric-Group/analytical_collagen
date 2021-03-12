@@ -602,7 +602,7 @@ void readAtomInfos(collagenFibril &fib)
     fib.mol.printAtoms();
   }
   if (flags.printMoleculeInfo && flags.consoleOutput) {
-    fib.printMoleculeInfo();
+    fib.mol.printMoleculeInfo();
   }
 }
 

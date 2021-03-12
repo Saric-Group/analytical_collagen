@@ -102,7 +102,6 @@ struct collagenFibril {
   /* New functions */
   void minimizeEnergy();
   void writeXYZ();
-  void printMoleculeInfo();
 };
 
 #endif
