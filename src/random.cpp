@@ -119,8 +119,6 @@ void runRandomAnalysis(int samples, collagenFibril fib)
     fprintf(outf, "\n%.4f", fib.radGap);
     fprintf(outf, "\t%.4f", fib.offset);
     fprintf(outf, "\t%.4f", fib.energy);
-    // std::cout << "\n===> offset: " << fib.offset;
-    // std::cout << "\n===> offset / binSize: " << (int) fib.offset / binSize;
     binsGap[(int) fib.radGap / binSize]++;
     binsDper[(int) fib.offset / binSize]++;
     if (abs(fib.offset - targetDper) / targetDper <= tolerance) {
@@ -157,10 +155,4 @@ void runRandomAnalysis(int samples, collagenFibril fib)
   fprintf(outf, "\t%i", binsGap[index_of_max_gap]);
   fprintf(outf, "\t%i", samples);
   fclose(outf);
-
-  // create random distributions -> ok
-  // measure d-periodicity and radial gap -> to file ok
-  // count values in bins -> to file ok
-  // count gap distribution only for right d-periodicities -> to file ok
-  // measure peak value vs total charge
 }
