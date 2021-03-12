@@ -29,6 +29,7 @@ struct filePaths_ {
 };
 
 struct flags_ {
+  bool help = false;
   bool consoleOutput = false;
   bool set_output = false; // @Joel: what is this used for?
   bool csv_output = false;

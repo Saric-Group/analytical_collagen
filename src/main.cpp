@@ -21,6 +21,7 @@ int main(int argc, char const *argv[])
   programInfo();
 
   collagenFibril fib;
+  collagenMolecule mol;
 
   if (parse_all_args(argc, argv, fib) != 1) {
     return 0;
@@ -43,7 +44,8 @@ int main(int argc, char const *argv[])
 
   if (flags.development) {
     std::cout << "\n#\n# Testing new config:";
-    parse_config();
+    parse_config(mol);
+    std::cout << "\n# ---> mainpath: " << filePaths.mainpath;
   }
 
   /************************************************************************/

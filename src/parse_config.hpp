@@ -2,11 +2,12 @@
 #define PARSE_CONFIG
 
 #include "main.hpp"
+#include "collmol.hpp"
 #include <locale.h>
 #include "config4cpp/include/config4cpp/Configuration.h"
 
 
 /* Functions */
-void parse_config();
+void parse_config(collagenMolecule mol);
 
 #endif

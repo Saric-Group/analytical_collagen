@@ -1,26 +1,51 @@
 #include "parse_config.hpp"
 
+using namespace config4cpp;
+
+
+/* Variables */
+extern filePaths_ filePaths;
+extern flags_ flags;
+
 
 /* Functions */
-void parse_config()
+void parse_config(collagenMolecule mol)
 {
-  setlocale(LC_ALL, "");
-
-  const char *remoteConfig = "exec#curl -sS https://github.com/Saric-Group/analytical_collagen/tree/new_config%2Bcleanup/config/test.config";
+  setlocale(LC_ALL, "en_US.UTF-8");
+  std::string tmp = "";
 
   const char *scope = "collagen";
-
-  bool consOut;
-
-  config4cpp::Configuration *cfg = config4cpp::Configuration::create();
+  Configuration *cfg = Configuration::create();
 
   try {
-    cfg->parse(remoteConfig);
-    consOut = cfg->lookupBoolean(scope, "consoleOutput");
-  } catch (const config4cpp::ConfigurationException &ex) {
+    cfg->parse("./config/test.config");
+
+    /* General */
+    filePaths.mainpath = cfg->lookupString(scope, "general.mainpath");
+
+    /* Flags */
+    flags.consoleOutput = cfg->lookupBoolean(scope, "flags.consoleOutput");
+    flags.help = cfg->lookupBoolean(scope, "flags.help");
+    flags.measureTime = cfg->lookupBoolean(scope, "flags.measureTime");
+
+    /* io */
+    filePaths.inputpath = cfg->lookupString(scope, "io.input");
+    filePaths.outputpath = cfg->lookupString(scope, "io.output");
+    filePaths.md_outputpath = cfg->lookupString(scope, "io.mdoutput");
+
+    /* molecule */
+    flags.printAtomInfo = cfg->lookupBoolean(scope, "molecule.printAtomInfo");
+    tmp = "molecule.printMoleculeInfo";
+    flags.printMoleculeInfo = cfg->lookupBoolean(scope, tmp.c_str());
+    mol.diameterAtom = cfg->lookupFloat(scope, "molecule.diameterAtom");
+    mol.distanceAtoms = cfg->lookupFloat(scope, "molecule.distanceAtoms");
+
+    /* layerModel */
+
+  } catch (const ConfigurationException &ex) {
     std::cerr << ex.c_str() << "\n";
     cfg->destroy();
   }
-  std::cout << "\n# -> console output: " << consOut;
+
   cfg->destroy();
 }
