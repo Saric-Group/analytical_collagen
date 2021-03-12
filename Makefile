@@ -3,7 +3,7 @@
 CC = g++
 
 # Options for compiler
-CFLAGS = -march=native -O2 -std=c++11 -Wall -c
+CFLAGS = -march=native -O2 -I$(SRCDIR)/config4cpp/include/ -std=c++11 -Wall -Wno-deprecated -c
 
 # cpp files & objects
 SRC = $(wildcard src/*.cpp)
@@ -20,7 +20,7 @@ all: main
 
 # Creates the final programm from the object files in build
 main: $(OBJ)
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ -L$(SRCDIR)/config4cpp/lib -lconfig4cpp
 #-lm -lgsl -lgslcblas -lgd
 
 # Creates all object files in build from the .cpp files in src

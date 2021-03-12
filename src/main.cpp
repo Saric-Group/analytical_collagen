@@ -7,6 +7,8 @@
 #include "funcs.hpp"
 #include "md.hpp"
 #include "cg.hpp"
+#include "parse_config.hpp"
+
 
 
 /* Settings */
@@ -40,6 +42,8 @@ int main(int argc, char const *argv[])
   }
 
   if (flags.development) {
+    std::cout << "\n#\n# Testing new config:";
+    parse_config();
   }
 
   /************************************************************************/
