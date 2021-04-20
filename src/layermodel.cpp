@@ -1,11 +1,11 @@
-#include "collfibril.hpp"
+#include "layermodel.hpp"
 
 /* Variables */
 extern filePaths_ filePaths;
 extern flags_ flags;
 
 /* Functions */
-double collagenFibril::distance(double pos, double first, int n, double lat_gap)
+double layerModel::distance(double pos, double first, int n, double lat_gap)
 {
     double d;
     d = first + n * mol.distanceAtoms - pos;
@@ -15,12 +15,12 @@ double collagenFibril::distance(double pos, double first, int n, double lat_gap)
     return d;
 }
 
-double collagenFibril::factorLJ(double d)
+double layerModel::factorLJ(double d)
 {
     return 4. * (pow(1. / d, 12.) - pow(1. / d, 6.));
 }
 
-double collagenFibril::LJ_per_mol(double pos, double dx, double ref, double lat_gap)
+double layerModel::LJ_per_mol(double pos, double dx, double ref, double lat_gap)
 {
   double d, sum;
   int left, right;
@@ -81,7 +81,7 @@ double collagenFibril::LJ_per_mol(double pos, double dx, double ref, double lat_
   return sum;
 }
 
-double collagenFibril::LJ_layer(double pos, double dx, int layer, double offset,
+double layerModel::LJ_layer(double pos, double dx, int layer, double offset,
                 double lat_gap, double box)
 {
   double sum = 0;
@@ -92,7 +92,7 @@ double collagenFibril::LJ_layer(double pos, double dx, int layer, double offset,
   return sum;
 }
 
-double collagenFibril::compLJ(double lat_gap, double rad_gap, double offset)
+double layerModel::compLJ(double lat_gap, double rad_gap, double offset)
 {
   double pos, sum, box;
   int left, right;
@@ -135,7 +135,7 @@ double collagenFibril::compLJ(double lat_gap, double rad_gap, double offset)
   return sum;
 }
 
-double collagenFibril::factorCD(double q1, double q2, double d)
+double layerModel::factorCD(double q1, double q2, double d)
 {
     double tmp = 0;
     double CDconst = 1.0;
@@ -147,7 +147,7 @@ double collagenFibril::factorCD(double q1, double q2, double d)
     return tmp;
 }
 
-double collagenFibril::CD_per_mol(double pos, double q1, double dx, double ref, double lat_gap)
+double layerModel::CD_per_mol(double pos, double q1, double dx, double ref, double lat_gap)
 {
     double d, sum, q2;
     int left, right;
@@ -170,7 +170,7 @@ double collagenFibril::CD_per_mol(double pos, double q1, double dx, double ref, 
     return sum;
 }
 
-double collagenFibril::CD_layer(double pos, double q1, double dx, int layer, double offset,
+double layerModel::CD_layer(double pos, double q1, double dx, int layer, double offset,
                 double lat_gap, double box)
 {
   double sum = 0;
@@ -181,7 +181,7 @@ double collagenFibril::CD_layer(double pos, double q1, double dx, int layer, dou
   return sum;
 }
 
-double collagenFibril::compCD(double lat_gap, double rad_gap, double offset)
+double layerModel::compCD(double lat_gap, double rad_gap, double offset)
 {
   double pos, sum, q1, q2, d, box;
   int left, right;
@@ -230,7 +230,7 @@ double collagenFibril::compCD(double lat_gap, double rad_gap, double offset)
   return sum;
 }
 
-int collagenFibril::produce_xyz(int numatoms, int rows, double distatom, double latgap, double radgap, double offset, int id[], int type[], double charges[], double xpos[], double ypos[], double zpos[])
+int layerModel::produce_xyz(int numatoms, int rows, double distatom, double latgap, double radgap, double offset, int id[], int type[], double charges[], double xpos[], double ypos[], double zpos[])
 {
 
   //cout << natoms << endl;
@@ -267,7 +267,7 @@ int collagenFibril::produce_xyz(int numatoms, int rows, double distatom, double 
 
 }
 
-int collagenFibril::output_xyz(std::string filename, int rows, double latgap, double radgap, double offset)
+int layerModel::output_xyz(std::string filename, int rows, double latgap, double radgap, double offset)
 {
 
   int natoms = layers * rows * mol.numAtoms;
@@ -310,7 +310,7 @@ int collagenFibril::output_xyz(std::string filename, int rows, double latgap, do
   return err;
 }
 
-std::string collagenFibril::hash_output()
+std::string layerModel::hash_output()
 {
   //create a unique code for the output file
 
@@ -375,7 +375,7 @@ std::string collagenFibril::hash_output()
     return filePaths.outputpath;
 }
 
-void collagenFibril::header(std::string &file)
+void layerModel::header(std::string &file)
 {
   FILE *outf;
   outf = fopen(file.c_str(), "w");
@@ -395,7 +395,7 @@ void collagenFibril::header(std::string &file)
   fclose(outf);
 }
 
-void collagenFibril::singleEmin()
+void layerModel::singleEmin()
 {
   std::cout << "\n#\n#";
   double latGap_ = mol.diameterAtom;
@@ -451,7 +451,7 @@ void collagenFibril::singleEmin()
     }
   }
 
-  if(flags.charge_hashed_outputs)
+  if(parameters.chargehash)
   {
     hash_output();
   }
@@ -466,12 +466,12 @@ void collagenFibril::singleEmin()
   }
   std::string xyzbasefile = "";
 
-  if(flags.xyz_outputs){
+  if(parameters.xyz_outputs){
     xyzbasefile = filePaths.outputpath;
   }
 
   FILE *outf;
-  if (flags.csv_output) {
+  if (parameters.csv_output) {
     filePaths.outputpath += filePaths.csv_extension;
     outf = fopen(filePaths.outputpath.c_str(), "w");
     fprintf(outf, "LJ_epsilon,");
@@ -494,7 +494,7 @@ void collagenFibril::singleEmin()
   outf = fopen(filePaths.outputpath.c_str(), "a");
   /* Both LJ and CD potential */
   std::string separator;
-  if (flags.csv_output) {
+  if (parameters.csv_output) {
     separator = ",";
   } else {
     separator = "\t";
@@ -511,7 +511,7 @@ void collagenFibril::singleEmin()
           fprintf(outf, "%s%.3f", separator.c_str(), eCDmin[i][j]);                        //E_CD min
           fprintf(outf, "%s%.3f", separator.c_str(), eLJmin[i][j]);                        //E_LJ min
           fprintf(outf, "%s%.3f", separator.c_str(), eTotmin[i][j]);                       //E_tot min
-          if(flags.xyz_outputs){
+          if(parameters.xyz_outputs){
             std::string xyzfile = xyzbasefile;
             xyzfile += "-"
               + replace_char(clean_to_string(parameters.lj_min + (i) * parameters.lj_stepsize),'.','_')
@@ -527,40 +527,45 @@ void collagenFibril::singleEmin()
   fclose(outf);
 }
 
-void collagenFibril::minimizeEnergy()
+void layerModel::minimizeEnergy()
 {
   double latGap_ = mol.diameterAtom;
-  double radGap_ = mol.diameterAtom;
-  double offset_ = mol.diameterAtom;
-  double energy_ = 1e16;
+  double gap;
+  double off;
+  double cdEnergy_ = 5e15;
+  double ljEnergy_ = 5e15;
+  double energy_ = cdEnergy_ + ljEnergy_;
   double a = 1.0;
-  // int N = 0.5 * (a * mol.numAtoms + 1) * (a * mol.numAtoms + 2);
-  // int counter = 0;
+  int M = ceil(a * (mol.length - mol.diameterAtom) / offset_stepsize);
+  int N = ceil(a * (mol.length - mol.diameterAtom) / gap_stepsize);
+  int total = 0.5 * N * (2 * M - N + 1);
+  int counter = 0;
 
   /* We do not vary the lateral gap here */
-  for (int rad = 0; rad <= a * mol.numAtoms; rad++) {
-    // std::cout << "\nrad: " << rad;
-    offset_ = radGap_;
-    for (int off = rad; off <= a * mol.numAtoms; off++) {
-      energy_ = compCD(latGap_, radGap_, offset_);
-      // std::cout << "\nradGap: " << radGap_;
-      // std::cout << "\toffset: " << offset_;
-      // std::cout << "\tenergy: " << energy_;
+  for (gap = mol.diameterAtom; gap <= mol.length; gap += gap_stepsize / a) {
+    for (off = gap; off <= mol.length; off += offset_stepsize / a) {
+      cdEnergy_ = compCD(latGap_, gap, off) / parameters.cd;
+      if (parameters.lj != 0.0) {
+        ljEnergy_ = compLJ(latGap_, gap, off) * parameters.lj;
+      } else {
+        ljEnergy_ = 0.0;
+      }
+      energy_ = cdEnergy_ + ljEnergy_;
       if (energy_ < energy) {
+        cdEnergy = cdEnergy_;
+        ljEnergy = ljEnergy_;
         energy = energy_;
         latGap = latGap_;
-        radGap = radGap_;
-        offset = offset_;
+        radGap = gap;
+        offset = off;
       }
-      offset_ += mol.distanceAtoms / a;
-      // counter++;
-      // progresssBar(1.0 * counter / N, " fibril -> minimize energy ");
+      counter++;
+      progresssBar(1.0 * counter / total, " configuration -> minimize energy ");
     }
-    radGap_ += mol.distanceAtoms / a;
   }
 }
 
-void collagenFibril::writeXYZ()
+void layerModel::writeXYZ()
 {
   FILE *outf;
   std::string file = filePaths.outputpath;
@@ -600,6 +605,44 @@ void collagenFibril::writeXYZ()
       }
     }
   }
+  fclose(outf);
+}
+
+void layerModel::coutConfig()
+{
+  std::cout << "\n#\n# ";
+  std::cout << layers << " layers configuration:";
+  std::cout << "\n# energy: " << energy;
+  std::cout << "\n# cdEnergy: " << cdEnergy;
+  std::cout << "\n# ljEnergy: " << ljEnergy;
+  std::cout << "\n# radGap: " << radGap;
+  std::cout << "\n# offset: " << offset;
+  std::cout << "\n#";
+}
+
+void layerModel::writeConfig()
+{
+  FILE *outf;
+  filePaths.outputpath += filePaths.csv_extension;
+  outf = fopen(filePaths.outputpath.c_str(), "w");
+  fprintf(outf, "LJ_epsilon,");
+  fprintf(outf, "CD_epsilon,");
+  fprintf(outf, "lateral_gap_min,");
+  fprintf(outf, "radial_gap_min,");
+  fprintf(outf, "offset_min,");
+  // fprintf(outf, "D-periodicity_min,");
+  fprintf(outf, "E_CD_min,");
+  fprintf(outf, "E_LJ_min,");
+  fprintf(outf, "E_total_min");
+  fprintf(outf, "\n");
+  fprintf(outf, "%.3f,", parameters.cd);
+  fprintf(outf, "%.3f,", parameters.lj);
+  fprintf(outf, "%.3f,", latGap);
+  fprintf(outf, "%.3f,", radGap);
+  fprintf(outf, "%.3f,", offset);
+  fprintf(outf, "%.3f,", cdEnergy);
+  fprintf(outf, "%.3f,", ljEnergy);
+  fprintf(outf, "%.3f", energy);
   fclose(outf);
 }
 

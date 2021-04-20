@@ -20,6 +20,7 @@ all: main
 
 # Creates the final programm from the object files in build
 main: $(OBJ)
+	$(MAKE) -C ./src/config4cpp &> /dev/null
 	$(CC) -o $@ $^ -L$(SRCDIR)/config4cpp/lib -lconfig4cpp
 #-lm -lgsl -lgslcblas -lgd
 
@@ -35,3 +36,4 @@ $(OBJDIR)/.dirstamp:
 # Cleans the build directory and removes the programm
 clean:
 	rm -rf $(OBJDIR) main
+	$(MAKE) -C ./src/config4cpp clean > /dev/null

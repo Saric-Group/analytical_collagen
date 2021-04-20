@@ -4,7 +4,7 @@
 #include "main.hpp"
 #include "parse.hpp"
 #include "collmol.hpp"
-#include "collfibril.hpp"
+#include "layermodel.hpp"
 
 
 /* Classes and structures */
@@ -69,13 +69,14 @@ struct overrides_ {
 
 
 /* Functions */
-int process_arg(std::string strarg, int* errcodes, bool dashes, collagenFibril &fib);
-int read_config_file(std::string path, collagenFibril &fib);
-int read_args(int argc, char const *argv[], collagenFibril &fib);
-int parse_all_args(int argc, char const *argv[], collagenFibril &fib);
-void readAtomInfos(collagenFibril &fib);
+int process_arg(std::string strarg, int* errcodes, bool dashes, layerModel &lm, collagenMolecule &mol);
+int read_config_file(std::string path, layerModel &lm, collagenMolecule &mol);
+int read_args(int argc, char const *argv[], layerModel &lm, collagenMolecule &mol);
+int parse_all_args(int argc, char const *argv[], layerModel &lm, collagenMolecule &mol);
+void readAtomInfos(collagenMolecule &mol);
+void prioParse(int argc, char const *argv[]);
 void programInfo();
-void printOptions(collagenFibril fib);
+void printOptions(collagenMolecule mol, layerModel lm);
 void getTime(time_point &tp);
 void printCompTime(time_point start, time_point end);
 void print_help();

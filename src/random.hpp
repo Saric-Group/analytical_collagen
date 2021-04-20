@@ -2,7 +2,7 @@
 #define RANDOM
 
 #include "main.hpp"
-#include "collfibril.hpp"
+#include "layermodel.hpp"
 
 #include <random>
 
@@ -13,7 +13,7 @@ std::vector<double> createRandomChargeDistribution(collagenMolecule mol);
 void countCharges(std::vector<double> vec, int &pos, int&neg);
 void printChargeDistribution(std::vector<double> vec);
 
-void runRandomAnalysis(int samples, collagenFibril fib);
+void runRandomAnalysis(int samples, layerModel lm);
 
 
 #endif

@@ -2,7 +2,7 @@
 #define MD
 
 #include "main.hpp"
-#include "collfibril.hpp"
+#include "layermodel.hpp"
 #include "random.hpp"
 
 
@@ -126,22 +126,22 @@ vec3d crossproduct(vec3d a, vec3d b);
 vec3d getLinePtA(vec3d centerPoint, double length, double phi, double theta);
 vec3d getLinePtB(vec3d centerPoint, double length, double phi, double theta);
 double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2);
-bool moleculesOverlap(int a, int b, collagenFibril fib,
+bool moleculesOverlap(int a, int b, collagenMolecule mol,
                   std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem);
 bool checkOverlap(int i, int L, std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem,
-                  collagenFibril fib);
+                  collagenMolecule mol);
 
-void genTopologyZero(collagenFibril fib, int L);
+void genTopologyZero(collagenMolecule mol, int L);
 void printScriptVars(FILE *outf, md_var var, int tabs);
-std::vector<md_var> collectMDvars(collagenFibril fib);
+std::vector<md_var> collectMDvars(collagenMolecule mol);
 std::string getDir(std::vector<md_var> md_vars, bool pvalues = false);
 std::string getCargs(std::vector<md_var> md_vars);
-void genInSim(collagenFibril fib);
-void genQsub(collagenFibril fib);
-void genBashScript(collagenFibril fib);
-void createLAMMPSfiles(collagenFibril fib);
+void genInSim(collagenMolecule mol);
+void genQsub(collagenMolecule mol);
+void genBashScript(collagenMolecule mol);
+void createLAMMPSfiles(collagenMolecule mol);
 #endif

@@ -84,7 +84,7 @@ double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2)
   }
 }
 
-bool moleculesOverlap(int a, int b, collagenFibril fib,
+bool moleculesOverlap(int a, int b, collagenMolecule mol,
                   std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem)
@@ -93,7 +93,7 @@ bool moleculesOverlap(int a, int b, collagenFibril fib,
     return false;
   }
 
-  double length = fib.mol.length;
+  double length = mol.length;
   vec3d a_A = getLinePtA(gridPoints[a], length, phi_mem[a], theta_mem[a]);
   vec3d a_B = getLinePtB(gridPoints[a], length, phi_mem[a], theta_mem[a]);
   vec3d b_A = getLinePtA(gridPoints[b], length, phi_mem[b], theta_mem[b]);
@@ -102,13 +102,13 @@ bool moleculesOverlap(int a, int b, collagenFibril fib,
   double dist = shortestDistBetweenLines(a_A, a_B, b_A, b_B);
 
   // 100% safety margin -> distance of double atom diameter enforced
-  return fib.mol.diameterAtom * 2.0 > dist;
+  return mol.diameterAtom * 2.0 > dist;
 }
 
 bool checkOverlap(int i, int L, std::vector<vec3d> &gridPoints,
                   std::vector<double> &phi_mem,
                   std::vector<double> &theta_mem,
-                  collagenFibril fib)
+                  collagenMolecule mol)
 {
   int j;
   /*
@@ -124,58 +124,58 @@ bool checkOverlap(int i, int L, std::vector<vec3d> &gridPoints,
 
   // one molecule below
   if (i % L != 0) { // i % L = 0 are the bottom molecules
-    if (moleculesOverlap(i, i - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, i - 1, mol, gridPoints, phi_mem, theta_mem)) return true;
   }
 
   // three molecules to the left
   if (i % (L * L) >= L) { // i % (L * L) < L are the outer left molecules
     j = i - L;
     // molecule center left
-    if (moleculesOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j, mol, gridPoints, phi_mem, theta_mem)) return true;
     // molecule below left
     if (i % L != 0) {
-      if (moleculesOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j - 1, mol, gridPoints, phi_mem, theta_mem)) return true;
     }
     // molecule above left
     if (i % L != L - 1) {
-      if (moleculesOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j + 1, mol, gridPoints, phi_mem, theta_mem)) return true;
     }
   }
 
   // nine molecules in layer behind
   j = i - L * L;
   // molecule center behind
-  if (moleculesOverlap(i, j, fib, gridPoints, phi_mem, theta_mem)) return true;
+  if (moleculesOverlap(i, j, mol, gridPoints, phi_mem, theta_mem)) return true;
   // molecule below center behind
   if (i % L != 0) {
-    if (moleculesOverlap(i, j - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j - 1, mol, gridPoints, phi_mem, theta_mem)) return true;
   }
   // molecule above center behind
   if (i % L != L - 1) {
-    if (moleculesOverlap(i, j + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j + 1, mol, gridPoints, phi_mem, theta_mem)) return true;
   }
   if (i % (L * L) >= L) {
     // molecule center left behind
-    if (moleculesOverlap(i, j - L, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j - L, mol, gridPoints, phi_mem, theta_mem)) return true;
     // molecule below left behind
     if (i % L != 0) {
-      if (moleculesOverlap(i, j - L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j - L - 1, mol, gridPoints, phi_mem, theta_mem)) return true;
     }
     // molecule above left behind
     if (i % L != L - 1) {
-      if (moleculesOverlap(i, j - L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j - L + 1, mol, gridPoints, phi_mem, theta_mem)) return true;
     }
   }
   if (i % (L * L) < L * (L - 1)) { // i % (L * L) >= L * (L - 1) are the outer right molecules
     // molecule center right behind
-    if (moleculesOverlap(i, j + L, fib, gridPoints, phi_mem, theta_mem)) return true;
+    if (moleculesOverlap(i, j + L, mol, gridPoints, phi_mem, theta_mem)) return true;
     // molecule below right behind
     if (i % L != 0) {
-      if (moleculesOverlap(i, j + L - 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j + L - 1, mol, gridPoints, phi_mem, theta_mem)) return true;
     }
     // molecule above right behind
     if (i % L != L - 1) {
-      if (moleculesOverlap(i, j + L + 1, fib, gridPoints, phi_mem, theta_mem)) return true;
+      if (moleculesOverlap(i, j + L + 1, mol, gridPoints, phi_mem, theta_mem)) return true;
     }
   }
 
@@ -183,7 +183,7 @@ bool checkOverlap(int i, int L, std::vector<vec3d> &gridPoints,
   return false;
 }
 
-void genTopologyZero(collagenFibril fib, int L)
+void genTopologyZero(collagenMolecule mol, int L)
 {
   // number of molecules per sidelength of cubic box
   // #define L 10
@@ -195,12 +195,12 @@ void genTopologyZero(collagenFibril fib, int L)
   // to be in line with Anne's volume fraction, we have to calculate:
   double result = 0.0;
   result = (36 - 1) * 0.255 * 1000 / (100 * 100 * 100);
-  result /= (fib.mol.numAtoms - 1) * fib.mol.distanceAtoms * numMol;
+  result /= (mol.numAtoms - 1) * mol.distanceAtoms * numMol;
   result = 1 / result;
   result = pow(result, 1. / 3.);
   // Increased the box ==> lower volume fraction, to keep molecules in box
   // might need to think about boxsize again
-	double boxlength = result + 1.0 * fib.mol.length;
+	double boxlength = result + 1.0 * mol.length;
 	double xlo = -0.5 * boxlength;
 	double ylo = -0.5 * boxlength;
 	double zlo = -0.5 * boxlength;
@@ -209,20 +209,21 @@ void genTopologyZero(collagenFibril fib, int L)
 	double zhi = 0.5 * boxlength;
 
   std::string file = filePaths.md_outputpath;
-  file += "topology.0time";
+  file += mol.parametersMD.topFile;
+  // file += "topology.0time";
   FILE *outf;
   outf = fopen(file.c_str(), "w");
 
   /* LAMMPS Descritption */
   fprintf(outf, "LAMMPS Description\n\n");
 
-  fprintf(outf, "\t%i atoms", numMol * fib.mol.numAtoms);
-  fprintf(outf, "\n\t%i bonds", numMol * (fib.mol.numAtoms - 1));
-  fprintf(outf, "\n\t%i angles", numMol * (fib.mol.numAtoms - 2));
+  fprintf(outf, "\t%i atoms", numMol * mol.numAtoms);
+  fprintf(outf, "\n\t%i bonds", numMol * (mol.numAtoms - 1));
+  fprintf(outf, "\n\t%i angles", numMol * (mol.numAtoms - 2));
   fprintf(outf, "\n\t0 dihedrals");
   fprintf(outf, "\n\t0 impropers");
 
-  fprintf(outf, "\n\n\t%i atom types", (int) fib.mol.numTypes);
+  fprintf(outf, "\n\n\t%i atom types", (int) mol.numTypes);
   fprintf(outf, "\n\t1 bond types");
   fprintf(outf, "\n\t1 angle types");
   fprintf(outf, "\n\t0 dihedral types");
@@ -236,7 +237,7 @@ void genTopologyZero(collagenFibril fib, int L)
   /* Masses */
   fprintf(outf, "\n\nMasses");
   fprintf(outf, "\n");
-  for (int i = 0; i < fib.mol.numTypes; i++) {
+  for (int i = 0; i < mol.numTypes; i++) {
     fprintf(outf, "\n\t%i 1.000", i + 1);
   }
 
@@ -247,18 +248,18 @@ void genTopologyZero(collagenFibril fib, int L)
   fprintf(outf, "\n\nAtoms");
   fprintf(outf, "\n");
   std::uniform_real_distribution<double> dis_real(0.0, M_PI);
-  double phi = fib.parametersMD.phi;
-  double theta = fib.parametersMD.theta;
-  if (!fib.parametersMD.random) {
+  double phi = mol.parametersMD.phi;
+  double theta = mol.parametersMD.theta;
+  if (!mol.parametersMD.random) {
     phi_mem.assign(numMol, phi);
     theta_mem.assign(numMol, theta);
-    if (checkOverlap(numMol / 2, L, grid.gridPoints, phi_mem, theta_mem, fib)) {
+    if (checkOverlap(numMol / 2, L, grid.gridPoints, phi_mem, theta_mem, mol)) {
       std::cout << "\n#  ERROR: overlapping molecules, choose other orientation angles! ";
       return;
     }
   }
   for (int i = 0; i < numMol; i++) {
-    if (fib.parametersMD.random) {
+    if (mol.parametersMD.random) {
       bool overlap = false;
       do {
         if (overlap) {
@@ -269,17 +270,17 @@ void genTopologyZero(collagenFibril fib, int L)
         theta = dis_real(generator);
         phi_mem.push_back(phi);
         theta_mem.push_back(theta);
-        overlap = checkOverlap(i, L, grid.gridPoints, phi_mem, theta_mem, fib);
+        overlap = checkOverlap(i, L, grid.gridPoints, phi_mem, theta_mem, mol);
       } while(overlap);
     }
-    for (int j = 0; j < fib.mol.numAtoms; j++) {
-      fprintf(outf, "\n\t%i", i * fib.mol.numAtoms + j + 1);  // Atom ID
+    for (int j = 0; j < mol.numAtoms; j++) {
+      fprintf(outf, "\n\t%i", i * mol.numAtoms + j + 1);  // Atom ID
       fprintf(outf, " %i", i + 1);  // Molecule ID
-      fprintf(outf, " %i", fib.mol.atomTypes[j]);   // Atom type
-      fprintf(outf, " %.6f", fib.mol.charges[j]);   // Atom charge
-      fprintf(outf, " %.6f", grid.gridPoints[i].x - (0.5 * fib.mol.length - j * fib.mol.distanceAtoms) * cos(phi) * sin(theta));
-      fprintf(outf, " %.6f", grid.gridPoints[i].y - (0.5 * fib.mol.length - j * fib.mol.distanceAtoms) * sin(phi) * sin(theta));
-      fprintf(outf, " %.6f", grid.gridPoints[i].z - (0.5 * fib.mol.length - j * fib.mol.distanceAtoms) * cos(theta));
+      fprintf(outf, " %i", mol.atomTypes[j]);   // Atom type
+      fprintf(outf, " %.6f", mol.charges[j]);   // Atom charge
+      fprintf(outf, " %.6f", grid.gridPoints[i].x - (0.5 * mol.length - j * mol.distanceAtoms) * cos(phi) * sin(theta));
+      fprintf(outf, " %.6f", grid.gridPoints[i].y - (0.5 * mol.length - j * mol.distanceAtoms) * sin(phi) * sin(theta));
+      fprintf(outf, " %.6f", grid.gridPoints[i].z - (0.5 * mol.length - j * mol.distanceAtoms) * cos(theta));
     }
   }
 
@@ -287,11 +288,11 @@ void genTopologyZero(collagenFibril fib, int L)
   fprintf(outf, "\n\nBonds");
   fprintf(outf, "\n");
   for (int i = 0; i < numMol; i++) {
-    for (int j = 1; j < fib.mol.numAtoms; j++) {
-      fprintf(outf, "\n\t%i", i * (fib.mol.numAtoms - 1) + j);  // Bond ID
+    for (int j = 1; j < mol.numAtoms; j++) {
+      fprintf(outf, "\n\t%i", i * (mol.numAtoms - 1) + j);  // Bond ID
       fprintf(outf, " 1");    // Bond type
-      fprintf(outf, " %i", i * fib.mol.numAtoms + j);   // Atom 1 ID
-      fprintf(outf, " %i", i * fib.mol.numAtoms + j + 1);    // Atom 2 ID
+      fprintf(outf, " %i", i * mol.numAtoms + j);   // Atom 1 ID
+      fprintf(outf, " %i", i * mol.numAtoms + j + 1);    // Atom 2 ID
     }
   }
 
@@ -300,12 +301,12 @@ void genTopologyZero(collagenFibril fib, int L)
   fprintf(outf, "\n\nAngles");
   fprintf(outf, "\n");
   for (int i = 0; i < numMol; i++) {
-    for (int j = 1; j < fib.mol.numAtoms - 1; j++) {
-      fprintf(outf, "\n\t%i", i * (fib.mol.numAtoms - 2) + j);  // Angle ID
+    for (int j = 1; j < mol.numAtoms - 1; j++) {
+      fprintf(outf, "\n\t%i", i * (mol.numAtoms - 2) + j);  // Angle ID
       fprintf(outf, " 1");    // Angle type
-      fprintf(outf, " %i", i * fib.mol.numAtoms + j);   // Atom 1 ID
-      fprintf(outf, " %i", i * fib.mol.numAtoms + j + 1);    // Atom 2 ID
-      fprintf(outf, " %i", i * fib.mol.numAtoms + j + 2);    // Atom 3 ID
+      fprintf(outf, " %i", i * mol.numAtoms + j);   // Atom 1 ID
+      fprintf(outf, " %i", i * mol.numAtoms + j + 1);    // Atom 2 ID
+      fprintf(outf, " %i", i * mol.numAtoms + j + 2);    // Atom 3 ID
     }
   }
 
@@ -338,32 +339,32 @@ void printScriptVars(FILE *outf, md_var var, int tabs)
   fprintf(outf, "do");
 }
 
-std::vector<md_var> collectMDvars(collagenFibril fib)
+std::vector<md_var> collectMDvars(collagenMolecule mol)
 {
   std::vector<md_var> md_vars;
 
-  if (fib.parametersMD.kAngle_start + fib.parametersMD.kAngle_inc <= fib.parametersMD.kAngle_end) {
-    md_vars.push_back(md_var("ka", sizeof(fib.parametersMD.kAngle_start),
-                &fib.parametersMD.kAngle,
-                std::vector<double *>{&fib.parametersMD.kAngle_start,
-                                      &fib.parametersMD.kAngle_inc,
-                                      &fib.parametersMD.kAngle_end}, 1));
+  if (mol.parametersMD.kAngle_start + mol.parametersMD.kAngle_inc <= mol.parametersMD.kAngle_end) {
+    md_vars.push_back(md_var("ka", sizeof(mol.parametersMD.kAngle_start),
+                &mol.parametersMD.kAngle,
+                std::vector<double *>{&mol.parametersMD.kAngle_start,
+                                      &mol.parametersMD.kAngle_inc,
+                                      &mol.parametersMD.kAngle_end}, 1));
   }
 
-  if (fib.parametersMD.LJepsilon_start + fib.parametersMD.LJepsilon_inc <= fib.parametersMD.LJepsilon_end) {
-    md_vars.push_back(md_var("lje", sizeof(fib.parametersMD.LJepsilon_start),
-                &fib.parametersMD.LJepsilon,
-                std::vector<double *>{&fib.parametersMD.LJepsilon_start,
-                                      &fib.parametersMD.LJepsilon_inc,
-                                      &fib.parametersMD.LJepsilon_end}, 3));
+  if (mol.parametersMD.LJepsilon_start + mol.parametersMD.LJepsilon_inc <= mol.parametersMD.LJepsilon_end) {
+    md_vars.push_back(md_var("lje", sizeof(mol.parametersMD.LJepsilon_start),
+                &mol.parametersMD.LJepsilon,
+                std::vector<double *>{&mol.parametersMD.LJepsilon_start,
+                                      &mol.parametersMD.LJepsilon_inc,
+                                      &mol.parametersMD.LJepsilon_end}, 3));
   }
 
-  if (fib.parametersMD.dielectric_start + fib.parametersMD.dielectric_inc <= fib.parametersMD.dielectric_end) {
-    md_vars.push_back(md_var("die", sizeof(fib.parametersMD.dielectric_start),
-                &fib.parametersMD.dielectric,
-                std::vector<double *>{&fib.parametersMD.dielectric_start,
-                                      &fib.parametersMD.dielectric_inc,
-                                      &fib.parametersMD.dielectric_end}, 1));
+  if (mol.parametersMD.dielectric_start + mol.parametersMD.dielectric_inc <= mol.parametersMD.dielectric_end) {
+    md_vars.push_back(md_var("die", sizeof(mol.parametersMD.dielectric_start),
+                &mol.parametersMD.dielectric,
+                std::vector<double *>{&mol.parametersMD.dielectric_start,
+                                      &mol.parametersMD.dielectric_inc,
+                                      &mol.parametersMD.dielectric_end}, 1));
   }
 
   return md_vars;
@@ -413,37 +414,40 @@ std::string getCargs(std::vector<md_var> md_vars)
   return cargs;
 }
 
-void genInSim(collagenFibril fib)
+void genInSim(collagenMolecule mol)
 {
   std::string file = filePaths.md_outputpath;
-  file += "in.sim";
+  file += mol.parametersMD.inputFile;
+  // file += "in.sim";
   FILE *outf;
   outf = fopen(file.c_str(), "w");
 
-  std::vector<md_var> md_vars = collectMDvars(fib);
+  std::vector<md_var> md_vars = collectMDvars(mol);
   std::string dir = getDir(md_vars, true);
 
   fprintf(outf, "log");
-  fprintf(outf, "\t./%slog.sim", dir.c_str());
+  // fprintf(outf, "\t./%slog.sim", dir.c_str());
+  fprintf(outf, "\t./%s", mol.parametersMD.logFile.c_str());
 
   fprintf(outf, "\n\nunits\tlj");
   fprintf(outf,"\natom_style\tfull");
 
   fprintf(outf, "\n\nread_data\t");
-  fprintf(outf, "./topology.0time");
+  fprintf(outf, "./%s", mol.parametersMD.topFile.c_str());
+  // fprintf(outf, "./topology.0time");
 
   fprintf(outf, "\n\nvariable\tLANGEVIN_SEED\tequal\t1337");
 
   fprintf(outf, "\n\nbond_style\tharmonic");
-  fprintf(outf, "\nbond_coeff\t1 500 %.6f", fib.mol.distanceAtoms);
+  fprintf(outf, "\nbond_coeff\t1 500 %.6f", mol.distanceAtoms);
 
   fprintf(outf, "\n\nangle_style\tharmonic");
-  fprintf(outf, "\nangle_coeff\t1 %.1f 180", fib.parametersMD.kAngle);
+  fprintf(outf, "\nangle_coeff\t1 %.1f 180", mol.parametersMD.kAngle);
 
-  fprintf(outf, "\n\npair_style\thybrid/overlay lj/cut %.1f coul/debye 1 %.1f", fib.parametersMD.lj_cutoff, fib.parametersMD.cd_cutoff);
-  fprintf(outf, "\ndielectric\t%.1f", fib.parametersMD.dielectric);
-  fprintf(outf, "\npair_coeff\t* * lj/cut %.3f 1 %.1f", fib.parametersMD.LJepsilon, fib.parametersMD.lj_cutoff);
-  fprintf(outf, "\npair_coeff\t* * coul/debye %.1f", fib.parametersMD.cd_cutoff);
+  fprintf(outf, "\n\npair_style\thybrid/overlay lj/cut %.1f coul/debye 1 %.1f", mol.parametersMD.lj_cutoff, mol.parametersMD.cd_cutoff);
+  fprintf(outf, "\ndielectric\t%.1f", mol.parametersMD.dielectric);
+  fprintf(outf, "\npair_coeff\t* * lj/cut %.3f 1 %.1f", mol.parametersMD.LJepsilon, mol.parametersMD.lj_cutoff);
+  fprintf(outf, "\npair_coeff\t* * coul/debye %.1f", mol.parametersMD.cd_cutoff);
   fprintf(outf, "\npair_modify\tshift yes");
   fprintf(outf, "\nneigh_modify\texclude molecule/intra all");
 
@@ -451,11 +455,12 @@ void genInSim(collagenFibril fib)
   fprintf(outf, "\nvelocity\tall zero angular");
   fprintf(outf, "\nvelocity\tall zero linear");
 
-  fprintf(outf, "\n\ndump\tmydump all custom 10000 ./%s", dir.c_str());
-  fprintf(outf, "out_sim.xyz type q x y z");
+  // fprintf(outf, "\n\ndump\tmydump all custom 10000 ./%s", dir.c_str());
+  fprintf(outf, "\n\ndump\tmydump all custom 10000 ./%s", mol.parametersMD.dumpFile.c_str());
+  fprintf(outf, " type q x y z");
   fprintf(outf, "\ndump_modify\tmydump sort id");
 
-  if (fib.parametersMD.rigid) {
+  if (mol.parametersMD.rigid) {
     fprintf(outf, "\n\nfix\t0 all rigid/nve molecule");
   } else {
     fprintf(outf, "\n\nfix\t0 all nve");
@@ -467,13 +472,13 @@ void genInSim(collagenFibril fib)
   fprintf(outf, " eangle emol epair pe ke etotal fmax fnorm press");
   fprintf(outf, "\nthermo_modify\tflush yes");
 
-  fprintf(outf, "\n\ntimestep\t%.6f", fib.parametersMD.timestep);
-  fprintf(outf, "\nrun\t%.i upto", fib.parametersMD.runtime);
+  fprintf(outf, "\n\ntimestep\t%.6f", mol.parametersMD.timestep);
+  fprintf(outf, "\nrun\t%.i upto", mol.parametersMD.runtime);
 
   fclose(outf);
 }
 
-void genQsub(collagenFibril fib)
+void genQsub(collagenMolecule mol)
 {
   std::string file = filePaths.md_outputpath;
   file += "run.qsub";
@@ -482,24 +487,24 @@ void genQsub(collagenFibril fib)
 
   fprintf(outf, "#!/bin/bash -l");
   fprintf(outf, "\n#$ -S /bin/bash");
-  fprintf(outf, "\n#$ -l h_rt=%i:00:00", fib.parametersMD.walltime);
+  fprintf(outf, "\n#$ -l h_rt=%i:00:00", mol.parametersMD.walltime);
   fprintf(outf, "\n#$ -l mem=1G");
   // fprintf(outf, "\n#$ -N name"); // name is given automatically per script
-  fprintf(outf, "\n#$ -pe mpi %i", fib.parametersMD.cores);
+  fprintf(outf, "\n#$ -pe mpi %i", mol.parametersMD.cores);
   fprintf(outf, "\n#$ -cwd");
 
-  std::vector<md_var> md_vars = collectMDvars(fib);
+  std::vector<md_var> md_vars = collectMDvars(mol);
   std::string dir = getDir(md_vars);
 
   fprintf(outf, "\n");
-  fprintf(outf, "\ngerun %s", fib.parametersMD.lmp_mpi.c_str());
+  fprintf(outf, "\ngerun %s", mol.parametersMD.lmp_mpi.c_str());
   fprintf(outf, " -in ./%s" , dir.c_str());
   fprintf(outf, "in.sim");
 
   fclose(outf);
 }
 
-void genBashScript(collagenFibril fib)
+void genBashScript(collagenMolecule mol)
 {
   std::string file = filePaths.md_outputpath;
   file += "sim.sh";
@@ -546,7 +551,7 @@ void genBashScript(collagenFibril fib)
   fprintf(outf, "\n\thelpFunction");
   fprintf(outf, "\nfi");
 
-  std::vector<md_var> md_vars = collectMDvars(fib);
+  std::vector<md_var> md_vars = collectMDvars(mol);
   std::string dir = getDir(md_vars);
   std::string cargs = getCargs(md_vars);
   std::string tabs = "\t";
@@ -600,11 +605,11 @@ void genBashScript(collagenFibril fib)
   chmod(file.c_str(), S_IRWXU);
 }
 
-void createLAMMPSfiles(collagenFibril fib)
+void createLAMMPSfiles(collagenMolecule mol)
 {
-  bool tmp = fib.parametersMD.outputTopology;
-  tmp = tmp || fib.parametersMD.outputLAMMPSinput;
-  tmp = tmp || fib.parametersMD.outputScript;
+  bool tmp = mol.parametersMD.topology;
+  tmp = tmp || mol.parametersMD.input;
+  tmp = tmp || mol.parametersMD.script;
 
   if (flags.consoleOutput && tmp) {
     std::cout << "\n#\n#";
@@ -612,8 +617,8 @@ void createLAMMPSfiles(collagenFibril fib)
     std::cout << filePaths.md_outputpath;
   }
 
-  if (fib.parametersMD.outputTopology) {
-    if (fib.parametersMD.scriptbuild) {
+  if (mol.parametersMD.topology) {
+    if (mol.parametersMD.scriptbuild) {
       std::cout << "\n#  WARNING: Topology file is created multiple times!";
       std::cout << " To save disk space, it is recommended to avoid this by";
       std::cout << " unsetting MD_topology flag in the config file before";
@@ -621,30 +626,35 @@ void createLAMMPSfiles(collagenFibril fib)
     }
     if (flags.consoleOutput) {
       std::cout << "\n#  -> creating topology file for ";
-      std::cout << pow(fib.parametersMD.numMolperDim, 3) << " molecules";
+      std::cout << pow(mol.parametersMD.numMolperDim, 3) << " molecules";
     }
-    genTopologyZero(fib, fib.parametersMD.numMolperDim);
+    genTopologyZero(mol, mol.parametersMD.numMolperDim);
   }
 
-  if (fib.parametersMD.outputLAMMPSinput) {
+  if (mol.parametersMD.input) {
     if (flags.consoleOutput) {
-      std::cout << "\n#  -> creating input file";
+      std::cout << "\n#  -> creating LAMMPS-input file";
     }
-    if (fib.parametersMD.scriptbuild) {
-      genInSim(fib);
+    if (mol.parametersMD.scriptbuild) {
+      genInSim(mol);
     } else {
       // TODO cycle through all variable parameters and create multiple in.sim
-      // std::vector<md_var> md_vars = collectMDvars(fib);
-      std::cout << " using *_start values for variable parameters";
-      fib.parametersMD.kAngle = fib.parametersMD.kAngle_start;
-      fib.parametersMD.dielectric = fib.parametersMD.dielectric_start;
-      fib.parametersMD.LJepsilon = fib.parametersMD.LJepsilon_start;
-      genInSim(fib);
+      // std::vector<md_var> md_vars = collectMDvars(mol);
+      mol.parametersMD.kAngle = mol.parametersMD.kAngle_start;
+      mol.parametersMD.dielectric = mol.parametersMD.dielectric_start;
+      mol.parametersMD.LJepsilon = mol.parametersMD.LJepsilon_start;
+      if (flags.consoleOutput) {
+        std::cout << " for ";
+        std::cout << "\n#     kAngle = " << mol.parametersMD.kAngle;
+        std::cout << "\n#     dielectric = " << mol.parametersMD.dielectric;
+        std::cout << "\n#     lj_epsilon = " << mol.parametersMD.LJepsilon;
+      }
+      genInSim(mol);
     }
   }
 
-  if (fib.parametersMD.outputScript) {
-    if (fib.parametersMD.scriptbuild) {
+  if (mol.parametersMD.script) {
+    if (mol.parametersMD.scriptbuild) {
       std::cout << "\n#  WARNING: Bash scripts are created multiple times!";
       std::cout << " To save disk space, it is recommended to avoid this by";
       std::cout << " unsetting MD_script flag in the config file before";
@@ -653,7 +663,7 @@ void createLAMMPSfiles(collagenFibril fib)
     if (flags.consoleOutput) {
       std::cout << "\n#  -> creating bash scripts";
     }
-    genBashScript(fib);
-    genQsub(fib);
+    genBashScript(mol);
+    genQsub(mol);
   }
 }

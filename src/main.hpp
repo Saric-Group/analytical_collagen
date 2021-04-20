@@ -31,16 +31,19 @@ struct filePaths_ {
 struct flags_ {
   bool help = false;
   bool consoleOutput = false;
-  bool set_output = false; // @Joel: what is this used for?
-  bool csv_output = false;
-  bool charge_hashed_outputs = false;
-  bool xyz_outputs = false;
   bool printAtomInfo = false;
   bool printMoleculeInfo = false;
-  bool originalOutput = false;
-  bool mdOutput = false;
+  bool layermodel = false;
+  bool minimize = false;
+  bool lammps = false;
+  bool md = false;
   bool measureTime = false;
   bool development = false;
+};
+
+struct dev_ {
+  double factor = 1.0;
+  int samples = 2;
 };
 
 #endif

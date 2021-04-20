@@ -1,5 +1,5 @@
-#ifndef COLLFIBRIL
-#define COLLFIBRIL
+#ifndef LAYERMODEL
+#define LAYERMODEL
 
 #include "main.hpp"
 #include "parse.hpp"
@@ -9,10 +9,20 @@
 
 /* Classes and structures */
 struct parameters_ {
+  bool csv_output = false;
+  bool chargehash = false;
+  bool xyz_outputs = false;
+
+  bool lj_active = false;
+  bool lj_specific = false;
+  double lj = 0.01;
   double lj_min = 0.01;
   double lj_stepsize = 0.01;
   int lj_steps = 50;
 
+  bool cd_active = false;
+  bool cd_specific = false;
+  double cd = 10.0;
   double cd_min = 10.0;
   double cd_stepsize = 10.0;
   int cd_steps = 20;
@@ -27,54 +37,19 @@ struct parameters_ {
   }
 };
 
-struct parametersMD_ {
-  bool outputScript = false;
-  bool outputTopology = false;
-  bool outputLAMMPSinput = false;
-  bool scriptbuild = false;
-  bool rigid = false;
-
-  int walltime = 24;
-  int cores = 1;
-
-  int numMolperDim = 5;
-  bool random = false;
-  double phi = 0.0;
-  double theta = 0.3 * M_PI;
-
-  double kAngle = 50.0;
-  double kAngle_start = 50.0;
-  double kAngle_inc = 50.0;
-  double kAngle_end = 50.0;
-
-  double dielectric = 10.0;
-  double dielectric_start = 10.0;
-  double dielectric_inc = 10.0;
-  double dielectric_end = 100.0;
-
-  double LJepsilon = 0.01;
-  double LJepsilon_start = 0.01;
-  double LJepsilon_inc = 0.01;
-  double LJepsilon_end = 0.5;
-
-  double cd_cutoff = 5.0;
-  double lj_cutoff = 5.0;
-
-  double timestep = 0.002;
-  int runtime = 6000001;
-
-  std::string lmp_mpi = "~/Scratch/lammps-29Oct20/src/lmp_mpi";
-};
-
-struct collagenFibril {
+struct layerModel {
   collagenMolecule mol;
   parameters_ parameters;
-  parametersMD_ parametersMD;
   int layers = 2;
+
+  double gap_stepsize = mol.distanceAtoms;
+  double offset_stepsize = mol.distanceAtoms;
   double latGap = mol.diameterAtom;
   double radGap = mol.diameterAtom;
   double offset = mol.diameterAtom;
-  double energy = 1e16;
+  double cdEnergy = 5e15;
+  double ljEnergy = 5e15;
+  double energy = cdEnergy + ljEnergy;
 
   /* Constructors */
 
@@ -102,6 +77,8 @@ struct collagenFibril {
   /* New functions */
   void minimizeEnergy();
   void writeXYZ();
+  void coutConfig();
+  void writeConfig();
 };
 
 #endif

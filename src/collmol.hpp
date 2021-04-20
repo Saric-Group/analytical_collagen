@@ -5,7 +5,51 @@
 
 
 /* Classes and structures */
+struct parametersMD_ {
+  bool script = false;
+  bool topology = false;
+  std::string topFile = "topology.0time";
+  bool input = false;
+  std::string inputFile = "in.sim";
+  std::string logFile = "log.sim";
+  std::string dumpFile = "out_sim.xyz";
+  bool scriptbuild = false;
+  bool rigid = false;
+
+  int walltime = 24;
+  int cores = 1;
+
+  int numMolperDim = 5;
+  bool random = false;
+  double phi = 0.0;
+  double theta = 0.3 * M_PI;
+
+  double kAngle = 50.0;
+  double kAngle_start = 50.0;
+  double kAngle_inc = 50.0;
+  double kAngle_end = 50.0;
+
+  double dielectric = 10.0;
+  double dielectric_start = 10.0;
+  double dielectric_inc = 10.0;
+  double dielectric_end = 100.0;
+  double cd_cutoff = 5.0;
+
+  double LJepsilon = 0.01;
+  double LJepsilon_start = 0.01;
+  double LJepsilon_inc = 0.01;
+  double LJepsilon_end = 0.5;
+  double lj_cutoff = 5.0;
+
+  double timestep = 0.002;
+  int runtime = 6000001;
+
+  std::string lmp_mpi = "~/Scratch/lammps-29Oct20/src/lmp_mpi";
+};
+
 struct collagenMolecule {
+  parametersMD_ parametersMD;
+
   int numAtoms = 0;
   int numTypes = 0;
   int numPos = 0;
@@ -20,7 +64,7 @@ struct collagenMolecule {
   std::vector<double> charges, nonZeroChargesIndex;
   std::vector<int> atomTypes;
 
-  const int maxNumTypes = 20;
+  int maxNumTypes = 20;
   int typeCharge [20] = {0,   // 01 Glutamine GLN
                          0,   // 02 Methionine MET
                          0,   // 03 Serine SER

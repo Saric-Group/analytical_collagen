@@ -2,7 +2,7 @@
 #include "mainfuncs.hpp"
 #include "parse.hpp"
 #include "collmol.hpp"
-#include "collfibril.hpp"
+#include "layermodel.hpp"
 #include "random.hpp"
 #include "funcs.hpp"
 #include "md.hpp"
@@ -14,38 +14,58 @@
 /* Settings */
 filePaths_ filePaths;       /* IO File paths */
 flags_ flags;               /* Various flags, see main.hpp */
+dev_ dev;                   /* Variables used for dev stuff */
+
 
 
 int main(int argc, char const *argv[])
 {
+  prioParse(argc, argv);
   programInfo();
 
-  collagenFibril fib;
+  layerModel lm;
   collagenMolecule mol;
 
-  if (parse_all_args(argc, argv, fib) != 1) {
-    return 0;
+  if (parse(argc, argv, mol, lm) == 1) {
+    return 1;
   }
 
   time_point start, end;
   getTime(start);
 
-  printOptions(fib);
+  printOptions(mol, lm);
 
-  readAtomInfos(fib);
+  readAtomInfos(mol);
+  lm.mol = mol;
 
-  if (flags.originalOutput) {
-    fib.singleEmin();
+  if (!flags.development) {
+    // Layer-Model
+    if (flags.minimize) {
+      lm.minimizeEnergy();
+      lm.writeConfig();
+    }
+
+    // LAMMPS
+    if (mol.parametersMD.topology || mol.parametersMD.input) {
+      createLAMMPSfiles(mol);
+    }
   }
 
-  if (flags.mdOutput) {
-    createLAMMPSfiles(fib);
-  }
+  // if (flags.md) {
+  //   createLAMMPSfiles(mol);
+  // }
+  //
+  // if (flags.layermodel) {
+  //   lm.singleEmin();
+  // }
 
   if (flags.development) {
-    std::cout << "\n#\n# Testing new config:";
-    parse_config(mol);
-    std::cout << "\n# ---> mainpath: " << filePaths.mainpath;
+    // lm.mol.numAtoms *= dev.factor;
+    // lm.mol.numPos *= dev.factor;
+    // lm.mol.numNeg *= dev.factor;
+    // lm.mol.numPos = 8;
+    // lm.mol.numNeg = 0;
+    // runRandomAnalysis(dev.samples, lm);
   }
 
   /************************************************************************/

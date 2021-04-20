@@ -90,39 +90,45 @@ void printChargeDistribution(std::vector<double> vec)
   }
 }
 
-void runRandomAnalysis(int samples, collagenFibril fib)
+void runRandomAnalysis(int samples, layerModel lm)
 {
   // double targetGap = 34.77;
   double targetDper = 66.975;
   double tolerance = 0.15;
 
   double binSize = 2.5;
-  int nBins = ceil(fib.mol.length / binSize);
+  int nBins = ceil(lm.mol.length / binSize);
   std::vector<int> binsGap, binsGoodGap, binsDper;
+  std::vector<std::vector<int>> bins2D;
   binsGap.assign(nBins, 0);
   binsGoodGap.assign(nBins, 0);
   binsDper.assign(nBins, 0);
+  bins2D.assign(nBins, std::vector<int> (nBins, 0));
 
   FILE *outf;
   std::string filepath = filePaths.outputpath;
-  filepath += "_nPos=" + std::to_string(fib.mol.numPos);
-  filepath += "_nNeg=" + std::to_string(fib.mol.numNeg);
-  outf = fopen((filepath + ".dat").c_str(), "w");
+  filepath += "_N=" + std::to_string(lm.mol.numAtoms);
+  filepath += "_nPos=" + std::to_string(lm.mol.numPos);
+  filepath += "_nNeg=" + std::to_string(lm.mol.numNeg);
+  filepath += "_layers=" + std::to_string(lm.layers);
+  outf = fopen((filepath + ".dat").c_str(), "a");
   fprintf(outf, "#radGap\toffset\tenergy");
 
+  std::cout << "\n#";
   for (int i = 0; i < samples; i++) {
-    std::cout << "\n# Run " << i + 1;
+    std::cout << "\n# Sample " << i + 1 << " / " << samples;
     std::cout.flush();
-    fib.mol.readCharges(createRandomChargeDistribution(fib.mol));
-    fib.energy = 1e16;
-    fib.minimizeEnergy();
-    fprintf(outf, "\n%.4f", fib.radGap);
-    fprintf(outf, "\t%.4f", fib.offset);
-    fprintf(outf, "\t%.4f", fib.energy);
-    binsGap[(int) fib.radGap / binSize]++;
-    binsDper[(int) fib.offset / binSize]++;
-    if (abs(fib.offset - targetDper) / targetDper <= tolerance) {
-      binsGoodGap[(int) fib.radGap / binSize]++;
+    lm.mol.readCharges(createRandomChargeDistribution(lm.mol));
+    lm.energy = 1e16;
+    lm.minimizeEnergy();
+    fprintf(outf, "\n%.4f", lm.radGap);
+    fprintf(outf, "\t%.4f", lm.offset);
+    fprintf(outf, "\t%.4f", lm.energy);
+    binsGap[(int) lm.radGap / binSize]++;
+    binsDper[(int) lm.offset / binSize]++;
+    bins2D[(int) lm.radGap / binSize][(int) lm.offset / binSize]++;
+    if (abs(lm.offset - targetDper) / targetDper <= tolerance) {
+      binsGoodGap[(int) lm.radGap / binSize]++;
     }
   }
   fclose(outf);
@@ -144,11 +150,23 @@ void runRandomAnalysis(int samples, collagenFibril fib)
   }
   fclose(outf);
 
+  outf = fopen((filepath + ".2Dbins").c_str(), "w");
+  fprintf(outf, "#gap\tdper\tcounts");
+  for (int i = 0; i < nBins; i++) {
+    for (int j = 0; j < nBins; j++) {
+      fprintf(outf, "\n%.3f", binSize * i);
+      fprintf(outf, "\t%.3f", binSize * j);
+      fprintf(outf, "\t%i", bins2D[i][j]);
+    }
+    fprintf(outf, "\n");
+  }
+  fclose(outf);
+
   outf = fopen((filePaths.outputpath + ".peaks").c_str(), "a");
   fprintf(outf, "\n");
-  fprintf(outf, "%i", fib.mol.numPos);
-  fprintf(outf, "\t%i", fib.mol.numNeg);
-  fprintf(outf, "\t%i", fib.mol.numAtoms);
+  fprintf(outf, "%i", lm.mol.numPos);
+  fprintf(outf, "\t%i", lm.mol.numNeg);
+  fprintf(outf, "\t%i", lm.mol.numAtoms);
   fprintf(outf, "\t%.1f", binSize * index_of_max_dper);
   fprintf(outf, "\t%i", binsDper[index_of_max_dper]);
   fprintf(outf, "\t%.1f", binSize * index_of_max_gap);
