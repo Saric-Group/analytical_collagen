@@ -646,6 +646,28 @@ void layerModel::writeConfig()
   fclose(outf);
 }
 
+void layerModel::densityToFile(std::string &file)
+{
+  // test version
+  double x;
+  int count;
+  FILE *outf;
+  outf = fopen(file.c_str(), "w");
+  fprintf(outf, "#x\tdensity");
+
+  for (x = 2 * mol.length; x <= 7 * mol.length; x += 0.285) {
+    count = 0;
+    // main layer
+    for (int layer = 0; layer < layers; layer++) {
+      if (fmod(x - layer * offset, mol.length + radGap) <= mol.length) {
+        count++;
+      }
+    }
+    fprintf(outf, "\n%.3f\t%i", x - 2 * mol.length, count);
+  }
+  fclose(outf);
+}
+
 /* Functions  to clean up*/
 // double newLJ_per_mol(double pos, double dx, double ref, double lat_gap)
 // {

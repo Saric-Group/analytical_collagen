@@ -141,3 +141,43 @@ void collagenMolecule::printMoleculeInfo()
   std::cout << "\n#    Number of negative charges: " << numNeg;
   std::cout << "\n#    Total charge: " << totalCharge;
 }
+
+void collagenMolecule::chargesToFile(std::string &file, int k)
+{
+  FILE *outf;
+  outf = fopen(file.c_str(), "a");
+  // fprintf(outf, "%i", numAtoms);
+  // fprintf(outf, "\nAtoms");
+  for (int i = 0; i < numAtoms; i++) {
+    fprintf(outf, "\n%.3f", charges[i]);
+    fprintf(outf, " %.6f", i * distanceAtoms);
+    fprintf(outf, " %.6f", k * diameterAtom);
+    fprintf(outf, " 0");
+  }
+  fclose(outf);
+}
+
+void collagenMolecule::addOvitoHeaderToChargeFile(std::string &file)
+{
+  std::ofstream outputFile("outputFileName");
+  std::ifstream inputFile(file);
+
+  std::string line;
+  int N = 0;
+  while (std::getline(inputFile, line)) {
+    N++;
+  }
+  inputFile.close();
+
+  outputFile << N - 1 << "\n";
+  outputFile << "Atoms";
+
+  inputFile.open(file, std::ifstream::in);
+  outputFile << inputFile.rdbuf();
+
+  inputFile.close();
+  outputFile.close();
+
+  std::remove(file.c_str());
+  std::rename("outputFileName", file.c_str());
+}

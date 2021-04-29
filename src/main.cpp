@@ -60,12 +60,17 @@ int main(int argc, char const *argv[])
   // }
 
   if (flags.development) {
+    // mol.printMoleculeInfo();
     // lm.mol.numAtoms *= dev.factor;
-    // lm.mol.numPos *= dev.factor;
-    // lm.mol.numNeg *= dev.factor;
-    // lm.mol.numPos = 8;
-    // lm.mol.numNeg = 0;
-    // runRandomAnalysis(dev.samples, lm);
+    lm.mol.numPos *= dev.factor;
+    lm.mol.numNeg *= dev.factor;
+    // lm.minimizeEnergy();
+    // lm.coutConfig();
+    // std::string fdens = "./data/analysis/density";
+    // lm.densityToFile(fdens);
+    // lm.mol.numPos = dev.pos;
+    // lm.mol.numNeg = dev.neg;
+    runRandomAnalysis(dev.samples, lm);
   }
 
   /************************************************************************/

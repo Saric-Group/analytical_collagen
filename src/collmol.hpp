@@ -100,6 +100,8 @@ struct collagenMolecule {
 
   void printAtoms();
   void printMoleculeInfo();
+  void chargesToFile(std::string &file, int k = 0);
+  void addOvitoHeaderToChargeFile(std::string &file);
 };
 
 #endif

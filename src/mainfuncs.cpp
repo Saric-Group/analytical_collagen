@@ -7,6 +7,15 @@ extern filePaths_ filePaths;
 extern flags_ flags;
 
 /* Functions */
+bool fexists (const std::string& name) {
+  if (FILE *file = fopen(name.c_str(), "r")) {
+      fclose(file);
+      return true;
+  } else {
+      return false;
+  }
+}
+
 int process_arg(std::string strarg, int* errcodes, bool dashes, layerModel &lm, collagenMolecule &mol)
 {
   //io overrides

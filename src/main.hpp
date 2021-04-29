@@ -11,6 +11,7 @@
 #include <algorithm>        /* std::remove */
 #include <iomanip>          /* std::setw() */
 #include <sys/stat.h>       /* chmod */
+#include <stdio.h>
 
 
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
@@ -44,6 +45,7 @@ struct flags_ {
 struct dev_ {
   double factor = 1.0;
   int samples = 2;
+  int pos, neg;
 };
 
 #endif

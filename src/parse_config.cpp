@@ -104,7 +104,9 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     flags.minimize = cfg->lookupBoolean(scope, "main.minimizeEnergy");
     lm.layers = cfg->lookupInt(scope, "main.layers");
     lm.parameters.cd = cfg->lookupFloat(scope, "main.cd");
+    lm.parameters.cd_cutoff = cfg->lookupFloat(scope, "main.cdcutoff");
     lm.parameters.lj = cfg->lookupFloat(scope, "main.lj");
+    lm.parameters.lj_cutoff = cfg->lookupFloat(scope, "main.ljcutoff");
     lm.gap_stepsize = cfg->lookupFloat(scope, "main.radGapStepsize");
     lm.offset_stepsize = cfg->lookupFloat(scope, "main.offsetStepsize");
 
@@ -213,6 +215,8 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     flags.development = cfg->lookupBoolean(scope, "development.active");
     dev.factor = cfg->lookupFloat(scope, "development.factor");
     dev.samples = cfg->lookupInt(scope, "development.samples");
+    dev.pos = cfg->lookupInt(scope, "development.pos");
+    dev.neg = cfg->lookupInt(scope, "development.neg");
 
   } catch (const ConfigurationException &ex) {
     std::cerr << "\n# error: " << ex.c_str() << "\n";

@@ -2,6 +2,7 @@
 #define RANDOM
 
 #include "main.hpp"
+#include "mainfuncs.hpp"
 #include "layermodel.hpp"
 
 #include <random>
@@ -12,8 +13,11 @@ std::vector<double> createRandomChargeDistribution(int n, int nPos, int nNeg, st
 std::vector<double> createRandomChargeDistribution(collagenMolecule mol);
 void countCharges(std::vector<double> vec, int &pos, int&neg);
 void printChargeDistribution(std::vector<double> vec);
-
+double checkValue(layerModel lm);
 void runRandomAnalysis(int samples, layerModel lm);
 
 
 #endif
+// implement n/k multiple for check value
+// calculation of d-period in case of periodic structure
+// run bigger sample size on myriad
