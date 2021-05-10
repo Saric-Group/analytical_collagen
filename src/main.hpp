@@ -43,6 +43,8 @@ struct flags_ {
 };
 
 struct dev_ {
+  bool random = "false";
+  int seed = 1337;
   double factor = 1.0;
   int samples = 2;
   int pos, neg;

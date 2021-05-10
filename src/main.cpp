@@ -47,6 +47,11 @@ int main(int argc, char const *argv[])
 
     // LAMMPS
     if (mol.parametersMD.topology || mol.parametersMD.input) {
+      std::vector<double> coarseGrainedCharges;
+      coarseGrainedCharges = mol.smoothen(25);
+      coarseGrainedCharges = mol.binNormalize(coarseGrainedCharges, 100);
+      mol.readCharges(coarseGrainedCharges);
+      mol.printMoleculeInfo();
       createLAMMPSfiles(mol);
     }
   }

@@ -657,7 +657,6 @@ void layerModel::densityToFile(std::string &file)
 
   for (x = 2 * mol.length; x <= 7 * mol.length; x += 0.285) {
     count = 0;
-    // main layer
     for (int layer = 0; layer < layers; layer++) {
       if (fmod(x - layer * offset, mol.length + radGap) <= mol.length) {
         count++;
