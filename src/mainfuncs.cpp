@@ -628,38 +628,40 @@ void prioParse(int argc, char const *argv[])
 void debugInfo(collagenMolecule mol)
 {
   std::cout << "\n#";
-  std::cout << "\n# Debug-Info:";
+  std::cout << "\n# Debug-Info";
 
 
-  std::cout << "\n#\t.Config file: ";
-  std::cout << filePaths.configpath;
+  std::cout << "\n#\t.Config";
+
+  std::cout << "\n#\t\t.config file\t";
+  std::cout << "\033[1;31m" << filePaths.configpath << "\033[0m";
 
 
-  std::cout << "\n#\t.Input filepaths:";
+  std::cout << "\n#\t.Input";
 
-  std::cout << "\n#\t\t.molecule input: ";
-  std::cout << filePaths.inputpath;
+  std::cout << "\n#\t\t.molecule input\t";
+  std::cout << "\033[1;31m" << filePaths.inputpath << "\033[0m";
 
 
-  std::cout << "\n#\t.Output filepaths:";
+  std::cout << "\n#\t.Output";
 
-  std::cout << "\n#\t\t.general output: ";
-  std::cout << filePaths.outputpath;
+  std::cout << "\n#\t\t.general output\t";
+  std::cout << "\033[1;31m" << filePaths.outputpath << "\033[0m";
 
-  std::cout << "\n#\t\t.md output folder: ";
-  std::cout << filePaths.md_outputpath;
+  std::cout << "\n#\t\t.md output folder\t";
+  std::cout << "\033[1;31m" << filePaths.md_outputpath << "\033[0m";
 
-  std::cout << "\n#\t\t.md topology file: ";
-  std::cout << mol.parametersMD.topFile;
+  std::cout << "\n#\t\t.md topology file\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.topFile << "\033[0m";
 
-  std::cout << "\n#\t\t.md lammps input file: ";
-  std::cout << mol.parametersMD.inputFile;
+  std::cout << "\n#\t\t.md lammps input file\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.inputFile << "\033[0m";
 
-  std::cout << "\n#\t\t.md lammps log filepath: ";
-  std::cout << mol.parametersMD.logFile;
+  std::cout << "\n#\t\t.md lammps log filepath\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.logFile << "\033[0m";
 
-  std::cout << "\n#\t\t.md lammps dump filepath: ";
-  std::cout << mol.parametersMD.dumpFile;
+  std::cout << "\n#\t\t.md lammps dump filepath\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.dumpFile << "\033[0m";
 }
 
 void programInfo()
