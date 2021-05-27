@@ -81,7 +81,7 @@ Temporary Items
 .apdisk
 
 # config4cpp
-./src/config4cpp/bin/config2cpp
+src/config4cpp/bin/config2cpp
 src/config4cpp/bin/config4cpp
 src/config4cpp/demos/encapsulate-lookup-api/demo
 src/config4cpp/demos/extended-schema-validator/demo
