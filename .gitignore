@@ -79,3 +79,16 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# config4cpp
+./src/config4cpp/bin/config2cpp
+src/config4cpp/bin/config4cpp
+src/config4cpp/demos/encapsulate-lookup-api/demo
+src/config4cpp/demos/extended-schema-validator/demo
+src/config4cpp/demos/log-level/demo
+src/config4cpp/demos/recipes/demo
+src/config4cpp/demos/simple-encapsulation/demo
+src/config4cpp/src/config2cpp
+src/config4cpp/src/config2cpp-nocheck
+src/config4cpp/src/config4cpp
+src/config4cpp/tests/schema-types/test-schema-types
