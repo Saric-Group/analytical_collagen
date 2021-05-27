@@ -92,3 +92,7 @@ src/config4cpp/src/config2cpp
 src/config4cpp/src/config2cpp-nocheck
 src/config4cpp/src/config4cpp
 src/config4cpp/tests/schema-types/test-schema-types
+src/config4cpp/demos/simple-encapsulation/FallbackConfiguration.h
+src/config4cpp/demos/simple-encapsulation/FallbackConfiguration.cpp
+src/config4cpp/demos/encapsulate-lookup-api/FallbackConfiguration.h
+src/config4cpp/demos/encapsulate-lookup-api/FallbackConfiguration.cpp
