@@ -55,7 +55,7 @@ struct collagenMolecule {
   int numPos = 0;
   int numNeg = 0;
 
-  double distanceAtoms = 0.255;
+  double distanceAtoms = 0.285;
   double diameterAtom = 1.12;
   double chargeAtom = 22.4;
   double length;

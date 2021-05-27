@@ -19,14 +19,14 @@ typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point;
 
 /* Classes and structures */
 struct filePaths_ {
-  std::string mainpath = "";
-  std::string inputpath = "./molecule/charges_distribution_36";
-  std::string outputpath = "./energy_min.dat";
+  std::string mainpath;
+  std::string inputpath;
+  std::string outputpath;
   std::string file_extension = ".dat";
   std::string csv_extension = ".csv";
-  std::string configpath = "";
+  std::string configpath;
 
-  std::string md_outputpath = "./md/";
+  std::string md_outputpath;
 };
 
 struct flags_ {
@@ -44,10 +44,10 @@ struct flags_ {
 };
 
 struct dev_ {
-  bool random = "false";
-  int seed = 1337;
-  double factor = 1.0;
-  int samples = 2;
+  bool random;
+  int seed;
+  double factor;
+  int samples;
   int pos, neg;
 };
 

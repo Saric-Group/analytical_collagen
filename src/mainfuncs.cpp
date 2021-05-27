@@ -627,8 +627,12 @@ void prioParse(int argc, char const *argv[])
 
 void debugInfo(collagenMolecule mol)
 {
-  std::cout << "#";
+  std::cout << "\n#";
   std::cout << "\n# Debug-Info:";
+
+
+  std::cout << "\n#\t.Config file: ";
+  std::cout << filePaths.configpath;
 
 
   std::cout << "\n#\t.Input filepaths:";

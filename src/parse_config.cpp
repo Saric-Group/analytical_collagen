@@ -12,6 +12,9 @@ extern dev_ dev;
 /* Functions */
 int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
 {
+  collagenMolecule dummyMol;
+  layerModel dummyLm;
+
   std::cout << "\n# Parsing config file and command line arguments";
   for (int i = 0; i < argc; i++) {
     // scope deactivated for now
@@ -82,69 +85,69 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     /* Flags */
     // strcpy(scope, scope);
     // strcat(scope, ".flags");
-    flags.consoleOutput = cfg->lookupBoolean(scope, "flags.consoleOutput");
-    flags.debugInfo = cfg->lookupBoolean(scope, "flags.debugInfo");
-    flags.help = cfg->lookupBoolean(scope, "flags.help");
-    flags.measureTime = cfg->lookupBoolean(scope, "flags.measureTime");
+    flags.consoleOutput = cfg->lookupBoolean(scope, "flags.consoleOutput", false);
+    flags.debugInfo = cfg->lookupBoolean(scope, "flags.debugInfo", false);
+    flags.help = cfg->lookupBoolean(scope, "flags.help", false);
+    flags.measureTime = cfg->lookupBoolean(scope, "flags.measureTime", false);
 
     /* io */
     // strcpy(scope, scope);
     // strcat(scope, ".io");
-    filePaths.inputpath = cfg->lookupString(scope, "io.input");
-    filePaths.outputpath = cfg->lookupString(scope, "io.output");
-    filePaths.md_outputpath = cfg->lookupString(scope, "io.lammps-output");
+    filePaths.inputpath = cfg->lookupString(scope, "io.input", "./molecule/charges_distribution_36");
+    filePaths.outputpath = cfg->lookupString(scope, "io.output", "./energy_min.dat");
+    filePaths.md_outputpath = cfg->lookupString(scope, "io.lammps-output", "./md/");
     /* molecule */
     // strcpy(scope, scope);
     // strcat(scope, ".molecule");
-    flags.printAtomInfo = cfg->lookupBoolean(scope, "molecule.printAtomInfo");
-    flags.printMoleculeInfo = cfg->lookupBoolean(scope, "molecule.printMoleculeInfo");
-    mol.diameterAtom = cfg->lookupFloat(scope, "molecule.diameterAtom");
-    mol.distanceAtoms = cfg->lookupFloat(scope, "molecule.distanceAtoms");
+    flags.printAtomInfo = cfg->lookupBoolean(scope, "molecule.printAtomInfo", false);
+    flags.printMoleculeInfo = cfg->lookupBoolean(scope, "molecule.printMoleculeInfo", false);
+    mol.diameterAtom = cfg->lookupFloat(scope, "molecule.diameterAtom", dummyMol.diameterAtom);
+    mol.distanceAtoms = cfg->lookupFloat(scope, "molecule.distanceAtoms", dummyMol.distanceAtoms);
 
     /* main */
-    flags.minimize = cfg->lookupBoolean(scope, "main.minimizeEnergy");
-    lm.layers = cfg->lookupInt(scope, "main.layers");
-    lm.parameters.cd = cfg->lookupFloat(scope, "main.cd");
-    lm.parameters.cd_cutoff = cfg->lookupFloat(scope, "main.cdcutoff");
-    lm.parameters.lj = cfg->lookupFloat(scope, "main.lj");
-    lm.parameters.lj_cutoff = cfg->lookupFloat(scope, "main.ljcutoff");
-    lm.gap_stepsize = cfg->lookupFloat(scope, "main.radGapStepsize");
-    lm.offset_stepsize = cfg->lookupFloat(scope, "main.offsetStepsize");
+    flags.minimize = cfg->lookupBoolean(scope, "main.minimizeEnergy", false);
+    lm.layers = cfg->lookupInt(scope, "main.layers", 2);
+    lm.parameters.cd = cfg->lookupFloat(scope, "main.cd", dummyLm.parameters.cd);
+    lm.parameters.cd_cutoff = cfg->lookupFloat(scope, "main.cdcutoff", dummyLm.parameters.cd_cutoff);
+    lm.parameters.lj = cfg->lookupFloat(scope, "main.lj", dummyLm.parameters.lj);
+    lm.parameters.lj_cutoff = cfg->lookupFloat(scope, "main.ljcutoff", dummyLm.parameters.lj_cutoff);
+    lm.gap_stepsize = cfg->lookupFloat(scope, "main.radGapStepsize", dummyLm.gap_stepsize);
+    lm.offset_stepsize = cfg->lookupFloat(scope, "main.offsetStepsize", dummyLm.offset_stepsize);
 
     // mol.parametersMD.script = cfg->lookupBoolean(scope, "md.script");
-    mol.parametersMD.topology = cfg->lookupBoolean(scope, "main.lammps-topology");
-    mol.parametersMD.topFile = cfg->lookupString(scope, "main.topologyFile");
+    mol.parametersMD.topology = cfg->lookupBoolean(scope, "main.lammps-topology", dummyMol.parametersMD.topology);
+    mol.parametersMD.topFile = cfg->lookupString(scope, "main.topologyFile", dummyMol.parametersMD.topFile.c_str());
 
-    mol.parametersMD.input = cfg->lookupBoolean(scope, "main.lammps-input");
-    mol.parametersMD.inputFile = cfg->lookupString(scope, "main.inputFile");
-    mol.parametersMD.logFile = cfg->lookupString(scope, "main.logFile");
-    mol.parametersMD.dumpFile = cfg->lookupString(scope, "main.dumpFile");
+    mol.parametersMD.input = cfg->lookupBoolean(scope, "main.lammps-input", dummyMol.parametersMD.input);
+    mol.parametersMD.inputFile = cfg->lookupString(scope, "main.inputFile", dummyMol.parametersMD.inputFile.c_str());
+    mol.parametersMD.logFile = cfg->lookupString(scope, "main.logFile", dummyMol.parametersMD.logFile.c_str());
+    mol.parametersMD.dumpFile = cfg->lookupString(scope, "main.dumpFile", dummyMol.parametersMD.dumpFile.c_str());
 
-    mol.parametersMD.rigid = cfg->lookupBoolean(scope, "main.rigidMolecules");
-    mol.parametersMD.random = cfg->lookupBoolean(scope, "main.randomOrientations");
-    mol.parametersMD.phi = cfg->lookupFloat(scope, "main.phi");
-    mol.parametersMD.theta = cfg->lookupFloat(scope, "main.theta");
-    mol.parametersMD.numMolperDim = cfg->lookupInt(scope, "main.numMolperDim");
-    mol.parametersMD.timestep = cfg->lookupFloat(scope, "main.lammps-timestep");
-    mol.parametersMD.runtime = cfg->lookupFloat(scope, "main.lammps-runtime");
+    mol.parametersMD.rigid = cfg->lookupBoolean(scope, "main.rigidMolecules", dummyMol.parametersMD.rigid);
+    mol.parametersMD.random = cfg->lookupBoolean(scope, "main.randomOrientations", dummyMol.parametersMD.random);
+    mol.parametersMD.phi = cfg->lookupFloat(scope, "main.phi", dummyMol.parametersMD.phi);
+    mol.parametersMD.theta = cfg->lookupFloat(scope, "main.theta", dummyMol.parametersMD.theta);
+    mol.parametersMD.numMolperDim = cfg->lookupInt(scope, "main.numMolperDim", dummyMol.parametersMD.numMolperDim);
+    mol.parametersMD.timestep = cfg->lookupFloat(scope, "main.lammps-timestep", dummyMol.parametersMD.timestep);
+    mol.parametersMD.runtime = cfg->lookupFloat(scope, "main.lammps-runtime", dummyMol.parametersMD.runtime);
     // strcat(scope, ".kAngle");
-    mol.parametersMD.kAngle_start = cfg->lookupFloat(scope, "main.lammps-kAngle.start");
-    mol.parametersMD.kAngle_inc = cfg->lookupFloat(scope, "main.lammps-kAngle.increment");
-    mol.parametersMD.kAngle_end = cfg->lookupFloat(scope, "main.lammps-kAngle.end");
+    mol.parametersMD.kAngle_start = cfg->lookupFloat(scope, "main.lammps-kAngle.start", dummyMol.parametersMD.kAngle_start);
+    mol.parametersMD.kAngle_inc = cfg->lookupFloat(scope, "main.lammps-kAngle.increment", dummyMol.parametersMD.kAngle_inc);
+    mol.parametersMD.kAngle_end = cfg->lookupFloat(scope, "main.lammps-kAngle.end", dummyMol.parametersMD.kAngle_end);
     // strcpy(scope, scope);
     // strcat(scope, ".MD");
     // strcat(scope, ".dielectric");
-    mol.parametersMD.dielectric_start = cfg->lookupFloat(scope, "main.lammps-dielectric.start");
-    mol.parametersMD.dielectric_inc = cfg->lookupFloat(scope, "main.lammps-dielectric.increment");
-    mol.parametersMD.dielectric_end = cfg->lookupFloat(scope, "main.lammps-dielectric.end");
-    mol.parametersMD.cd_cutoff = cfg->lookupFloat(scope, "main.lammps-dielectric.cutoff");
+    mol.parametersMD.dielectric_start = cfg->lookupFloat(scope, "main.lammps-dielectric.start", dummyMol.parametersMD.dielectric_start);
+    mol.parametersMD.dielectric_inc = cfg->lookupFloat(scope, "main.lammps-dielectric.increment", dummyMol.parametersMD.dielectric_inc);
+    mol.parametersMD.dielectric_end = cfg->lookupFloat(scope, "main.lammps-dielectric.end", dummyMol.parametersMD.dielectric_end);
+    mol.parametersMD.cd_cutoff = cfg->lookupFloat(scope, "main.lammps-dielectric.cutoff", dummyMol.parametersMD.cd_cutoff);
     // strcpy(scope, scope);
     // strcat(scope, ".MD");
     // strcat(scope, ".LJepsilon");
-    mol.parametersMD.LJepsilon_start = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.start");
-    mol.parametersMD.LJepsilon_inc = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.increment");
-    mol.parametersMD.LJepsilon_end = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.end");
-    mol.parametersMD.lj_cutoff = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.cutoff");
+    mol.parametersMD.LJepsilon_start = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.start", dummyMol.parametersMD.LJepsilon_start);
+    mol.parametersMD.LJepsilon_inc = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.increment", dummyMol.parametersMD.LJepsilon_inc);
+    mol.parametersMD.LJepsilon_end = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.end", dummyMol.parametersMD.LJepsilon_end);
+    mol.parametersMD.lj_cutoff = cfg->lookupFloat(scope, "main.lammps-lj_epsilon.cutoff", dummyMol.parametersMD.lj_cutoff);
 
     /* layerModel */
     // // strcpy(scope, scope);
@@ -213,13 +216,13 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     /* development */
     // strcpy(scope, scope);
     // strcat(scope, ".development");
-    flags.development = cfg->lookupBoolean(scope, "development.active");
-    dev.random = cfg->lookupBoolean(scope, "development.random");
-    dev.seed = cfg->lookupInt(scope, "development.seed");
-    dev.factor = cfg->lookupFloat(scope, "development.factor");
-    dev.samples = cfg->lookupInt(scope, "development.samples");
-    dev.pos = cfg->lookupInt(scope, "development.pos");
-    dev.neg = cfg->lookupInt(scope, "development.neg");
+    flags.development = cfg->lookupBoolean(scope, "development.active", false);
+    dev.random = cfg->lookupBoolean(scope, "development.random", false);
+    dev.seed = cfg->lookupInt(scope, "development.seed", 1337);
+    dev.factor = cfg->lookupFloat(scope, "development.factor", 1.0);
+    dev.samples = cfg->lookupInt(scope, "development.samples", 1);
+    dev.pos = cfg->lookupInt(scope, "development.pos", 86);
+    dev.neg = cfg->lookupInt(scope, "development.neg", 82);
 
   } catch (const ConfigurationException &ex) {
     std::cerr << "\n# error: " << ex.c_str() << "\n";
