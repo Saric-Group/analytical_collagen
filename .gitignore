@@ -53,6 +53,7 @@ my.config
 
 
 # General
+.vscode
 .DS_Store
 .AppleDouble
 .LSOverride

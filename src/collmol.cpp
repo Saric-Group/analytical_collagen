@@ -141,3 +141,161 @@ void collagenMolecule::printMoleculeInfo()
   std::cout << "\n#    Number of negative charges: " << numNeg;
   std::cout << "\n#    Total charge: " << totalCharge;
 }
+
+void collagenMolecule::moleculeToFile(std::string &file)
+{
+  FILE *outf;
+  outf = fopen(file.c_str(), "w");
+  fprintf(outf, "# charges");
+  for (int i = 0; i < numAtoms; i++) {
+    fprintf(outf, "\n%.3f", charges[i]);
+  }
+  fclose(outf);
+}
+
+void collagenMolecule::chargesToFile(std::string &file, int k)
+{
+  FILE *outf;
+  outf = fopen(file.c_str(), "a");
+  // fprintf(outf, "%i", numAtoms);
+  // fprintf(outf, "\nAtoms");
+  for (int i = 0; i < numAtoms; i++) {
+    fprintf(outf, "\n%.3f", charges[i]);
+    fprintf(outf, " %.6f", i * distanceAtoms);
+    fprintf(outf, " %.6f", k * diameterAtom);
+    fprintf(outf, " 0");
+  }
+  fclose(outf);
+}
+
+void collagenMolecule::addOvitoHeaderToChargeFile(std::string &file)
+{
+  std::ofstream outputFile("outputFileName");
+  std::ifstream inputFile(file);
+
+  std::string line;
+  int N = 0;
+  while (std::getline(inputFile, line)) {
+    N++;
+  }
+  inputFile.close();
+
+  outputFile << N - 1 << "\n";
+  outputFile << "Atoms";
+
+  inputFile.open(file, std::ifstream::in);
+  outputFile << inputFile.rdbuf();
+
+  inputFile.close();
+  outputFile.close();
+
+  std::remove(file.c_str());
+  std::rename("outputFileName", file.c_str());
+}
+
+std::vector<double> collagenMolecule::smoothen(int delta)
+{
+  /* need to redo the boundaries */
+  double ma = 0;                  /* moving average */
+  std::vector<double> smoothed;        /* smoothed moving average charges */
+  double div = 2.0 * delta + 1;
+
+  // std::cout << "######## Start ########" << std::endl;
+  for (int i = -delta; i <= delta; i++) {
+    if (i < 0) {
+      ma += charges[abs(i) - 1] / div;
+      // std::cout << "+" << abs(i) - 1;
+      // std::cout << " +" << charges[abs(i) - 1] / div << std::endl;
+    } else {
+      ma += charges[i] / div;
+      // std::cout << "+" << i;
+      // std::cout << " +" << charges[i] / div << std::endl;
+    }
+  }
+  // std::cout << "moving average for site 0 " << ma << std::endl;
+  smoothed.push_back(ma);
+  // std::cout << "######## Body ########" << std::endl;
+  for (int i = 1; i < numAtoms; i++) {
+    // std::cout << "i = " << i << std::endl;
+    if (i - 1 - delta < 0) {
+      ma += charges[i + delta] / div;
+      // std::cout << "+" << i + delta;
+      // std::cout << " +" << charges[i + delta] / div;
+      ma -= charges[abs(i - delta)] / div;
+      // std::cout << " -" << abs(i - delta);
+      // std::cout << " -" << charges[abs(i - delta)] / div << std::endl;
+    } else if (i + delta > numAtoms - 1) {
+      ma -= charges[i - 1 - delta] / div;
+      // std::cout << "-" << i - 1 - delta;
+      // std::cout << " -" << charges[i - 1 - delta] / div;
+      ma += charges[numAtoms - 1 - (i - numAtoms + delta)] / div;
+      // std::cout << " +" << numAtoms - 1 - (i - numAtoms + delta);
+      // std::cout << " +" << charges[numAtoms - 1 - (i - numAtoms + delta)] / div << std::endl;
+    } else {
+      ma += (charges[i + delta] - charges[i - 1 - delta]) / div;
+      // std::cout << "+" << i + delta;
+      // std::cout << " +" << charges[i + delta] / div;
+      // std::cout << " -" << i - 1 - delta;
+      // std::cout << " -" << charges[i - 1 - delta] / div << std::endl << std::endl;
+    }
+    // std::cout << "moving average for site " << i << " " << ma << std::endl;
+    smoothed.push_back(ma);
+    // if (i >= 12050) {
+    //   std::cin >> i;
+    // }
+  }
+
+  // printVec(smoothed);
+  // double sum = 0.0;
+  // for (int i = 0; i < (int) smoothed.size(); i++) {
+  //   sum += smoothed[i];
+  // }
+  // std::cout << "\nSize: " << smoothed.size();
+  // std::cout << "\nSum after smoothing: " << sum;
+
+  return smoothed;
+}
+
+std::vector<double> collagenMolecule::binNormalize(std::vector<double> vec, int n)
+{
+  std::vector<double> normalized;
+  double ma;
+  int binSize = floor(numAtoms / n);
+  int split = numAtoms % n;
+  for (int i = 0; i < split; i++) {
+    // cout << "\nBin " << i + 1 << " adding:\n";
+    ma = 0;
+    for (int j = 0; j <= binSize; j++) {
+      // cout << i * (binSize + 1) + j << " ";
+      ma += vec[i * (binSize + 1) + j];
+    }
+    normalized.push_back(ma);
+  }
+  for (int i = split; i < n - 1; i++) {
+    // cout << "\nBin " << i + 1 << " adding:\n";
+    ma = 0;
+    for (int j = 0; j < binSize; j++) {
+      // cout << i * binSize + split + j << " ";
+      ma += vec[i * binSize + split + j];
+    }
+    normalized.push_back(ma);
+  }
+  ma = 0;
+  // cout << "\nBin " << n << " adding:\n";
+  for (int i = (n - 1) * binSize + split; i < (int) vec.size(); i++) {
+    // cout << i << " ";
+    ma += vec[i];
+  }
+  normalized.push_back(ma);
+
+  // cout << "\n\ntest: " << vec.size() % n;
+
+  // double sum = 0.0;
+  // for (int i = 0; i < (int) normalized.size(); i++) {
+  //   sum += normalized[i];
+  // }
+  // cout << "\nSize: " << normalized.size();
+  // std::cout << "\nIntegral: " << sum;
+
+  return normalized;
+}

@@ -55,7 +55,7 @@ struct collagenMolecule {
   int numPos = 0;
   int numNeg = 0;
 
-  double distanceAtoms = 0.255;
+  double distanceAtoms = 0.285;
   double diameterAtom = 1.12;
   double chargeAtom = 22.4;
   double length;
@@ -100,6 +100,13 @@ struct collagenMolecule {
 
   void printAtoms();
   void printMoleculeInfo();
+  void moleculeToFile(std::string &file);
+  void chargesToFile(std::string &file, int k = 0);
+  void addOvitoHeaderToChargeFile(std::string &file);
+
+  std::vector<double> smoothen(int delta);
+  std::vector<double> binNormalize(std::vector<double> vec, int n);
+
 };
 
 #endif

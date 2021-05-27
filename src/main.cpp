@@ -38,6 +38,10 @@ int main(int argc, char const *argv[])
   readAtomInfos(mol);
   lm.mol = mol;
 
+  if (flags.debugInfo) {
+    debugInfo(mol);
+  }
+
   if (!flags.development) {
     // Layer-Model
     if (flags.minimize) {
@@ -47,6 +51,11 @@ int main(int argc, char const *argv[])
 
     // LAMMPS
     if (mol.parametersMD.topology || mol.parametersMD.input) {
+      // std::vector<double> coarseGrainedCharges;
+      // coarseGrainedCharges = mol.smoothen(25);
+      // coarseGrainedCharges = mol.binNormalize(coarseGrainedCharges, 100);
+      // mol.readCharges(coarseGrainedCharges);
+      // mol.printMoleculeInfo();
       createLAMMPSfiles(mol);
     }
   }
@@ -60,11 +69,16 @@ int main(int argc, char const *argv[])
   // }
 
   if (flags.development) {
+    // mol.printMoleculeInfo();
     // lm.mol.numAtoms *= dev.factor;
     // lm.mol.numPos *= dev.factor;
     // lm.mol.numNeg *= dev.factor;
-    // lm.mol.numPos = 8;
-    // lm.mol.numNeg = 0;
+    // lm.minimizeEnergy();
+    // lm.coutConfig();
+    // std::string fdens = "./data/analysis/density";
+    // lm.densityToFile(fdens);
+    // lm.mol.numPos = dev.pos;
+    // lm.mol.numNeg = dev.neg;
     // runRandomAnalysis(dev.samples, lm);
   }
 

@@ -7,6 +7,15 @@ extern filePaths_ filePaths;
 extern flags_ flags;
 
 /* Functions */
+bool fexists (const std::string& name) {
+  if (FILE *file = fopen(name.c_str(), "r")) {
+      fclose(file);
+      return true;
+  } else {
+      return false;
+  }
+}
+
 int process_arg(std::string strarg, int* errcodes, bool dashes, layerModel &lm, collagenMolecule &mol)
 {
   //io overrides
@@ -614,6 +623,45 @@ void prioParse(int argc, char const *argv[])
       std::cout.setstate(std::ios_base::failbit);
     }
   }
+}
+
+void debugInfo(collagenMolecule mol)
+{
+  std::cout << "\n#";
+  std::cout << "\n# Debug-Info";
+
+
+  std::cout << "\n#\t.Config";
+
+  std::cout << "\n#\t\t.config file\t";
+  std::cout << "\033[1;31m" << filePaths.configpath << "\033[0m";
+
+
+  std::cout << "\n#\t.Input";
+
+  std::cout << "\n#\t\t.molecule input\t";
+  std::cout << "\033[1;31m" << filePaths.inputpath << "\033[0m";
+
+
+  std::cout << "\n#\t.Output";
+
+  std::cout << "\n#\t\t.general output\t";
+  std::cout << "\033[1;31m" << filePaths.outputpath << "\033[0m";
+
+  std::cout << "\n#\t\t.md output folder\t";
+  std::cout << "\033[1;31m" << filePaths.md_outputpath << "\033[0m";
+
+  std::cout << "\n#\t\t.md topology file\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.topFile << "\033[0m";
+
+  std::cout << "\n#\t\t.md lammps input file\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.inputFile << "\033[0m";
+
+  std::cout << "\n#\t\t.md lammps log filepath\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.logFile << "\033[0m";
+
+  std::cout << "\n#\t\t.md lammps dump filepath\t";
+  std::cout << "\033[1;31m" << mol.parametersMD.dumpFile << "\033[0m";
 }
 
 void programInfo()

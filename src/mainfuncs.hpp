@@ -69,12 +69,14 @@ struct overrides_ {
 
 
 /* Functions */
+bool fexists (const std::string& name);
 int process_arg(std::string strarg, int* errcodes, bool dashes, layerModel &lm, collagenMolecule &mol);
 int read_config_file(std::string path, layerModel &lm, collagenMolecule &mol);
 int read_args(int argc, char const *argv[], layerModel &lm, collagenMolecule &mol);
 int parse_all_args(int argc, char const *argv[], layerModel &lm, collagenMolecule &mol);
 void readAtomInfos(collagenMolecule &mol);
 void prioParse(int argc, char const *argv[]);
+void debugInfo(collagenMolecule mol);
 void programInfo();
 void printOptions(collagenMolecule mol, layerModel lm);
 void getTime(time_point &tp);

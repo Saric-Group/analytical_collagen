@@ -79,6 +79,7 @@ struct layerModel {
   void writeXYZ();
   void coutConfig();
   void writeConfig();
+  void densityToFile(std::string &file);
 };
 
 #endif
