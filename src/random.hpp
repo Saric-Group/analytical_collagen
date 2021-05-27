@@ -18,6 +18,3 @@ void runRandomAnalysis(int samples, layerModel lm);
 
 
 #endif
-// implement n/k multiple for check value
-// calculation of d-period in case of periodic structure
-// run bigger sample size on myriad
