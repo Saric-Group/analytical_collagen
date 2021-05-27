@@ -47,11 +47,11 @@ int main(int argc, char const *argv[])
 
     // LAMMPS
     if (mol.parametersMD.topology || mol.parametersMD.input) {
-      std::vector<double> coarseGrainedCharges;
-      coarseGrainedCharges = mol.smoothen(25);
-      coarseGrainedCharges = mol.binNormalize(coarseGrainedCharges, 100);
-      mol.readCharges(coarseGrainedCharges);
-      mol.printMoleculeInfo();
+      // std::vector<double> coarseGrainedCharges;
+      // coarseGrainedCharges = mol.smoothen(25);
+      // coarseGrainedCharges = mol.binNormalize(coarseGrainedCharges, 100);
+      // mol.readCharges(coarseGrainedCharges);
+      // mol.printMoleculeInfo();
       createLAMMPSfiles(mol);
     }
   }
@@ -67,15 +67,15 @@ int main(int argc, char const *argv[])
   if (flags.development) {
     // mol.printMoleculeInfo();
     // lm.mol.numAtoms *= dev.factor;
-    lm.mol.numPos *= dev.factor;
-    lm.mol.numNeg *= dev.factor;
+    // lm.mol.numPos *= dev.factor;
+    // lm.mol.numNeg *= dev.factor;
     // lm.minimizeEnergy();
     // lm.coutConfig();
     // std::string fdens = "./data/analysis/density";
     // lm.densityToFile(fdens);
     // lm.mol.numPos = dev.pos;
     // lm.mol.numNeg = dev.neg;
-    runRandomAnalysis(dev.samples, lm);
+    // runRandomAnalysis(dev.samples, lm);
   }
 
   /************************************************************************/
