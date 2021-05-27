@@ -1,7 +1,7 @@
 #----
 # TO DO: check the output of "uname -o" on HPUX and AIX
 #----
-OS= $(shell uname -o)
+OS= $(shell uname -s)
 
 ifeq ($(OS),Gnu/Linux)
 OS=Linux
@@ -10,6 +10,7 @@ ifeq ($(OS),GNU/Linux)
 OS=Linux
 endif
 
+# $(info $$OS is [${OS}])
 
 LIB_DIR=$(PROJECT_ROOT)/lib
 BIN_DIR=$(PROJECT_ROOT)/bin
@@ -92,6 +93,15 @@ CXX		= g++
 else ifeq ($(OS),Aix)
 #-----
 # AIX
+#-----
+AR		= ar
+AR_FLAGS	= -r
+RANLIB		= ranlib
+RANLIB_FLAGS	= 
+CXX		= g++
+else ifeq ($(OS),Darwin)
+#-----
+# Darwin
 #-----
 AR		= ar
 AR_FLAGS	= -r
