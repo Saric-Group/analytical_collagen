@@ -100,8 +100,13 @@ struct collagenMolecule {
 
   void printAtoms();
   void printMoleculeInfo();
+  void moleculeToFile(std::string &file);
   void chargesToFile(std::string &file, int k = 0);
   void addOvitoHeaderToChargeFile(std::string &file);
+
+  std::vector<double> smoothen(int delta);
+  std::vector<double> binNormalize(std::vector<double> vec, int n);
+
 };
 
 #endif

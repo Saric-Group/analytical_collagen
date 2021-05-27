@@ -2,11 +2,11 @@
 
 
 /* Variables */
-// int seed = 1337;
-std::random_device device;
-std::mt19937 generator(device());
-// std::mt19937 generator(seed);
 extern filePaths_ filePaths;
+extern dev_ dev;
+std::random_device device;
+// std::mt19937 generator(device());
+std::mt19937 generator(dev.seed);
 
 
 /* Functions */
@@ -106,11 +106,12 @@ double checkValue(layerModel lm)
 void runRandomAnalysis(int samples, layerModel lm)
 {
   bool dataout = true;
-  bool ovitoout = true;
+  bool ovitoout = false;
   bool densityout = true;
-  bool binsout = true;
-  bool bins2dout = true;
-  bool peaksout = true;
+  bool binsout = false;
+  bool bins2dout = false;
+  bool peaksout = false;
+  bool moleculeout = true;
 
   // double targetGap = 34.77;
   double targetDper = 66.975;
@@ -159,6 +160,15 @@ void runRandomAnalysis(int samples, layerModel lm)
       lm.energy = 1e16;
       lm.minimizeEnergy();
 
+      if (moleculeout) {
+        std::string fmol;
+        fmol = filepath;
+        fmol += "_molecules/";
+        mkdir(fmol.c_str(), 0777);
+        fmol += "molecule" + std::to_string(i);
+        lm.mol.moleculeToFile(fmol);
+      }
+
       if (ovitoout) {
         double clow = -20;
         double chigh = 20;
@@ -199,8 +209,10 @@ void runRandomAnalysis(int samples, layerModel lm)
     fclose(outf);
   }
 
-  lm.mol.addOvitoHeaderToChargeFile(ovito_p);
-  lm.mol.addOvitoHeaderToChargeFile(ovito_nonp);
+  if (ovitoout) {
+    lm.mol.addOvitoHeaderToChargeFile(ovito_p);
+    lm.mol.addOvitoHeaderToChargeFile(ovito_nonp);
+  }
 
   int index_of_max_dper = 0, index_of_max_gap = 0;
   if (binsout) {

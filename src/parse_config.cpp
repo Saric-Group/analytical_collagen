@@ -213,6 +213,8 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     // strcpy(scope, scope);
     // strcat(scope, ".development");
     flags.development = cfg->lookupBoolean(scope, "development.active");
+    dev.random = cfg->lookupBoolean(scope, "development.random");
+    dev.seed = cfg->lookupInt(scope, "development.seed");
     dev.factor = cfg->lookupFloat(scope, "development.factor");
     dev.samples = cfg->lookupInt(scope, "development.samples");
     dev.pos = cfg->lookupInt(scope, "development.pos");
