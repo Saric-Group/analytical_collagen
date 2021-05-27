@@ -83,6 +83,7 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     // strcpy(scope, scope);
     // strcat(scope, ".flags");
     flags.consoleOutput = cfg->lookupBoolean(scope, "flags.consoleOutput");
+    flags.debugInfo = cfg->lookupBoolean(scope, "flags.debugInfo");
     flags.help = cfg->lookupBoolean(scope, "flags.help");
     flags.measureTime = cfg->lookupBoolean(scope, "flags.measureTime");
 

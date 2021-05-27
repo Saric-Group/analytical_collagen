@@ -38,6 +38,10 @@ int main(int argc, char const *argv[])
   readAtomInfos(mol);
   lm.mol = mol;
 
+  if (flags.debugInfo) {
+    debugInfo(mol);
+  }
+
   if (!flags.development) {
     // Layer-Model
     if (flags.minimize) {

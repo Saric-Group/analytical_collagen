@@ -625,6 +625,39 @@ void prioParse(int argc, char const *argv[])
   }
 }
 
+void debugInfo(collagenMolecule mol)
+{
+  std::cout << "#";
+  std::cout << "\n# Debug-Info:";
+
+
+  std::cout << "\n#\t.Input filepaths:";
+
+  std::cout << "\n#\t\t.molecule input: ";
+  std::cout << filePaths.inputpath;
+
+
+  std::cout << "\n#\t.Output filepaths:";
+
+  std::cout << "\n#\t\t.general output: ";
+  std::cout << filePaths.outputpath;
+
+  std::cout << "\n#\t\t.md output folder: ";
+  std::cout << filePaths.md_outputpath;
+
+  std::cout << "\n#\t\t.md topology file: ";
+  std::cout << mol.parametersMD.topFile;
+
+  std::cout << "\n#\t\t.md lammps input file: ";
+  std::cout << mol.parametersMD.inputFile;
+
+  std::cout << "\n#\t\t.md lammps log filepath: ";
+  std::cout << mol.parametersMD.logFile;
+
+  std::cout << "\n#\t\t.md lammps dump filepath: ";
+  std::cout << mol.parametersMD.dumpFile;
+}
+
 void programInfo()
 {
   std::cout << "#";

@@ -32,6 +32,7 @@ struct filePaths_ {
 struct flags_ {
   bool help = false;
   bool consoleOutput = false;
+  bool debugInfo = false;
   bool printAtomInfo = false;
   bool printMoleculeInfo = false;
   bool layermodel = false;

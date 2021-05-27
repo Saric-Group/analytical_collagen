@@ -76,6 +76,7 @@ int read_args(int argc, char const *argv[], layerModel &lm, collagenMolecule &mo
 int parse_all_args(int argc, char const *argv[], layerModel &lm, collagenMolecule &mol);
 void readAtomInfos(collagenMolecule &mol);
 void prioParse(int argc, char const *argv[]);
+void debugInfo(collagenMolecule mol);
 void programInfo();
 void printOptions(collagenMolecule mol, layerModel lm);
 void getTime(time_point &tp);

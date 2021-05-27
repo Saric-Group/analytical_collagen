@@ -560,7 +560,9 @@ void layerModel::minimizeEnergy()
         offset = off;
       }
       counter++;
-      progresssBar(1.0 * counter / total, " configuration -> minimize energy ");
+      if (false) {
+        progresssBar(1.0 * counter / total, " configuration -> minimize energy ");
+      }
     }
   }
 }
