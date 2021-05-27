@@ -45,6 +45,7 @@ void collagenMolecule::chargesFromTypes()
     }
   }
   countCharges();
+  numTypes = maxNumTypes;
 }
 void collagenMolecule::readCharges(std::string &file)
 {
