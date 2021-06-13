@@ -565,6 +565,16 @@ void layerModel::minimizeEnergy()
       }
     }
   }
+
+  if (parameters.xyz_outputs) {
+    std::string xyzfile = filePaths.outputpath;
+    xyzfile += "-"
+      + replace_char(clean_to_string(parameters.lj),'.','_')
+      + "-"
+      +  replace_char(clean_to_string(parameters.cd),'.','_')
+      + ".xyz";
+      output_xyz(xyzfile, 3, latGap, radGap, offset);
+  }
 }
 
 void layerModel::writeXYZ()
