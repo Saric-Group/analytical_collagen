@@ -107,6 +107,7 @@ int parse(int argc, char const *argv[], collagenMolecule &mol, layerModel &lm)
     /* main */
     flags.minimize = cfg->lookupBoolean(scope, "main.minimizeEnergy", false);
     lm.layers = cfg->lookupInt(scope, "main.layers", 2);
+    lm.parameters.xyz_outputs = cfg->lookupBoolean(scope, "main.xyz_output", dummyLm.parameters.xyz_outputs);
     lm.parameters.cd = cfg->lookupFloat(scope, "main.cd", dummyLm.parameters.cd);
     lm.parameters.cd_cutoff = cfg->lookupFloat(scope, "main.cdcutoff", dummyLm.parameters.cd_cutoff);
     lm.parameters.lj = cfg->lookupFloat(scope, "main.lj", dummyLm.parameters.lj);
