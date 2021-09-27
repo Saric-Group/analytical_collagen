@@ -5,8 +5,9 @@
 extern filePaths_ filePaths;
 extern dev_ dev;
 std::random_device device;
-std::mt19937 generator(device());
+// std::mt19937 generator(device());
 // std::mt19937 generator(dev.seed);
+std::mt19937 generator(1232);
 
 
 /* Functions */

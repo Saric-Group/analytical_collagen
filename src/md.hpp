@@ -93,6 +93,7 @@ std::ostream& operator<<(std::ostream &os, const vec3d &a);
 
 struct cubeGrid {
   double length;    // length of cube side
+  double shift;     // distance of nearest neighbours
   int numPoints;    // points per side, total #points = numPoints^3
   std::vector<vec3d> gridPoints;
 
@@ -102,7 +103,7 @@ struct cubeGrid {
   {
     length = length_;
     numPoints = numPoints_;
-    double shift = length / (numPoints + 1);
+    shift = length / (numPoints + 1);
     double x, y, z;
     for (int i = 1; i <= numPoints; i++) {
       x = i * shift - length / 2.0;

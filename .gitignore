@@ -49,6 +49,7 @@ my.config
 /scripts/*
 /md/*
 /molecule/others/*
+/molecule/ga/*
 /storage/*
 
 
