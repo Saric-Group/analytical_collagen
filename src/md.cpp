@@ -59,7 +59,7 @@ vec3d getLinePtB(vec3d centerPoint, double length, double phi, double theta)
   return vec3d(x, y, z);
 }
 
-double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2, bool debug)
+double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2)
 {
   // just Algebra things
   vec3d a = a2 - a1;
@@ -67,55 +67,17 @@ double shortestDistBetweenLines(vec3d a1, vec3d a2, vec3d b1, vec3d b2, bool deb
   vec3d n = crossproduct(a, b);
 
   if (n.length == 0) {
-    if (debug) {
-      std::cout << "n.length = 0 -> distance: ";
-      std::cout << crossproduct(a, b1 - a1).length / a.length;
-    }
     return crossproduct(a, b1 - a1).length / a.length;
   } else {
-    double s = b1 * a - a1 * a;
-    s *= a * b;
-    s /= a * a;
-    s -= b1 * b;
-    s += a1 * b;
-    s /= b * b - (b * a) * (a * b) / (a * a);
-    s = std::min(std::max(s, 0.0), 1.0);
-    double t = (b1 * a + s * b * a - a1 * a) / (a * a);
-    t = std::min(std::max(t, 0.0), 1.0);
-    vec3d c1 = a1 + t * a;
-    vec3d c2 = b1 + s * b;
-
-
     double s_ = (b1 * b - a1 * b) * (a * a) - (b1 * a - a1 * a) * (a * b);
     s_ /= (b * a) * (a * b) - (b * b) * (a * a);
-    double s__ = s_;
     s_ = std::min(std::max(s_, 0.0), 1.0);
+
     double t_ = (b1 * b - a1 * b + s_ * (b * b)) / (a * b);
-    double t2 = ((b1 * a) - (a1 * a) + s_ * (b * a)) / (a * a);
-    double t__ = t_;
     t_ = std::min(std::max(t_, 0.0), 1.0);
 
     vec3d p_b = b1 + s_ * b;
     vec3d p_a = a1 + t_ * a;
-
-    if (debug) {
-    std::cout << "\nShortest distance debug:\n";
-    std::cout << "a1: " << a1 << " a2: " << a2 << "\n";
-    std::cout << "b1: " << b1 << " b2: " << b2 << "\n";
-    std::cout << "a: " << a << " b: " << b << "\n";
-    std::cout << "n: " << n << n.length << "\n";
-    std::cout << "t: " << t << " c1: " << c1 << "\n";
-    std::cout << "s: " << s << " c2: " << c2 << "\n";
-    std::cout << c2 - c1 << "\n";
-    std::cout << (c2 - c1).length << "\n";
-    std::cout << (c2 - (a1 + (1 - t) * a)).length << "\n";
-    std::cout << "new calc:\n";
-    std::cout << "t_: " << t_ << " (" << t__ << ", " << t2 << ") p_a: " << p_a << "\n";
-    std::cout << "s_: " << s_ << " (" << s__ << ") p_b: " << p_b << "\n";
-    std::cout << (p_b - p_a).length << "\n";
-    }
-
-    // return (c2 - c1).length;
     return (p_b - p_a).length;
   }
 }
@@ -135,15 +97,7 @@ bool moleculesOverlap(int a, int b, collagenMolecule mol,
   vec3d b_A = getLinePtA(gridPoints[b], length, phi_mem[b], theta_mem[b]);
   vec3d b_B = getLinePtB(gridPoints[b], length, phi_mem[b], theta_mem[b]);
 
-  double dist = shortestDistBetweenLines(a_A, a_B, b_A, b_B, false);
-
-  if (a == 11 && b == 10) {
-    std::cout << "\n";
-    std::cout << a_A << a_B << "\n";
-    std::cout << b_A << b_B << "\n";
-    std::cout << dist << "\n";
-    shortestDistBetweenLines(a_A, a_B, b_A, b_B, true);
-  }
+  double dist = shortestDistBetweenLines(a_A, a_B, b_A, b_B);
 
   // 100% safety margin -> distance of tripple atom diameter enforced
   // printf("%s", mol.diameterAtom * 3.0 > dist ? "true" : "false");
@@ -289,7 +243,6 @@ void genTopologyZero(collagenMolecule mol, int L)
   
   /* Atoms */
   cubeGrid grid(boxlength, L);
-  printf("\n\nnnb distance: %f", grid.shift);
   std::vector<double> phi_mem, theta_mem;
   fprintf(outf, "\n\nAtoms");
   fprintf(outf, "\n");
@@ -305,7 +258,6 @@ void genTopologyZero(collagenMolecule mol, int L)
     }
   }
   for (int i = 0; i < numMol; i++) {
-    // std::cout << "randomizing " << i + 1 << "\n";
     if (mol.parametersMD.random) {
       bool overlap = false;
       do {
